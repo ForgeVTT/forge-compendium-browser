@@ -10,10 +10,10 @@ export class CompendiumBrowser extends Application {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            id: "compendium-browser",
-            template: "./modules/compendium-browser/templates/browser.html",
+            id: "forge-compendium-browser",
+            template: "./modules/forge-compendium-browser/templates/browser.html",
             title: "Compendium Browser",
-            classes: ["compendium-browser"],
+            classes: ["forge-compendium-browser"],
             popOut: true,
             resizable: true,
             width: 800,

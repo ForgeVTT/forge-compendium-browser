@@ -31,7 +31,7 @@ export class ForgeCompendiumBrowser {
     }
 
     static get version() {
-        return game.modules.get("compendium-browser").version;
+        return game.modules.get("forge-compendium-browser").version;
     }
 
     static parseCompendiums() {
@@ -39,12 +39,12 @@ export class ForgeCompendiumBrowser {
         //Find all the DnDBeyond modules
         log("Parsing compendiums");
         for (let module of game.modules.values()) {
-            if (module.data.flags["compendium-browser"]?.active && module.active) {
+            if (module.data.flags["forge-compendium-browser"]?.active && module.active) {
                 let bookData = {
                     id: module.id,
                     title: module.data.title,
                     description: module.data.description,
-                    img: module.data.flags["compendium-browser"]?.background,
+                    img: module.data.flags["forge-compendium-browser"]?.background,
                     module: module,
                     packs: module.data.packs,
                 };
