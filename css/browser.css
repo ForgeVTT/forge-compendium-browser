@@ -1,0 +1,137 @@
+.window-app .window-content .forge-compendium-container {
+    max-height:100%;
+}
+
+.forge-compendium-sidebar {
+    flex: 0 0 var(--sidebar-width);
+    height: calc(100% + 17px);
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    border: 1px solid var(--color-border-dark);
+    overflow: hidden;
+    background: url(../../../ui/denim075.png) repeat;
+    margin-left: -8px;
+    margin-top: -9px;
+    color: var(--color-text-light-highlight);
+}
+
+.forge-compendium-sidebar img {
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+    object-position: top center;
+}
+
+.forge-compendium-sidebar .directory-header {
+    height: 236px;
+    overflow: hidden;
+}
+
+.forge-compendium-pack {
+    display: none;
+}
+
+.forge-compendium-content {
+    height:100%;
+    overflow-y: auto;
+}
+
+.forge-compendium-listing {
+    justify-items: center;
+}
+
+.forge-compendium-item {
+    position: relative;
+    margin: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.forge-compendium-library .forge-compendium-item {
+    flex: 0 0 210px;
+    height: 250px;
+}
+
+.forge-compendium-library  .forge-compendium-item .forge-compendium-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 8px;
+}
+
+.forge-compendium-library .forge-compendium-item .forge-compendium-title {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    font-size: 14px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.8);
+    text-align: center;
+    padding: 10px;
+}
+
+.forge-compendium-listing .forge-compendium-item {
+    flex: 1;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+}
+
+.forge-compendium-listing .forge-compendium-item[data-type="category"] {
+    height: 60px;
+}
+
+.forge-compendium-listing .forge-compendium-item[data-type="document"] {
+    height: 50px;
+}
+
+.forge-compendium-listing .forge-compendium-item .forge-compendium-img {
+    object-fit: contain;
+    object-position: center;
+    height: 100%;
+    flex: 0 0 50px;
+}
+
+.forge-compendium-listing .forge-compendium-item[data-type="book"] .forge-compendium-img {
+    height: 60px;
+    flex: 0 0 50px;
+    padding: 10px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 8px;
+}
+
+.forge-compendium-listing .forge-compendium-item .forge-compendium-icon {
+    height: 60px;
+    flex: 0 0 50px;
+    padding: 10px;
+    text-align: center;
+    font-size: 40px;
+    line-height: 1px;
+}
+
+.forge-compendium-listing .forge-compendium-item .forge-compendium-title {
+    font-size: 20px;
+    line-height: 40px;
+    margin: 0px 10px;
+}
+
+.forge-compendium-listing .forge-compendium-item[data-type="category"] .forge-compendium-title {
+    font-size: 30px;
+    line-height: 60px;
+    margin: 0px;
+}
+
+.forge-compendium-listing .forge-compendium-item[data-type="document"] .forge-compendium-title {
+    font-size: 30px;
+    line-height: 50px;
+    margin: 0px;
+}
+
+.forge-compendium-sidebar .directory-list .subdirectory .folder {
+    border-left: 6px solid transparent;
+    border-color: transparent;
+}

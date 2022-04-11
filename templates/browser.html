@@ -1,0 +1,58 @@
+{{#*inline "folderPartial"}}
+<li class="directory-item folder flexcol {{#unless folder.expanded}}collapsed{{/unless}}" data-id="{{folder.id}}">
+    <header class="folder-header flexrow">
+        <h3><i class="fas fa-folder-open fa-fw"></i>{{folder.name}}</h3>
+    </header>
+
+    <ol class="subdirectory">
+        {{~#each folder.children as |child i|}}
+        {{> folderPartial folder=child user=../user}}
+        {{/each~}}
+    </ol>
+</li>
+{{/inline}}
+
+<div class="forge-compendium-container flexrow">
+    {{#if book}}
+    <div class="forge-compendium-sidebar directory flexcol">
+        <header class="directory-header">
+            <div class="header-actions action-buttons flexrow">
+                <button class="compendium-library"><i class="fas fa-books"></i> Compendium Library</button>
+            </div>
+            <img src="{{book.img}}">
+        </header>
+        <ol class="directory-list">
+            {{~#each tree.children as |f fi|}}
+            {{> folderPartial folder=f user=../user}}
+            {{/each}}
+        </ol>
+    </div>
+    <div class="forge-compendium-content">
+        {{#if listing}}
+        <div class="forge-compendium-listing lexcol">
+            {{#each listing}}
+            <div class="forge-compendium-item" data-id="{{this.id}}" data-type="{{this.type}}">
+                {{#if this.img}}
+                <img class="forge-compendium-img" src="{{this.img}}" />
+                {{else if this.icon}}
+                <div class="forge-compendium-icon">{{{this.icon}}}</div>
+                {{/if}}
+                <div class="forge-compendium-title">{{this.name}}</div>
+            </div>
+            {{/each}}
+        </div>
+        {{/if}}
+    </div>
+    {{else}}
+    <div class="forge-compendium-library flexrow">
+        {{#each listing}}
+        <div class="forge-compendium-item" data-id="{{this.id}}" data-type="book">
+            {{#if this.img}}
+            <img class="forge-compendium-img" src="{{this.img}}" />
+            {{/if}}
+            <div class="forge-compendium-title">{{this.name}}</div>
+        </div>
+        {{/each}}
+    </div>
+    {{/if}}
+</div>
