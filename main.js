@@ -23,6 +23,11 @@ export class ForgeCompendiumBrowser {
     static init() {
         registerSettings();
 
+        Dlopen.register('forge-compendium-browser', {
+            scripts: "/modules/forge-compendium-browser/dist/vue-components.min.js",
+            dependencies: ["vue"]
+        });
+
         //compile the DnDBeyond compendiums
         ForgeCompendiumBrowser.parseCompendiums();
     }
