@@ -24,8 +24,10 @@ export class ForgeCompendiumBrowser {
         registerSettings();
 
         Dlopen.register('forge-compendium-browser', {
-            scripts: "/modules/forge-compendium-browser/dist/vue-components.min.js",
-            dependencies: ["vue"]
+            scripts: "/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.umd.js",
+            styles: "/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.css",
+            init: () => Vue.component("ForgeCompendiumBrowser", ForgeCompendiumBrowserVue),
+            dependencies: "vue"
         });
 
         //compile the DnDBeyond compendiums
