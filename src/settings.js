@@ -1,4 +1,4 @@
-import { i18n } from "./main.js";
+import { i18n } from "./browser.js";
 
 export const registerSettings = function () {
     let modulename = "forge-compendium-browser";

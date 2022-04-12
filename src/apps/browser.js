@@ -1,4 +1,4 @@
-import { ForgeCompendiumBrowser, log, setting, i18n } from '../main.js';
+import { ForgeCompendiumBrowser, log, setting, i18n } from '../browser.js';
 
 export class CompendiumBrowser extends Application {
     constructor(object, options = {}) {
