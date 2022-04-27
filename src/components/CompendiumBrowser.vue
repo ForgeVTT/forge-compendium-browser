@@ -6,7 +6,15 @@
 </template>
 
 <script>
+import CompendiumLibrary from "./CompendiumLibrary.vue";
+import CompendiumBook from "./CompendiumBook.vue";
+
 export default {
+    name: 'CompendiumBrowser',
+    components: {
+      CompendiumLibrary,
+      CompendiumBook
+    },
     props: {
     },
     data: () => ({

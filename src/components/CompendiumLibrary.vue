@@ -20,6 +20,7 @@
 
 <script>
 export default {
+    name: "CompendiumLibrary",
     props: {
         library: Array
     },

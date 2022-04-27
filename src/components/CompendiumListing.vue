@@ -7,7 +7,13 @@
 </template>
 
 <script>
+import CompendiumList from "./CompendiumList.vue";
+
 export default {
+    name: "CompendiumListing",
+    components: {
+      CompendiumList
+    },
     props: {
         listing: Object,
     },

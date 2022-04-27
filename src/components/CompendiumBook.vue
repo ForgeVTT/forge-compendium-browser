@@ -58,7 +58,17 @@
 </template>
 
 <script>
+import CompendiumEntry from "./CompendiumEntry.vue";
+import CompendiumDirectory from "./CompendiumDirectory.vue";
+import CompendiumListing from "./CompendiumListing.vue";
+
 export default {
+    name: "CompendiumBook",
+    components: {
+        CompendiumDirectory,
+        CompendiumListing,
+        CompendiumEntry
+    },
     props: {
         book: Object
     },

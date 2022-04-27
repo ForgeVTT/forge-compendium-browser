@@ -11,6 +11,7 @@
 
 <script>
 export default {
+    name: "CompendiumList",
     props: {
         listing: Array,
         depth: Number,

@@ -11,6 +11,7 @@
 
 <script>
 export default {
+    name: "CompendiumDirectory",
     props: {
         hierarchy: {
             type: Array,

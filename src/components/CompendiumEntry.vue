@@ -5,6 +5,7 @@
 
 <script>
 export default {
+    name: "CompendiumEntry",
     props: {
         entry: Object
     },
@@ -33,7 +34,7 @@ export default {
     },
     async mounted() {
         console.log("Entry", this.entry);
-        this.entry.document.type = "base";
+        this.entry.document.type = "base";  // eslint-disable-line
         const cls = (this.entry.document._getSheetClass ? this.entry.document._getSheetClass() : null);
         this.subsheet = new cls(this.entry.document, { editable: false });
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
@@ -57,7 +58,7 @@ export default {
 
         $(`a[data-pack="${this.entry.document.pack}"]`).on("click", this.openLink.bind(this));
 
-        this.entry.document._sheet = null;
+        this.entry.document._sheet = null;  // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
     },
 };
