@@ -24,8 +24,10 @@ export class ForgeCompendiumBrowser {
         registerSettings();
 
         Dlopen.register('forge-compendium-browser-vueport', {
-            scripts: "/modules/forge-compendium-browser/dist/vue-components.min.js",
-            dependencies: "vue"
+            scripts: "/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.umd.min.js",
+            styles: "/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.css",
+            dependencies: "vue",
+            init: () => Vue.component("ForgeCompendiumBrowser", ForgeCompendiumBrowserVue),
         });
 
         game.ForgeCompendiumBrowser = ForgeCompendiumBrowser;
