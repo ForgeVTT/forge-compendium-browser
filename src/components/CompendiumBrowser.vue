@@ -63,7 +63,7 @@ export default {
     border: 1px solid var(--color-border-dark);
     border-top: 0px;
     overflow: hidden;
-    background: url(../../public/ui/denim075.png) repeat;
+    /*background: url(../../public/ui/denim075.png) repeat;*/
     color: var(--color-text-light-highlight);
 }
 
