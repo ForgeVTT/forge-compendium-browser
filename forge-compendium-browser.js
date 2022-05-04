@@ -32,9 +32,12 @@ export class ForgeCompendiumBrowser {
         game.ForgeCompendiumBrowser = ForgeCompendiumBrowser;
     }
 
-    static ready() {
+    static setup() {
         //compile the DnDBeyond compendiums
         ForgeCompendiumBrowser.parseCompendiums();
+    }
+
+    static ready() {
     }
 
     static setting(key) {
@@ -248,6 +251,7 @@ export class ForgeCompendiumBrowser {
 }
 
 Hooks.on('init', ForgeCompendiumBrowser.init);
+Hooks.on('setup', ForgeCompendiumBrowser.setup);
 Hooks.on('ready', ForgeCompendiumBrowser.ready);
 
 Hooks.on("renderCompendiumDirectory", (app, html, data) => {
