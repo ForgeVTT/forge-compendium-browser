@@ -1,10 +1,10 @@
 <template>
     <ol v-if="list.length > 0" class="directory-list">
-        <li v-for="folder in list" :key="folder.id" class="directory-item folder flexcol" :data-id="folder.id">
-            <header class="folder-header flexrow" @click="selectFolder">
-                <h3><i class="fas fa-folder-open fa-fw"></i>{{folder.name}}</h3>
+        <li v-for="folder in list" :key="folder.id" class="directory-item folder flexcol" :class="folderSelected(folder.id)" :data-id="folder.id">
+            <header class="folder-header flexrow" @click="selectItem(folder)">
+                <h3>{{folder.name}}</h3>
             </header>
-            <compendium-directory :hierarchy="folder.children" @select="selectFolder" class="subdirectory"></compendium-directory>
+            <compendium-directory :hierarchy="folder.children" :entity="entity" @select="selectItem" class="subdirectory"></compendium-directory>
         </li>
     </ol>
 </template>
@@ -18,23 +18,67 @@ export default {
             default() {
                 return [];
             }
-        }
+        },
+        entity: Object
     },
     data: () => ({
-        list: [],
     }),
     methods: {
-        selectFolder(folder) {
-            this.$emit("select", folder);
+        selectItem(item) {
+            console.log("Directory Select Item", item);
+            if(game.ForgeCompendiumBrowser.setting("same-name") && item.children && item.children.length == 1 && item.children[0].name == item.name) {
+                const childEntry = item.children.find(c => c.name == item.name);
+                console.log("Getting child entry", item, childEntry);
+                this.$emit("select", childEntry || item);
+            } else {
+                this.$emit("select", item);
+            }
+        },
+        folderSelected(id) {
+            console.log("Checking selected", this.entity, id, (this.entity && id == this.entity.id ? "active" : ""));
+            return this.entity && id == this.entity.id ? "active" : "";
         }
     },
     computed: {
+        list() {
+            return this.hierarchy.filter(f => f.type != "document");
+        }
     },
     watch: {
     },
     mounted() {
-        this.list = this.hierarchy.filter(f => f.type != "document");
-        console.log("Directory", this.hierarchy, this.list);
     },
 };
 </script>
+
+<style scoped>
+.directory-list .directory-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.directory-list .directory-item header {
+    border-left: 3px solid transparent;
+    padding-left: 8px;
+    cursor: pointer;
+}
+
+.directory-list .directory-item header:hover{
+    text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+
+.directory-list .directory-item.active > header {
+    border-left-color: #47D18C;
+}
+
+.directory-list .subdirectory {
+    padding-left: 0px;
+    margin-top: 0px;
+}
+
+.directory-list .subdirectory .directory-item header {
+    padding-left: 16px;
+    font-size: 14px;
+}
+</style>

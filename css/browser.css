@@ -1,0 +1,37 @@
+#forge-compendium-browser .window-content {
+    padding: 0px;
+}
+
+.forge-compendium-pack {
+    display: none;
+}
+
+/*
+.window-app .window-content .forge-compendium-container {
+    max-height:100%;
+}
+
+.forge-compendium-browser {
+    max-height: 100%;
+}
+
+.forge-compendium-content {
+    height:100%;
+    overflow: hidden;
+}
+
+.forge-compendium-browser .forge-compendium-book-container {
+    height: calc(100% + 16px);
+    overflow: hidden;
+    margin: -8px;
+}
+
+.forge-compendium-browser .forge-compendium-background {
+    height: 100%;
+    background-size: cover;
+    background-position: top center;
+}
+
+.forge-compendium-browser .forge-compendium-list {
+}
+*/

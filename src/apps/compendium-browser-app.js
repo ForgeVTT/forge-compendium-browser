@@ -18,7 +18,8 @@ export class CompendiumBrowserApp extends Application {
             resizable: true,
             width: vw - 400,
             height: vh - 200,
-            scrollY: ["ol.directory-list"],
+            scrollY: ["ol.directory-list", ".forge-compendium-listing > div"],
+            dragDrop: [{ dragSelector: ".draggable-item" }]
         });
     }
 

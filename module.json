@@ -18,9 +18,13 @@
     }
   ],
   "esmodules": [
-    "dist/ForgeCompendiumBrowserModule.umd.min.js"
+    "dist/ForgeCompendiumBrowserModule.umd.min.js",
+    "forge-compendium-browser.js"
   ],
   "packs": [],
+  "styles": [
+    "css/browser.css"
+  ],
   "languages": [
     {
       "lang": "en",

@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'Modesto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./modesto-condensed.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Modesto';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./modesto-condensed-bold.woff2') format('woff2');
+}

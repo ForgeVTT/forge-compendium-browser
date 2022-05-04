@@ -1,7 +1,7 @@
 <template>
-    <div class="forge-compendium-listing flexcol">
+    <div ref="mainlisting" class="forge-compendium-listing flexcol">
         <div>
-            <compendium-list :listing="listing.children" :depth="0" @select="selectListing" @entry="selectListing"></compendium-list>
+            <compendium-list :listing="listing.children" :parent="listing" :depth="0" @select="selectItem"></compendium-list>
         </div>
     </div>
 </template>
@@ -20,22 +20,30 @@ export default {
     data: () => ({
     }),
     methods: {
-        selectListing(item) {
-            if (item.type === "document")
-                this.$emit("entry", item);
-            else
-                this.$emit("select", item);
-        },
-        goBack() {
-            this.$emit("select", null);
+        selectItem(item) {
+            this.$emit("select", item);
         },
     },
     computed: {
     },
     watch: {
+        listing() {
+
+        }
     },
     mounted() {
         console.log("Listing", this.listing);
     },
 };
 </script>
+
+<style scoped>
+.forge-compendium-listing {
+    height: 100%;
+    overflow: hidden;
+}
+
+.forge-compendium-listing > div {
+    overflow-y: auto;
+}
+</style>
