@@ -51,10 +51,10 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   position: absolute;
-  width: 1520px;
-  height: 769px;
   left: 200px;
   top: 100px;
+  right: 200px;
+  bottom: 100px;
   border-radius: 8px;
 }
 .window-content > * {
