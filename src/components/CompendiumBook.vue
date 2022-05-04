@@ -5,7 +5,8 @@
                 <div class="header-action-buttons flexrow">
                     <button class="compendium-library" @click="exit"><i class="fas fa-atlas"></i> Compendium Library</button>
                 </div>
-                <img :src="book.img" @click="clearPath">
+                <img class="forge-compendium-book-image" :src="book.img" @click="clearPath">
+                <hr />
                 <div class="flexrow navigation-row">
                     <div class="navigation-button prev" :class="!canPrevChapter ? 'disabled' : ''" @click="changeChapter(-1)">
                         <i class="fas fa-chevron-left"></i> Prev Chapter
@@ -15,11 +16,13 @@
                     </div>
                 </div>
                 <!-- section links -->
-                <div class="flexrow navigation-row">
+                <div class="flexrow navigation-section">
                     <div v-for="section in sections" :key="section.id" class="navigation-section-link" :class="sectionActive(section)" :title="section.name" @click="selectEntity(section)">
                         <i class="fas" :class="section.icon"></i>
+                        <span>{{ section.name }}</span>
                     </div>
                 </div>
+                <hr />
             </header>
             <compendium-directory :hierarchy="directoryList" :entity="entity" @select="selectEntity"></compendium-directory>
         </div>
@@ -35,13 +38,19 @@
                 </ul>
             </h2>
             <div v-if="!currentEntity" class="forge-compendium-background flexcol" :style="backgroundStyle">
-                <div class="forge-compendium-book-title">{{book.name}}</div>
+                <div class="forge-compendium-book-title">
+                    <svg :viewBox="titleViewbox" class="forge-compendium-svg">
+                        <text x="15" y="60" stroke="#000000" fill="#ffffff" stroke-width="3" font-family="Modesto Condensed" font-weight="bold">
+                            {{ bookName }}
+                        </text>
+                    </svg>
+                </div>
                 <div class="forge-compendium-info flexcol">
                     <div class="flexrow flexcontain">
                         <div class="forge-compendium-description" v-html="book.description"></div>
                         <div class="forge-compendium-contains">
                             <b>Contains:</b>
-                            <ul>
+                            <ul class="forge-compendium-contains-list">
                                 <li v-for="section in sections" :key="section.id">
                                     <i class="fas" :class="section.icon"></i> {{section.count}} {{section.name}}
                                 </li>
@@ -92,8 +101,12 @@ export default {
             console.log("Book, Selecting Entity", entity);
             if (entity && entity.type == "book") {
                 this.clearPath();
-            } else {
-                this.entity = entity;
+            } else if(entity) {
+                if (game.ForgeCompendiumBrowser.setting("same-name") && entity.children && entity.children.length && entity.children[0].name == entity.name) {
+                    this.entity = entity.children[0];
+                } else {
+                    this.entity = entity;
+                }
             }
         },
         changeChapter(dir) {
@@ -223,6 +236,12 @@ export default {
                 return "";
 
             return `background-image:url(${this.book.background})`;
+        },
+        bookName() {
+            return this.book.name.toUpperCase();
+        },
+        titleViewbox() {
+            return `0 0 ${this.book.name.length * 100} 50`;
         }
     },
     watch: {
@@ -260,8 +279,7 @@ export default {
 .forge-compendium-sidebar header {
     overflow: hidden;
     text-align: center;
-    margin: 0 0 3px;
-    flex: 0 0 400px;
+    flex: 0 0 442px;
 }
 
 .forge-compendium-sidebar .header-action-buttons {
@@ -284,6 +302,15 @@ export default {
     object-fit: contain;
     object-position: top center;
     cursor: pointer;
+    border: 0px;
+}
+
+.forge-compendium-sidebar header hr {
+    flex: 0 0 1px;
+    width: 100%;
+    border-top-color: var(--color-border-dark-primary);
+    border-bottom-color: var(--color-border-dark-secondary);
+    margin: 4px 0px 1px 0px;
 }
 
 .forge-compendium-browser .navigation-row {
@@ -296,6 +323,10 @@ export default {
     cursor: pointer;
 }
 
+.forge-compendium-browser .navigation-row .navigation-button:not(.disabled):hover {
+    text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+
 .forge-compendium-browser .navigation-row .navigation-button.next {
     text-align: right;
 }
@@ -305,18 +336,36 @@ export default {
     color: #808080;
 }
 
-.forge-compendium-browser .navigation-row .navigation-section-link {
+.forge-compendium-browser .navigation-section {
+    flex: 0 0 55px;
+    height: 55px;
+}
+
+.forge-compendium-browser .navigation-section .navigation-section-link {
     flex-grow: 0;
-    padding: 4px;
+    padding: 4px 6px;
     line-height: 22px;
     cursor: pointer;
 }
 
-.forge-compendium-browser .navigation-row .navigation-section-link:first-child {
+.forge-compendium-browser .navigation-section .navigation-section-link i {
+    font-size: 24px;
+}
+
+.forge-compendium-browser .navigation-section .navigation-section-link span {
+    font-size: 12px;
+}
+
+.forge-compendium-browser .navigation-section .navigation-section-link:first-child {
     margin-left: 4px;
 }
 
-.forge-compendium-browser .navigation-row .navigation-section-link.active {
+.forge-compendium-browser .navigation-section .navigation-section-link:hover {
+    color: lightgray;
+    text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+
+.forge-compendium-browser .navigation-section .navigation-section-link.active {
     color: limegreen;
 }
 
@@ -390,6 +439,11 @@ export default {
     flex: 0 0 300px;
 }
 
+.forge-compendium-content .forge-compendium-contains .forge-compendium-contains-list {
+    list-style: none;
+    padding-left: 10px;
+}
+
 .forge-compendium-content .forge-compendium-contains i {
     width: 24px;
 }
@@ -432,6 +486,11 @@ export default {
     overflow: hidden;
     white-space:nowrap;
     text-overflow: ellipsis;
+}
+
+.forge-compendium-content .forge-compendium-book-title  .forge-compendium-svg {
+    width: 100%;
+    height: 100%;
 }
 
 .forge-compendium-content .forge-compendium-info {

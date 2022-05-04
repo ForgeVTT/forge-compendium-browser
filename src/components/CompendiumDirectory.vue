@@ -74,6 +74,10 @@ export default {
     cursor: pointer;
 }
 
+.directory-list .directory-item header h3 {
+    margin: 4px 0px;
+}
+
 .directory-list .directory-item header:hover{
     text-shadow: 0 0 8px var(--color-shadow-primary);
 }

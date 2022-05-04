@@ -79,7 +79,7 @@ export default {
     border-color: #51a351 #51a351 #387038;
     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
     flex: 0 0 150px;
-    width: calc(100% - 50px)
+    width: 100%;
 }
 
 .forge-compendium-library .forge-compendium-alert a[href] {

@@ -116,6 +116,10 @@ export default {
     margin-top: 0px;
 }
 
+.forge-compendium-listing > div > .forge-compendium-list > div > .forge-compendium-item {
+    padding-bottom: 8px;
+}
+
 .forge-compendium-list .forge-compendium-list[depth="1"] .forge-compendium-title {
     font-size: 16px;
     margin-left: 20px;
