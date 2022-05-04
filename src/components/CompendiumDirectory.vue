@@ -35,8 +35,18 @@ export default {
             }
         },
         folderSelected(id) {
-            console.log("Checking selected", this.entity, id, (this.entity && id == this.entity.id ? "active" : ""));
-            return this.entity && id == this.entity.id ? "active" : "";
+            if (!this.entity) {
+                return "";
+            }
+            let ids = [];
+            let entity = this.entity;
+            while (entity.parent) {
+                ids.push(entity.id);
+                entity = entity.parent;
+            }
+
+            console.log("Checking selected", this.entity, id, ids);
+            return ids.includes(id) ? "active" : "";
         }
     },
     computed: {
@@ -70,6 +80,10 @@ export default {
 
 .directory-list .directory-item.active > header {
     border-left-color: #47D18C;
+}
+
+.directory-list .directory-item .directory-item.active > header {
+    border-left-width: 6px;
 }
 
 .directory-list .subdirectory {

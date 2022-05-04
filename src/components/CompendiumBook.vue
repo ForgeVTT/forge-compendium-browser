@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <!-- section links -->
-                <div v-if="currentEntity" class="flexrow navigation-row">
+                <div class="flexrow navigation-row">
                     <div v-for="section in sections" :key="section.id" class="navigation-section-link" :class="sectionActive(section)" :title="section.name" @click="selectEntity(section)">
                         <i class="fas" :class="section.icon"></i>
                     </div>
@@ -188,9 +188,9 @@ export default {
             console.log("Directory List", this.currentSection);
             if (this.currentSection) {
                 return [this.currentSection];
-            } else if(this.sections) {
-                return this.sections.map(({children, ...o}) => o);   //Don't include the children, we only want the upper level at this point
-            }
+            } //else if(this.sections) {
+            //    return this.sections.map(({children, ...o}) => o);   //Don't include the children, we only want the upper level at this point
+            //}
             return [];
         },
         currentSection() {
@@ -258,10 +258,10 @@ export default {
 }
 
 .forge-compendium-sidebar header {
-    flex: 2;
     overflow: hidden;
     text-align: center;
     margin: 0 0 3px;
+    flex: 0 0 400px;
 }
 
 .forge-compendium-sidebar .header-action-buttons {
@@ -278,9 +278,10 @@ export default {
 }
 
 .forge-compendium-sidebar header img {
-    height: 200px;
+    height: 300px;
+    flex: 0 0 300px;
     width: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: top center;
     cursor: pointer;
 }
