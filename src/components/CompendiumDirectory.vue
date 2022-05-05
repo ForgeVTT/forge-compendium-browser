@@ -1,10 +1,10 @@
 <template>
-    <ol v-if="list.length > 0" class="directory-list">
-        <li v-for="folder in list" :key="folder.id" class="directory-item folder flexcol" :class="folderSelected(folder.id)" :data-id="folder.id">
-            <header class="folder-header flexrow" @click="selectItem(folder)">
+    <ol v-if="list.length > 0" class="forge-compendium-directory-list">
+        <li v-for="folder in list" :key="folder.id" class="forge-compendium-directory-item flexcol" :class="folderSelected(folder.id)" :data-id="folder.id">
+            <header class="forge-compendium-folder-header flexrow" @click="selectItem(folder)">
                 <h3>{{folder.name}}</h3>
             </header>
-            <compendium-directory :hierarchy="folder.children" :entity="entity" @select="selectItem" class="subdirectory"></compendium-directory>
+            <compendium-directory :hierarchy="folder.children" :entity="entity" @select="selectItem" class="forge-compendium-subdirectory"></compendium-directory>
         </li>
     </ol>
 </template>
@@ -44,8 +44,6 @@ export default {
                 ids.push(entity.id);
                 entity = entity.parent;
             }
-
-            console.log("Checking selected", this.entity, id, ids);
             return ids.includes(id) ? "active" : "";
         }
     },
@@ -62,40 +60,45 @@ export default {
 </script>
 
 <style scoped>
-.directory-list .directory-item {
+.forge-compendium-directory-list {
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+.forge-compendium-directory-list .forge-compendium-directory-item {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.directory-list .directory-item header {
+.forge-compendium-directory-list .forge-compendium-directory-item header {
     border-left: 3px solid transparent;
     padding-left: 8px;
     cursor: pointer;
 }
 
-.directory-list .directory-item header h3 {
+.forge-compendium-directory-list .forge-compendium-directory-item header h3 {
     margin: 4px 0px;
 }
 
-.directory-list .directory-item header:hover{
+.forge-compendium-directory-list .forge-compendium-directory-item header:hover{
     text-shadow: 0 0 8px var(--color-shadow-primary);
 }
 
-.directory-list .directory-item.active > header {
+.forge-compendium-directory-list .forge-compendium-directory-item.active > header {
     border-left-color: #47D18C;
 }
 
-.directory-list .directory-item .directory-item.active > header {
+.forge-compendium-directory-list .forge-compendium-directory-item .forge-compendium-directory-item.active > header {
     border-left-width: 6px;
 }
 
-.directory-list .subdirectory {
+.forge-compendium-directory-list .forge-compendium-subdirectory {
     padding-left: 0px;
     margin-top: 0px;
 }
 
-.directory-list .subdirectory .directory-item header {
+.forge-compendium-directory-list .forge-compendium-subdirectory .forge-compendium-directory-item header {
     padding-left: 16px;
     font-size: 14px;
 }

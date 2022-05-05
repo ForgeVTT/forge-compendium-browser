@@ -36,6 +36,15 @@ body {
   padding: 0px;
 }
 
+#app .forge-compendium-library {
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+}
+
+#app .forge-compendium-library .forge-compendium-banner {
+    width: calc(100% - 20px);
+}
+
 #app .forge-compendium-library .forge-compendium-book .forge-compendium-title {
     width: calc(100% - 32px);
 }

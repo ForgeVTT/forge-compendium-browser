@@ -58,10 +58,10 @@
                         </div>
                     </div>
                     <!-- Section listing -->
-                    <div class="forge-compendium-listing flexcol">
-                        <div class="forge-compendium-section flexrow" v-for="item in sections" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
+                    <div class="forge-compendium-section-listing flexrow">
+                        <div class="forge-compendium-section flexcol" v-for="item in sections" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
                             <div class="forge-compendium-icon"><i class="fas" :class="item.icon"></i></div>
-                            <div class="forge-compendium-title">{{item.name}}<span class="forge-compendium-stat">{{item.count}} entries</span></div>
+                            <div class="forge-compendium-title">{{item.name}}</div>
                         </div>
                     </div>
                 </div>
@@ -313,6 +313,12 @@ export default {
     margin: 4px 0px 1px 0px;
 }
 
+.forge-compendium-background {
+    background-position: top center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
 .forge-compendium-browser .navigation-row {
     flex: 0 0 30px;
 }
@@ -449,8 +455,8 @@ export default {
 }
 
 .forge-compendium-content .forge-compendium-section {
-    height: 60px;
-    flex: 0 0 60px;
+    height: 200px;
+    flex: 0 0 170px;
     position: relative;
     margin: 8px;
     border-radius: 8px;
@@ -459,18 +465,19 @@ export default {
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-icon {
-    height: 60px;
-    flex: 0 0 50px;
-    padding: 10px;
+    height: 40px;
+    padding: 30px;
     text-align: center;
-    font-size: 40px;
+    font-size: 80px;
     line-height: 1px;
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-title {
     font-size: 30px;
-    line-height: 60px;
+    line-height: 30px;
     margin: 0px;
+    text-align: center;
+    flex: 0 0 60px;
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-stat{
@@ -501,6 +508,12 @@ export default {
     overflow-x: hidden;
 }
 
+.forge-compendium-content .forge-compendium-info .forge-compendium-section-listing {
+    justify-content: center;
+    /*align-content: center;*/
+    margin-top: 20px;
+}
+
 .forge-compendium-browser .forge-compendium-listing-header {
     padding: 8px;
     background: rgba(0, 0, 0, 0.7);
@@ -517,6 +530,9 @@ export default {
     flex-grow: 0;
     white-space: nowrap;
 }
+.forge-compendium-breadcrumbs li:last-child {
+    font-weight: bold;
+}
 .forge-compendium-breadcrumbs li > * {
     display: inline-block;
     white-space: nowrap;
@@ -532,7 +548,9 @@ export default {
 }
 
 .back-button {
-    flex: 0 0 20px;
+    flex: 0 0 30px;
+    text-align: center;
+    margin-right: 10px;
     cursor: pointer;
 }
 .back-button:hover {

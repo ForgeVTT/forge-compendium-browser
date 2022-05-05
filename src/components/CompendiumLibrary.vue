@@ -1,7 +1,7 @@
 <template>
     <div class="forge-compendium-library">
         <div v-if="hasBooks" class="forge-compendium-library flexcol">
-            <div class="forge-compendium-alert flexrow">
+            <div class="forge-compendium-banner flexrow">
                 <img class="forge-logo" src="modules/forge-compendium-browser/img/the-forge-logo-400x400.png" @click="forgeLink" />
                 <div class="flexcol">
                     <h2 class="flexcontain">Forge Compendium Library</h2>
@@ -62,7 +62,7 @@ export default {
     padding: 8px;
 }
 
-.forge-compendium-library .forge-compendium-alert {
+.forge-compendium-library .forge-compendium-banner {
     padding: 10px;
     border-radius: 10px;
     border: 2px solid #468847;
@@ -82,7 +82,7 @@ export default {
     width: 100%;
 }
 
-.forge-compendium-library .forge-compendium-alert a[href] {
+.forge-compendium-library .forge-compendium-banner a[href] {
     color: #468847;
 }
 
@@ -90,7 +90,7 @@ export default {
     width: 150px;
     height: 150px;
     flex: 0 0 150px;
-    padding-right: 20px;
+    margin-right: 20px;
     cursor: pointer;
     border: none;
 }
