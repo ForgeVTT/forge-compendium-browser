@@ -95,4 +95,8 @@ export default {
 .forge-compendium-entry select[name="folder"] {
     display: none;
 }
+
+.forge-compendium-entry.journal-sheet form .editor {
+    height: 100%;
+}
 </style>
