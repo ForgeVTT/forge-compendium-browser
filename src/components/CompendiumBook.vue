@@ -8,11 +8,17 @@
                 <img class="forge-compendium-book-image" :src="book.img" @click="clearPath">
                 <hr />
                 <div class="flexrow navigation-row">
-                    <div class="navigation-button prev" :class="!canPrevChapter ? 'disabled' : ''" @click="changeChapter(-1)">
-                        <i class="fas fa-chevron-left"></i> Prev Chapter
+                    <div class="navigation-button first" :class="!canPrevChapter ? 'disabled' : ''" @click="changeChapter(-1)">
+                        <i class="fas fa-arrow-left"></i>
                     </div>
-                    <div class="navigation-button next" :class="!canNextChapter ? 'disabled' : ''" @click="changeChapter(1)">
-                        Next Chapter <i class="fas fa-chevron-right"></i>
+                    <div class="navigation-button prev" :class="!canPrevItem ? 'disabled' : ''" @click="changeItem(-1)">
+                        <i class="fas fa-chevron-left"></i> Prev
+                    </div>
+                    <div class="navigation-button next" :class="!canNextItem ? 'disabled' : ''" @click="changeItem(1)">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="navigation-button last" :class="!canNextChapter ? 'disabled' : ''" @click="changeChapter(1)">
+                        <i class="fas fa-arrow-right"></i>
                     </div>
                 </div>
                 <!-- section links -->
@@ -24,20 +30,25 @@
                 </div>
                 <hr />
             </header>
-            <compendium-directory :hierarchy="directoryList" :entity="entity" @select="selectEntity"></compendium-directory>
+            <ol v-if="currentSection" class="forge-compendium-directory-list">
+                <compendium-directory :entity="currentSection" :selected="document || folder" @select="selectEntity" @open="selectEntity"></compendium-directory>
+            </ol>
         </div>
         <div class="forge-compendium-content flexcol">
-            <h2 v-if="currentEntity" class="flexrow flexcontain forge-compendium-listing-header">
-                <div class="back-button" @click="selectEntity(entity.parent)"><i class="fas fa-chevron-left"></i></div>
+            <h2 v-if="document" class="flexrow flexcontain forge-compendium-listing-header">
+                <div class="back-button" :class="canHistory(-1)" @click="viewHistory(-1)"><i class="fas fa-chevron-left"></i></div>
+                <div class="forward-button" :class="canHistory(1)" @click="viewHistory(1)"><i class="fas fa-chevron-right"></i></div>
                 <!-- breadcrumbs -->
                 <ul class="flexrow forge-compendium-breadcrumbs">
                     <li v-for="(item, index) in path" :key="item.id">
                         <span v-if="index != 0">/</span>
-                        <div @click="selectEntity(item)">{{item.name}}</div>
+                        <div>{{ item.name }}</div>
                     </li>
                 </ul>
             </h2>
-            <div v-if="!currentEntity" class="forge-compendium-background flexcol" :style="backgroundStyle">
+            <compendium-entry v-if="document" :entry="document" @link="openLink"></compendium-entry>
+            <compendium-listing v-else-if="currentSection" :listing="currentSection" @select="selectEntity" @open="selectEntity"></compendium-listing>
+            <div v-else class="forge-compendium-background flexcol" :style="backgroundStyle">
                 <div class="forge-compendium-book-title">
                     <svg :viewBox="titleViewbox" class="forge-compendium-svg">
                         <text x="15" y="60" stroke="#000000" fill="#ffffff" stroke-width="3" font-family="Modesto Condensed" font-weight="bold">
@@ -66,8 +77,6 @@
                     </div>
                 </div>
             </div>
-            <compendium-entry v-else-if="currentEntity.type == 'document'" :entry="currentEntity" @link="openLink"></compendium-entry>
-            <compendium-listing v-else :listing="currentEntity" @select="selectEntity"></compendium-listing>
         </div>
     </div>
 </template>
@@ -88,25 +97,34 @@ export default {
         book: Object
     },
     data: () => ({
-        entity: null,
+        folder: null,
+        document: null,
+        history: [],
+        historyPosition: 0
     }),
     methods: {
         exit() {
             this.$emit("exit");
         },
         clearPath() {
-            this.entity = null;
+            this.folder = null;
+            this.document = null;
         },
         selectEntity(entity) {
             console.log("Book, Selecting Entity", entity);
-            if (entity && entity.type == "book") {
+            if (!entity)
+                return;
+
+            if (entity.type == "book") {
                 this.clearPath();
-            } else if(entity) {
-                if (game.ForgeCompendiumBrowser.setting("same-name") && entity.children && entity.children.length && entity.children[0].name == entity.name) {
-                    this.entity = entity.children[0];
-                } else {
-                    this.entity = entity;
-                }
+            } else if (entity.type == "document") {
+                this.document = entity;
+                this.addToHistory(entity);
+                this.folder = entity.parent;
+            } else if (entity) {
+                this.folder = entity;
+                if (entity.type == "section")
+                    this.document = null;
             }
         },
         changeChapter(dir) {
@@ -116,11 +134,33 @@ export default {
                 idx += dir;
                 // If there is an entry with the same name as the current chapter, then use that to display as the entity.
                 const chapter = this.currentSection.children[idx];
-                const entry = (game.ForgeCompendiumBrowser.setting("same-name") && chapter.children.length == 1 ? chapter.children.find(c => c.name == chapter.name) : null);
+                const entry = (game.ForgeCompendiumBrowser.setting("same-name") && chapter.children && chapter.children[0].name == chapter.name ? chapter.children[0] : null);
                 
                 console.log("Changing Chapter", chapter, entry);
                 
                 this.selectEntity(entry || chapter);
+            }
+        },
+        findClosestItem() {
+
+        },
+        changeItem(dir) {
+            // Find the next document, if there is no document, then move to the first document of the next folder
+            if (this.document) {
+                let idx = this.document.parent.children.findIdx(i => i.id == this.document.id);
+                if (idx == 0) {
+                    // move to the previous document
+                } else if (idx == this.document.parent.length - 1) {
+                    // move to next document
+                } else {
+                    // TODO: find the closest item
+                    idx += dir;
+                    let item = this.document.parent.children[idx];
+                    if (item.type == "document")
+                        this.document = item;
+                    else
+                        this.folder = item;
+                }
             }
         },
         sectionActive(section) {
@@ -151,6 +191,24 @@ export default {
                 // TODO: check to see if this is another compendium book
             }
         },
+        addToHistory(document) {
+            if (this.historyPosition < this.history.length - 1)
+                this.history.length = this.historyPosition + 1;
+            this.history.push(document);
+            this.historyPosition = this.history.length - 1;
+            console.log("add", this.historyPosition);
+        },
+        viewHistory(dir) {
+            this.historyPosition += dir;
+            this.historyPosition = Math.min(Math.max(0, this.historyPosition), this.history.length - 1);
+            this.document = this.history[this.historyPosition];
+            console.log("view", this.historyPosition);
+        },
+        canHistory(dir) {
+            const position = (this.historyPosition + dir);
+            console.log("can history", position);
+            return (position < 0) || (position > (this.history.length - 1)) ? "disabled" : "";
+        }
     },
     computed: {
         canPrevChapter() {
@@ -175,7 +233,7 @@ export default {
         },
         path() {
             let items = [];
-            let item = this.entity;
+            let item = this.document;
             items.push(item);
             while(item.parent){
                 item = item.parent;
@@ -207,10 +265,10 @@ export default {
             return [];
         },
         currentSection() {
-            if (!this.entity) {
+            if (!this.document && !this.folder) {
                 return null;
             } else {
-                let section = this.entity;
+                let section = this.document || this.folder;
                 while(section.type != "section" && section.parent){
                     section = section.parent;
                 }
@@ -218,18 +276,15 @@ export default {
             }
         },
         currentChapter() {
-            if (!this.entity || this.entity.type == "section") {
+            if (!this.folder || this.folder.type == "section") {
                 return null;
             } else {
-                let chapter = this.entity;
+                let chapter = this.folder;
                 while(chapter.parent && chapter.parent.type != "section"){
                     chapter = chapter.parent;
                 }
                 return chapter;
             }
-        },
-        currentEntity() {
-            return this.entity;
         },
         backgroundStyle() {
             if (!this.book)
@@ -242,7 +297,7 @@ export default {
         },
         titleViewbox() {
             return `0 0 ${this.book.name.length * 100} 50`;
-        }
+        },
     },
     watch: {
     },
@@ -321,10 +376,11 @@ export default {
 
 .forge-compendium-browser .navigation-row {
     flex: 0 0 30px;
+    padding: 0px 8px;
 }
 
 .forge-compendium-browser .navigation-row .navigation-button {
-    padding: 8px;
+    padding: 8px 4px;
     text-transform: uppercase;
     cursor: pointer;
 }
@@ -333,8 +389,16 @@ export default {
     text-shadow: 0 0 8px var(--color-shadow-primary);
 }
 
+.forge-compendium-browser .navigation-row .navigation-button.prev {
+    text-align: left;
+}
 .forge-compendium-browser .navigation-row .navigation-button.next {
     text-align: right;
+}
+
+.forge-compendium-browser .navigation-row .navigation-button.first,
+.forge-compendium-browser .navigation-row .navigation-button.last {
+    flex: 0 0 20px;
 }
 
 .forge-compendium-browser .navigation-row .navigation-button.disabled {
@@ -345,6 +409,7 @@ export default {
 .forge-compendium-browser .navigation-section {
     flex: 0 0 55px;
     height: 55px;
+    justify-content: center;
 }
 
 .forge-compendium-browser .navigation-section .navigation-section-link {
@@ -375,14 +440,19 @@ export default {
     color: limegreen;
 }
 
-.forge-compendium-sidebar .directory-list {
-    flex: 1;
+.forge-compendium-sidebar .forge-compendium-directory-list {
     list-style: none;
     margin: 0;
     padding: 0;
+}
+
+.forge-compendium-sidebar > .forge-compendium-directory-list {
+    flex: 1;
     overflow-y: auto;
 }
 
+
+/*
 .forge-compendium-sidebar .directory-list .directory-item {
   line-height: var(--sidebar-item-height);
   border-top: 1px solid transparent;
@@ -425,6 +495,7 @@ export default {
 .forge-compendium-sidebar .directory-list .directory-item.active {
   border-color: var(--color-border-highlight);
 }
+*/
 
 .forge-compendium-content {
     height: 100%;
@@ -530,9 +601,6 @@ export default {
     flex-grow: 0;
     white-space: nowrap;
 }
-.forge-compendium-breadcrumbs li:last-child {
-    font-weight: bold;
-}
 .forge-compendium-breadcrumbs li > * {
     display: inline-block;
     white-space: nowrap;
@@ -540,20 +608,23 @@ export default {
 .forge-compendium-breadcrumbs li > span {
     padding: 0px 8px;
 }
-.forge-compendium-breadcrumbs li > div {
-    cursor: pointer;
-}
-.forge-compendium-breadcrumbs li > div:hover {
-    text-shadow: 0 0 8px var(--color-shadow-primary);
-}
 
-.back-button {
+.back-button,
+.forward-button {
     flex: 0 0 30px;
     text-align: center;
     margin-right: 10px;
     cursor: pointer;
 }
-.back-button:hover {
+
+.back-button:not(.disabled):hover,
+.forward-button:not(.disabled):hover{
     text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+
+.back-button.disabled,
+.forward-button.disabled {
+    cursor: default;
+    color: #808080;
 }
 </style>

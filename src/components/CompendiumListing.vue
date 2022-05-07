@@ -1,7 +1,7 @@
 <template>
     <div ref="mainlisting" class="forge-compendium-listing flexcol">
         <div>
-            <compendium-list :listing="listing.children" :parent="listing" :depth="0" @select="selectItem"></compendium-list>
+            <compendium-list :listing="listing.children" :parent="listing" :depth="0" @select="selectItem" @open="selectItem"></compendium-list>
         </div>
     </div>
 </template>

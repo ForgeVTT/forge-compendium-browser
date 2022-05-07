@@ -2,11 +2,11 @@
     <div v-if="listing.length" class="forge-compendium-list" :depth="depth">
         <div v-for="item in listing" :key="item.id" :data-id="item.id">
             <div class="flexcol" :class="listClass(item)">
-                <div class="forge-compendium-title draggable-item flexrow" :class="item.img ? 'has-image' : ''" @click="selectItem(item)">
+                <div class="forge-compendium-title draggable-item flexrow" :class="item.img ? 'has-image' : ''" @click="openItem(item)">
                     <img v-if="item.img" :src="item.img" class="forge-compendium-image" draggable @dragstart="startDrag($event, item)" />
-                    <span>{{item.name}}</span>
+                    <span>{{ item.name }}</span>
                 </div>
-                <compendium-list :listing="filteredList(item)" :parent="item" :depth="depth + 1" @select="selectItem"></compendium-list>
+                <compendium-list :listing="filteredList(item)" :parent="item" :depth="depth + 1" @open="openItem"></compendium-list>
             </div>
         </div>
     </div>
@@ -23,12 +23,12 @@ export default {
     data: () => ({
     }),
     methods: {
-        selectItem(item) {
-            console.log("Select Item", item);
-            if (game.ForgeCompendiumBrowser.setting("same-name") && item.children && item.children.length && item.children[0].name == item.name) {
-                this.$emit("select", item.children[0]);
-            } else {
-                this.$emit("select", item);
+        openItem(item) {
+            console.log("Open Item", item);
+            if (item.type == "document"){
+                this.$emit("open", item);
+            } else if(item.children && item.children.length && item.children[0].name == item.name) {
+                this.$emit("open", item.children[0]);
             }
         },
         startDrag (event, item) {
@@ -46,10 +46,10 @@ export default {
         },
         filteredList(item) {
             const useSameName = game.ForgeCompendiumBrowser.setting("same-name");
-            if (!item.children)
+            if (!item.children || (item.children.length == 1 && item.children[0].name == item.name))
                 return [];
                 
-            return item.children.filter(i => i.name != item.name || !useSameName);
+            return item.children;
         }
     },
     computed: {
@@ -58,7 +58,6 @@ export default {
     watch: {
     },
     mounted() {
-        console.log("Mount List", this.listing, this.parent);
     },
 };
 </script>

@@ -1,55 +1,89 @@
 <template>
-    <ol v-if="list.length > 0" class="forge-compendium-directory-list">
-        <li v-for="folder in list" :key="folder.id" class="forge-compendium-directory-item flexcol" :class="folderSelected(folder.id)" :data-id="folder.id">
-            <header class="forge-compendium-folder-header flexrow" @click="selectItem(folder)">
-                <h3>{{folder.name}}</h3>
-            </header>
-            <compendium-directory :hierarchy="folder.children" :entity="entity" @select="selectItem" class="forge-compendium-subdirectory"></compendium-directory>
-        </li>
-    </ol>
+    <li class="forge-compendium-directory-item flexcol" :class="entitySelected">
+        <header class="forge-compendium-folder-header flexrow" @click="selectEntity()">
+            <h3 class="flexrow">
+                <span>{{this.entity.name}}</span>
+                <i v-if="showMarker" class="fas" :class="itemClass"></i>
+            </h3>
+        </header>
+        <ol v-if="showChildren" class="forge-compendium-directory-list subdirectory">
+            <compendium-directory 
+                v-for="item in filterList" 
+                :key="item.id" 
+                :entity="item" 
+                :selected="selected"
+                @select="bubbleEvent('select', arguments[0])" 
+                @open="bubbleEvent('open', arguments[0])" 
+            ></compendium-directory>
+        </ol>
+    </li>
 </template>
 
 <script>
 export default {
     name: "CompendiumDirectory",
     props: {
-        hierarchy: {
-            type: Array,
-            default() {
-                return [];
-            }
-        },
-        entity: Object
+        entity: Object,
+        selected: Object
     },
     data: () => ({
     }),
     methods: {
-        selectItem(item) {
-            console.log("Directory Select Item", item);
-            if(game.ForgeCompendiumBrowser.setting("same-name") && item.children && item.children.length == 1 && item.children[0].name == item.name) {
-                const childEntry = item.children.find(c => c.name == item.name);
-                console.log("Getting child entry", item, childEntry);
-                this.$emit("select", childEntry || item);
+        selectEntity() {
+            console.log("Directory Select Entity", this.entity);
+            if (this.entity.type == "document") {
+                this.$emit("open", this.entity);
             } else {
-                this.$emit("select", item);
+                if (this.entity.children && this.entity.children.length && this.entity.children[0].name == this.entity.name && this.entity.children[0].type == "document") {
+                    console.log("Opening");
+                    this.$emit("open", this.entity.children[0]);
+                } else {
+                    console.log("Selecting");
+                    this.$emit("select", this.entity);
+                }
             }
         },
-        folderSelected(id) {
+        bubbleEvent(name, entity) {
+            this.$emit(name, entity);
+        }
+    },
+    computed: {
+        entitySelected() {
             if (!this.entity) {
                 return "";
             }
             let ids = [];
-            let entity = this.entity;
-            while (entity.parent) {
-                ids.push(entity.id);
-                entity = entity.parent;
+            let item = this.selected;
+            while (item.parent) {
+                ids.push(item.id);
+                item = item.parent;
             }
-            return ids.includes(id) ? "active" : "";
-        }
-    },
-    computed: {
-        list() {
-            return this.hierarchy.filter(f => f.type != "document");
+
+            return ids.includes(this.entity.id) ? "active" : "";
+        },
+        filterList() {
+            if (!this.entity.children)
+                return [];
+
+            return this.entity.children.filter(c => c.name != this.entity.name);
+        },
+        showChildren() {
+            if (this.entity.children && this.entity.children.length == 1 && this.entity.children[0].name == this.entity.name)
+                return false;
+
+            if(!this.entitySelected)
+                return false;
+
+            return true;
+        },
+        showMarker() {
+            if ((this.entity.children && this.entity.children.length == 1 && this.entity.children[0].name == this.entity.name) || this.entity.type == "document")
+                return false;
+
+            return true;
+        },
+        itemClass() {
+            return this.entitySelected ? "fa-chevron-down" : "fa-chevron-right";
         }
     },
     watch: {
@@ -73,12 +107,24 @@ export default {
 
 .forge-compendium-directory-list .forge-compendium-directory-item header {
     border-left: 3px solid transparent;
-    padding-left: 8px;
     cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 4px 0px 4px 8px;
 }
 
 .forge-compendium-directory-list .forge-compendium-directory-item header h3 {
-    margin: 4px 0px;
+    margin: 0px;
+}
+
+.forge-compendium-directory-list .forge-compendium-directory-item header h3 span{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.forge-compendium-directory-list .forge-compendium-directory-item header h3 i {
+    flex: 0 0 20px;
 }
 
 .forge-compendium-directory-list .forge-compendium-directory-item header:hover{
@@ -89,17 +135,16 @@ export default {
     border-left-color: #47D18C;
 }
 
-.forge-compendium-directory-list .forge-compendium-directory-item .forge-compendium-directory-item.active > header {
+.forge-compendium-directory-list .subdirectory .forge-compendium-directory-item.active > header {
     border-left-width: 6px;
 }
 
-.forge-compendium-directory-list .forge-compendium-subdirectory {
-    padding-left: 0px;
+.forge-compendium-directory-list .subdirectory {
+    padding-left: 16px;
     margin-top: 0px;
 }
 
-.forge-compendium-directory-list .forge-compendium-subdirectory .forge-compendium-directory-item header {
-    padding-left: 16px;
+.forge-compendium-directory-list .subdirectory .forge-compendium-directory-item header {
     font-size: 14px;
 }
 </style>
