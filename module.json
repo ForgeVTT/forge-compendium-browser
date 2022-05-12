@@ -18,8 +18,7 @@
     }
   ],
   "esmodules": [
-    "dist/ForgeCompendiumBrowserModule.umd.min.js",
-    "forge-compendium-browser.js"
+    "dist/ForgeCompendiumBrowserModule.umd.min.js"
   ],
   "packs": [],
   "styles": [

@@ -34,15 +34,23 @@ export default {
             }
             if (this.entry.document instanceof Scene) {
                 const templateData = {
-                    img: this.entry.data.img,
+                    img: this.entry.document.data.img,
                     stats: {}
                 }
 
-                // Collect the stats ont he scene
+                // Collect the stats on the scene
+                for (let collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls"]) {
+                    if (this.entry.document.data[collection].size) {
+                        const name = this.entry.document.data[collection].documentClass.documentName;
+                        templateData.stats[name] = this.entry.document.data[collection].size;
+                    }
+                }
 
                 const html = await renderTemplate("modules/forge-compendium-browser/templates/scene-entry.html", templateData);
 
                 this.$refs.entry.innerHTML = html;
+
+                this.subsheet = { options: { classes: ["scene-entry"]}};
             } else {
                 this.subsheet = new cls(this.entry.document, { editable: false });
                 this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
@@ -104,6 +112,9 @@ export default {
     color: var(--color-text-dark-primary);
     overflow-y: auto;
     overflow-x: hidden;
+}
+.forge-compendium-entry.scene-entry {
+    overflow-y: hidden;
 }
 .forge-compendium-entry input[name="name"],
 .forge-compendium-entry select[name="folder"] {
