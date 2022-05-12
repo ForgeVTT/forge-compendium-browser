@@ -2,8 +2,8 @@
     <div v-if="listing.length" class="forge-compendium-list" :depth="depth">
         <div v-for="item in listing" :key="item.id" :data-id="item.id">
             <div class="flexcol" :class="listClass(item)">
-                <div class="forge-compendium-title draggable-item flexrow" :class="item.img ? 'has-image' : ''" @click="openItem(item)">
-                    <img v-if="item.img" :src="item.img" class="forge-compendium-image" draggable @dragstart="startDrag($event, item)" />
+                <div class="forge-compendium-title draggable-item flexrow" :class="item.img ? 'has-image' : ''" @click="openItem(item)" draggable @dragstart="startDrag($event, item)" >
+                    <img v-if="item.img" :src="item.img" class="forge-compendium-image" />
                     <span>{{ item.name }}</span>
                 </div>
                 <compendium-list :listing="filteredList(item)" :parent="item" :depth="depth + 1" @open="openItem"></compendium-list>
