@@ -50,7 +50,6 @@ export default {
     watch: {
     },
     mounted() {
-        console.log("library", this.library);
     },
 };
 </script>

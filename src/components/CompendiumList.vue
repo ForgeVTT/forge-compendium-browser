@@ -24,7 +24,6 @@ export default {
     }),
     methods: {
         openItem(item) {
-            console.log("Open Item", item);
             if (item.type == "document"){
                 this.$emit("open", item);
             } else if(item.children && item.children.length && item.children[0].name == item.name) {
@@ -37,7 +36,6 @@ export default {
                 pack: item.document.pack,
                 type: item.document.documentName
             };
-            console.log("Start Drag", dragData, item);
 
             event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
         },

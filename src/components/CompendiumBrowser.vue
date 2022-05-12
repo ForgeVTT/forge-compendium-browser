@@ -26,7 +26,6 @@ export default {
   }),
   methods: {
     selectBook(id) {
-      console.log("Select book", id);
       this.book = this.library.find((b) => b.id == id);
       if (id) {
         game.user.setFlag("forge-compendium-browser", "last-book", id);

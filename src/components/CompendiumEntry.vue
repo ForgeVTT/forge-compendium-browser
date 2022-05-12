@@ -18,14 +18,11 @@ export default {
             const packId = e.currentTarget.dataset.pack;
             const id = e.currentTarget.dataset.id;
 
-            console.log("Opening a Link", packId, id);
-
             this.$emit("link", packId, id);
             e.preventDefault();
             e.stopPropagation();
         },
         async loadDocument() {
-            console.log("Entry", this.entry);
             let cls = (this.entry.document._getSheetClass ? this.entry.document._getSheetClass() : null);
             if (this.entry.document instanceof JournalEntry) {
                 const cfg = CONFIG["JournalEntry"];

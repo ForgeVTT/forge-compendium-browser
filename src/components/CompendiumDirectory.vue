@@ -30,15 +30,12 @@ export default {
     }),
     methods: {
         selectEntity() {
-            console.log("Directory Select Entity", this.entity);
             if (this.entity.type == "document") {
                 this.$emit("open", this.entity);
             } else {
                 if (this.entity.children && this.entity.children.length && this.entity.children[0].name == this.entity.name && this.entity.children[0].type == "document") {
-                    console.log("Opening");
                     this.$emit("open", this.entity.children[0]);
                 } else {
-                    console.log("Selecting");
                     this.$emit("select", this.entity);
                 }
             }

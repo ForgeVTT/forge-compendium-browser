@@ -143,7 +143,6 @@ export default {
             this.searchTerm = null;
         },
         selectEntity(entity) {
-            console.log("Book, Selecting Entity", entity);
             if (!entity)
                 return;
 
@@ -155,7 +154,6 @@ export default {
                 this.folder = entity;
             } else if (entity) {
                 this.folder = entity;
-                console.log("Changing folder", this.folder);
                 if (entity.type == "section")
                     this.document = null;
             }
@@ -179,22 +177,11 @@ export default {
             let checkedEntities = [];
             const entry = this.findDocument(0, chapter, 1, checkedEntities);
             
-            /*
-            const entry = (game.ForgeCompendiumBrowser.setting("same-name") && 
-                chapter.children && 
-                chapter.children.length && 
-                chapter.children[0].name == chapter.name ? chapter.children[0] : null);
-                
-            console.log("Changing Chapter", chapter, entry);
-            */
-            
             this.selectEntity(entry || chapter);
         },
         moveUpParent(id, parent, dir, checkedEntities) {
             if (!parent || parent.type == "book")
                 return null;
-
-            console.log("Move Up Parent", id, parent);
 
             // Haven't found any children, so go up a parent and move to the next one
             let pidx = parent.children.findIndex(c => c.id == id);
@@ -208,7 +195,6 @@ export default {
         findDocument(index, parent, dir, checkedEntities) {
             checkedEntities.push(parent.id);
             for (let i = index; i >= 0 && i < parent.children.length; i += dir) {
-                console.log("Find Document", index, parent, parent.children[i]);
                 if (parent.children[i].children) {
                     let idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
                     if (!checkedEntities.includes(parent.children[i].id)) {
@@ -259,7 +245,6 @@ export default {
         },
         openLink(pack, id) {
             //find the other entry and open it.
-            console.log("Open a link", pack, id);
             const parts = pack.split(".");
             if (parts.length && parts[0] == this.book.id) {
                 // This is document is from this book, so find it and open it
@@ -276,17 +261,14 @@ export default {
                 this.history.length = this.historyPosition + 1;
             this.history.push(document);
             this.historyPosition = this.history.length - 1;
-            console.log("add", this.historyPosition);
         },
         viewHistory(dir) {
             this.historyPosition += dir;
             this.historyPosition = Math.min(Math.max(0, this.historyPosition), this.history.length - 1);
             this.document = this.history[this.historyPosition];
-            console.log("view", this.historyPosition);
         },
         canHistory(dir) {
             const position = (this.historyPosition + dir);
-            console.log("can history", position);
             return (position < 0) || (position > (this.history.length - 1)) ? "disabled" : "";
         },
         async importModule() {
@@ -341,10 +323,7 @@ export default {
             let traverseSearch = (parent) => {
                 let results = [];
 
-                console.log("Traverse", parent);
-
                 if (parent.type == "document") {
-                    console.log("Traverse, document", parent.document.content);
                     if (title != null) {
                         if(parent.name.toLowerCase().indexOf(title) >= 0) {
                             results.push(parent);
@@ -353,21 +332,15 @@ export default {
                     if (query != null) {
                         try {
                             if (parent.document instanceof JournalEntry) {
-                                console.log("Searching JE", parent.document.data.content, query, parent.document.data.content.toLowerCase().indexOf(query));
                                 if (parent.document.data.content.indexOf(query) >= 0) {
-                                    console.log("JE Adding to results");
                                     results.push(parent);
                                 }
                             } else if (parent.document instanceof Actor) {
-                                console.log("Searching Actor", parent.document.data.data.details.biography.value, query, parent.document.data.data.details.biography.value.toLowerCase().indexOf(query));
                                 if (parent.document.data.data.details.biography.value.indexOf(query) >= 0) {
-                                    console.log("Actor Adding to results");
                                     results.push(parent);
                                 }
                             } else if (parent.document instanceof Item) {
-                                console.log("Searching Item", parent.document.data.data.description.value, query, parent.document.data.data.description.value.toLowerCase().indexOf(query));
                                 if (parent.document.data.data.description.value.indexOf(query) >= 0) {
-                                    console.log("Item Adding to results");
                                     results.push(parent);
                                 }
                             }
@@ -384,14 +357,10 @@ export default {
                     }
                 }
 
-                if (results.length)
-                    console.log("Result", results);
                 return results;
             }
 
-            let results = traverseSearch(this.book);
-            console.log("Result", results);
-            this.searchResults = results;
+            this.searchResults = traverseSearch(this.book);
         }
     },
     computed: {
@@ -402,11 +371,9 @@ export default {
             return this.findClosestChapter(1) || !this.currentChapter;
         },
         canPrevItem() {
-            console.log("Can Prev Item");
             return this.findClosestItem(-1);
         },
         canNextItem() {
-            console.log("Can Next Item");
             return this.findClosestItem(1);
         },
         path() {
@@ -422,7 +389,6 @@ export default {
                         canAdd = false;
                     }
                     if(canAdd) {
-                        console.log("Adding breadcrumb", item);
                         items.push(item);
                     }
                 }
@@ -434,7 +400,6 @@ export default {
             return this.book.children;
         },
         directoryList() {
-            console.log("Directory List", this.currentSection);
             if (this.currentSection) {
                 return [this.currentSection];
             } //else if(this.sections) {
@@ -477,9 +442,7 @@ export default {
     watch: {
     },
     async mounted() {
-        console.log("game", game);
         await game.ForgeCompendiumBrowser.indexBook(this.book);
-        console.log("Book", this.book);
     },
 };
 </script>
