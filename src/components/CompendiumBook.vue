@@ -58,20 +58,22 @@
                 </div>
                 <div class="forge-compendium-info flexcol">
                     <!-- Search -->
-                    <div v-if="searchTerm != null" class="forge-compendium-search-area">
-                        <div class="flexrow">
-                            <input type="text" v-model="searchTerm" />
+                    <div v-if="searchTerm != null" class="forge-compendium-search-area flexcol">
+                        <div class="forge-compendium-search-bar flexrow">
+                            <input type="text" v-model="searchTerm" @keypress="checkEnter" />
                             <button type="button" @click="searchBook()"><i class="fas fa-search"></i></button>
                             <button type="button" @click="searchTerm = null"><i class="fas fa-trash"></i></button>
                         </div>
-                        <table v-if="searchResults.length" class="forge-compendium-search-list">
-                            <tr v-for="item in searchResults" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
-                                <td>
-                                    {{item.name}}
-                                </td>
-                            </tr>
-                        </table>
-                        <div v-else>
+                        <div v-if="searchResults.length" class="forge-compendium-search-list">
+                            <table>
+                                <tr v-for="item in searchResults" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
+                                    <td>
+                                        {{item.name}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div v-else class="no-results">
                             No Search Results
                         </div>
                     </div>
@@ -323,33 +325,73 @@ export default {
                 rejectClose: false,
             });
         },
+        checkEnter(e) {
+            if (e.keyCode === 13) {
+                this.searchBook();
+            }
+        },
         searchBook() {
-            let title = this.searchTerm;
+            if (this.searchTerm.length < 3) {
+                this.searchResults = [];
+            }
+            let title = this.searchTerm.toLowerCase();
             let type = null;
-            let query = this.searchTerm;
+            let query = this.searchTerm.toLowerCase();
 
             let traverseSearch = (parent) => {
                 let results = [];
 
+                console.log("Traverse", parent);
+
                 if (parent.type == "document") {
+                    console.log("Traverse, document", parent.document.content);
                     if (title != null) {
-                        if(parent.name.indexOf(title) >= 0)
+                        if(parent.name.toLowerCase().indexOf(title) >= 0) {
                             results.push(parent);
-                    } else if (parent.document.content.indexOf(query) >= 0)
-                        results.push(parent);
+                        }
+                    }
+                    if (query != null) {
+                        try {
+                            if (parent.document instanceof JournalEntry) {
+                                console.log("Searching JE", parent.document.data.content, query, parent.document.data.content.toLowerCase().indexOf(query));
+                                if (parent.document.data.content.indexOf(query) >= 0) {
+                                    console.log("JE Adding to results");
+                                    results.push(parent);
+                                }
+                            } else if (parent.document instanceof Actor) {
+                                console.log("Searching Actor", parent.document.data.data.details.biography.value, query, parent.document.data.data.details.biography.value.toLowerCase().indexOf(query));
+                                if (parent.document.data.data.details.biography.value.indexOf(query) >= 0) {
+                                    console.log("Actor Adding to results");
+                                    results.push(parent);
+                                }
+                            } else if (parent.document instanceof Item) {
+                                console.log("Searching Item", parent.document.data.data.description.value, query, parent.document.data.data.description.value.toLowerCase().indexOf(query));
+                                if (parent.document.data.data.description.value.indexOf(query) >= 0) {
+                                    console.log("Item Adding to results");
+                                    results.push(parent);
+                                }
+                            }
+                        } catch {
+                            // continue regardless of error
+                        }
+                    }
                 }
                 if (parent.children && parent.children.length) {
                     for(let child of parent.children) {
                         if (parent.type == "book" && type != null && child.type != type)
                             continue;
-                        results.concat(traverseSearch(child));
+                        results = results.concat(traverseSearch(child));
                     }
                 }
 
+                if (results.length)
+                    console.log("Result", results);
                 return results;
             }
 
-            this.searchResults = traverseSearch(this.book);
+            let results = traverseSearch(this.book);
+            console.log("Result", results);
+            this.searchResults = results;
         }
     },
     computed: {
@@ -505,6 +547,7 @@ export default {
     background-position: top center;
     background-size: cover;
     background-repeat: no-repeat;
+    height: 100%;
 }
 
 .forge-compendium-browser .navigation-row {
@@ -708,8 +751,7 @@ export default {
     margin: 10px;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.4);
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .forge-compendium-content .forge-compendium-info .forge-compendium-section-listing {
@@ -763,12 +805,16 @@ export default {
 
 .forge-compendium-search-area {
     padding: 10px;
+    height: 100%;
+}
+.forge-compendium-search-area .forge-compendium-search-bar {
+    flex: 0 0 30px;
 }
 .forge-compendium-search-area input[type="text"] {
     flex: 1;
     margin: 0 3px;
     background: rgba(255, 255, 245, 0.8);
-    height: var(--form-field-height);
+    height: 30px;
     padding: 1px 3px;
     color: var(--color-text-dark-primary);
     font-family: inherit;
@@ -787,9 +833,28 @@ export default {
     flex: 0 0 30px;
     border-radius: 0px;
     cursor: pointer;
+    overflow: hidden;
+    height: 30px;
 }
 .forge-compendium-search-area button:last-child {
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
+}
+.forge-compendium-search-area .no-results {
+    width: 100%;
+    text-align: center;
+    margin-top: 100px;
+}
+.forge-compendium-search-area .forge-compendium-search-list {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    padding: 8px;
+    height: calc(100% - 60px);
+    margin-top: 10px;
+    overflow-y: auto;
+}
+.forge-compendium-search-area .forge-compendium-search-list > table {
+    max-height: 100%;
+    margin: 0px;
 }
 </style>
