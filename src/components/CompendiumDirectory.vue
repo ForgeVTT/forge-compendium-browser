@@ -106,7 +106,7 @@ export default {
 }
 
 .forge-compendium-directory-list .forge-compendium-directory-item header {
-    border-left: 3px solid transparent;
+    border-left: 6px solid transparent;
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
@@ -133,10 +133,6 @@ export default {
 
 .forge-compendium-directory-list .forge-compendium-directory-item.active > header {
     border-left-color: #47D18C;
-}
-
-.forge-compendium-directory-list .subdirectory .forge-compendium-directory-item.active > header {
-    border-left-width: 6px;
 }
 
 .forge-compendium-directory-list .subdirectory {
