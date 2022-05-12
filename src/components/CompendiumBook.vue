@@ -31,7 +31,7 @@
                 <hr />
             </header>
             <ol v-if="currentSection" class="forge-compendium-directory-list">
-                <compendium-directory :entity="currentSection" :selected="document || folder" @select="selectEntity" @open="selectEntity"></compendium-directory>
+                <compendium-directory :entity="currentSection" :selected="folder" @select="selectEntity" @open="selectEntity"></compendium-directory>
             </ol>
         </div>
         <div class="forge-compendium-content flexcol">
@@ -50,29 +50,56 @@
             <compendium-listing v-else-if="currentSection" :listing="currentSection" @select="selectEntity" @open="selectEntity"></compendium-listing>
             <div v-else class="forge-compendium-background flexcol" :style="backgroundStyle">
                 <div class="forge-compendium-book-title">
-                    <svg :viewBox="titleViewbox" class="forge-compendium-svg">
-                        <text x="15" y="60" stroke="#000000" fill="#ffffff" stroke-width="3" font-family="Modesto Condensed" font-weight="bold">
+                    <svg class="forge-compendium-svg">
+                        <text x="15" y="110" stroke="#000000" fill="#ffffff" stroke-width="3" font-family="Modesto Condensed" font-weight="bold">
                             {{ bookName }}
                         </text>
                     </svg>
                 </div>
                 <div class="forge-compendium-info flexcol">
-                    <div class="flexrow flexcontain">
-                        <div class="forge-compendium-description" v-html="book.description"></div>
-                        <div class="forge-compendium-contains">
-                            <b>Contains:</b>
-                            <ul class="forge-compendium-contains-list">
-                                <li v-for="section in sections" :key="section.id">
-                                    <i class="fas" :class="section.icon"></i> {{section.count}} {{section.name}}
-                                </li>
-                            </ul>
+                    <!-- Search -->
+                    <div v-if="searchTerm != null" class="forge-compendium-search-area">
+                        <div class="flexrow">
+                            <input type="text" v-model="searchTerm" />
+                            <button type="button" @click="searchBook()"><i class="fas fa-search"></i></button>
+                            <button type="button" @click="searchTerm = null"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <table v-if="searchResults.length" class="forge-compendium-search-list">
+                            <tr v-for="item in searchResults" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
+                                <td>
+                                    {{item.name}}
+                                </td>
+                            </tr>
+                        </table>
+                        <div v-else>
+                            No Search Results
                         </div>
                     </div>
-                    <!-- Section listing -->
-                    <div class="forge-compendium-section-listing flexrow">
-                        <div class="forge-compendium-section flexcol" v-for="item in sections" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
-                            <div class="forge-compendium-icon"><i class="fas" :class="item.icon"></i></div>
-                            <div class="forge-compendium-title">{{item.name}}</div>
+                    <div v-else>
+                        <div class="flexrow flexcontain">
+                            <div class="forge-compendium-description" v-html="book.description"></div>
+                            <div class="forge-compendium-contains">
+                                <b>Contains:</b>
+                                <ul class="forge-compendium-contains-list">
+                                    <li v-for="section in sections" :key="section.id">
+                                        <i class="fas" :class="section.icon"></i> {{section.count}} {{section.name}}
+                                    </li>
+                                </ul>
+                                <div style="text-align: center;">
+                                    <button @click="importModule"><i class="fas fa-download"></i> Import Documents</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Section listing -->
+                        <div class="forge-compendium-section-listing flexrow">
+                            <div class="forge-compendium-section flexcol" v-for="item in sections" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
+                                <div class="forge-compendium-icon"><i class="fas" :class="item.icon"></i></div>
+                                <div class="forge-compendium-title">{{item.name}}</div>
+                            </div>
+                            <div class="forge-compendium-section flexcol" @click="searchTerm = ''">
+                                <div class="forge-compendium-icon"><i class="fas fa-search"></i></div>
+                                <div class="forge-compendium-title">Search</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -100,7 +127,9 @@ export default {
         folder: null,
         document: null,
         history: [],
-        historyPosition: 0
+        historyPosition: 0,
+        searchTerm: null,
+        searchResults: [],
     }),
     methods: {
         exit() {
@@ -109,6 +138,7 @@ export default {
         clearPath() {
             this.folder = null;
             this.document = null;
+            this.searchTerm = null;
         },
         selectEntity(entity) {
             console.log("Book, Selecting Entity", entity);
@@ -120,47 +150,95 @@ export default {
             } else if (entity.type == "document") {
                 this.document = entity;
                 this.addToHistory(entity);
-                this.folder = entity.parent;
+                this.folder = entity;
             } else if (entity) {
                 this.folder = entity;
+                console.log("Changing folder", this.folder);
                 if (entity.type == "section")
                     this.document = null;
             }
         },
-        changeChapter(dir) {
+        findClosestChapter(dir) {
             const currentChapter = this.currentChapter;
-            if (currentChapter) {
-                let idx = this.currentSection.children.findIndex(c => c.id == currentChapter.id);
-                idx += dir;
-                // If there is an entry with the same name as the current chapter, then use that to display as the entity.
-                const chapter = this.currentSection.children[idx];
-                const entry = (game.ForgeCompendiumBrowser.setting("same-name") && chapter.children && chapter.children[0].name == chapter.name ? chapter.children[0] : null);
-                
-                console.log("Changing Chapter", chapter, entry);
-                
-                this.selectEntity(entry || chapter);
-            }
-        },
-        findClosestItem() {
+            if (!currentChapter)
+                return false;
 
+            let idx = this.currentSection.children.findIndex(c => c.id == currentChapter.id);
+            idx += dir;
+            // If there is an entry with the same name as the current chapter, then use that to display as the entity.
+            const chapter = this.currentSection.children[idx];
+            return chapter;
+        },
+        changeChapter(dir) {
+            const chapter = this.findClosestChapter(dir);
+            if (!chapter)
+                return;
+
+            let checkedEntities = [];
+            const entry = this.findDocument(0, chapter, 1, checkedEntities);
+            
+            /*
+            const entry = (game.ForgeCompendiumBrowser.setting("same-name") && 
+                chapter.children && 
+                chapter.children.length && 
+                chapter.children[0].name == chapter.name ? chapter.children[0] : null);
+                
+            console.log("Changing Chapter", chapter, entry);
+            */
+            
+            this.selectEntity(entry || chapter);
+        },
+        moveUpParent(id, parent, dir, checkedEntities) {
+            if (!parent || parent.type == "book")
+                return null;
+
+            console.log("Move Up Parent", id, parent);
+
+            // Haven't found any children, so go up a parent and move to the next one
+            let pidx = parent.children.findIndex(c => c.id == id);
+            if (!checkedEntities.includes(parent.id)) {
+                let entity = this.findDocument(pidx + dir, parent, dir, checkedEntities); // reverse the endpoint of the child array if we're moving up the parents
+                if (entity)
+                    return entity;
+            }
+            return this.moveUpParent(parent.id, parent.parent, dir, checkedEntities);
+        },
+        findDocument(index, parent, dir, checkedEntities) {
+            checkedEntities.push(parent.id);
+            for (let i = index; i >= 0 && i < parent.children.length; i += dir) {
+                console.log("Find Document", index, parent, parent.children[i]);
+                if (parent.children[i].children) {
+                    let idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
+                    if (!checkedEntities.includes(parent.children[i].id)) {
+                        let entity = this.findDocument(idx, parent.children[i], dir, checkedEntities);
+                        if (entity)
+                            return entity;
+                    }
+                } else if(parent.children[i].type == "document") {
+                    return parent.children[i];
+                }
+            }
+            return null;
+        },
+        findClosestItem(dir, idx) {
+            let checkedEntities = [];
+
+            if (idx == undefined) {
+                if (!this.document)
+                    return null;
+                idx = this.document.parent.children.findIndex(i => i.id == this.document.id);
+            }
+
+            let newChild = this.findDocument(idx + dir, this.document.parent, dir, checkedEntities);
+            if (!newChild)
+                newChild = this.moveUpParent(this.document.parent.id, this.document.parent.parent, dir, checkedEntities);
+
+            return newChild;
         },
         changeItem(dir) {
-            // Find the next document, if there is no document, then move to the first document of the next folder
-            if (this.document) {
-                let idx = this.document.parent.children.findIdx(i => i.id == this.document.id);
-                if (idx == 0) {
-                    // move to the previous document
-                } else if (idx == this.document.parent.length - 1) {
-                    // move to next document
-                } else {
-                    // TODO: find the closest item
-                    idx += dir;
-                    let item = this.document.parent.children[idx];
-                    if (item.type == "document")
-                        this.document = item;
-                    else
-                        this.folder = item;
-                }
+            let entity = this.findClosestItem(dir);
+            if (entity && entity.type == "document") {
+                this.selectEntity(entity);
             }
         },
         sectionActive(section) {
@@ -208,28 +286,86 @@ export default {
             const position = (this.historyPosition + dir);
             console.log("can history", position);
             return (position < 0) || (position > (this.history.length - 1)) ? "disabled" : "";
+        },
+        async importModule() {
+            const sections = this.sections.map(s => ({ id: s.id, name: s.name, count: s.count }));
+            const html = await renderTemplate('modules/forge-compendium-browser/import-documents.html', { sections });
+            Dialog.prompt({
+                title: "Import Compendium Documents",
+                content: html,
+                label: "Import",
+                callback: html => {
+                    const form = html.querySelector("#forge-compendium-browser-import");
+                    const fd = new FormDataExtended(form);
+                    const data = fd.toObject();
+
+                    const doImport = (entry) => {
+                        //go through this entry, find all documents and import them
+                        if (entry) {
+                            if(entry.type == "document") {
+                                const collection = game.collections.get(entry.collection.documentName);
+                                return collection.importFromCompendium(entry.collection, entry.id, {}, { renderSheet: false });
+                            } else if(entry.children && entry.children.length) {
+                                for (let child of entry.children) {
+                                    doImport(child);
+                                }
+                            }
+                        }
+                    }
+                    
+                    for(let [k, v] of Object.entries(data.sections)) {
+                        if (v) {
+                            const section = this.sections.find(s => s.id == k);
+                            doImport(section);
+                        }
+                    }
+                },
+                rejectClose: false,
+            });
+        },
+        searchBook() {
+            let title = this.searchTerm;
+            let type = null;
+            let query = this.searchTerm;
+
+            let traverseSearch = (parent) => {
+                let results = [];
+
+                if (parent.type == "document") {
+                    if (title != null) {
+                        if(parent.name.indexOf(title) >= 0)
+                            results.push(parent);
+                    } else if (parent.document.content.indexOf(query) >= 0)
+                        results.push(parent);
+                }
+                if (parent.children && parent.children.length) {
+                    for(let child of parent.children) {
+                        if (parent.type == "book" && type != null && child.type != type)
+                            continue;
+                        results.concat(traverseSearch(child));
+                    }
+                }
+
+                return results;
+            }
+
+            this.searchResults = traverseSearch(this.book);
         }
     },
     computed: {
         canPrevChapter() {
-            const currentChapter = this.currentChapter;
-            console.log("current chapter", currentChapter);
-            if (!currentChapter) {
-                return false;
-            } else {
-                console.log("Section", this.currentSection);
-                return this.currentSection.children.findIndex(c => c.id == currentChapter.id) > 0;
-            }
+            return this.findClosestChapter(-1);
         },
         canNextChapter() {
-            const currentChapter = this.currentChapter;
-            console.log("current chapter", currentChapter, this.currentSection);
-            if (!currentChapter) {
-                return false;
-            } else {
-                console.log("Section", this.currentSection);
-                return this.currentSection.children.findIndex(c => c.id == currentChapter.id) < this.currentSection.children.length - 1;
-            }
+            return this.findClosestChapter(1) || !this.currentChapter;
+        },
+        canPrevItem() {
+            console.log("Can Prev Item");
+            return this.findClosestItem(-1);
+        },
+        canNextItem() {
+            console.log("Can Next Item");
+            return this.findClosestItem(1);
         },
         path() {
             let items = [];
@@ -294,9 +430,6 @@ export default {
         },
         bookName() {
             return this.book.name.toUpperCase();
-        },
-        titleViewbox() {
-            return `0 0 ${this.book.name.length * 100} 50`;
         },
     },
     watch: {
@@ -505,14 +638,14 @@ export default {
     margin: 10px;
     padding: 10px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .forge-compendium-content .forge-compendium-contains {
     margin: 10px;
     padding: 10px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     flex: 0 0 300px;
 }
 
@@ -532,7 +665,7 @@ export default {
     margin: 8px;
     border-radius: 8px;
     cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.95);
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-icon {
@@ -560,7 +693,7 @@ export default {
 .forge-compendium-content .forge-compendium-book-title {
     font-size: 100px;
     text-align: center;
-    flex: 0 0 25%;
+    flex: 0 0 150px;
     overflow: hidden;
     white-space:nowrap;
     text-overflow: ellipsis;
@@ -626,5 +759,37 @@ export default {
 .forward-button.disabled {
     cursor: default;
     color: #808080;
+}
+
+.forge-compendium-search-area {
+    padding: 10px;
+}
+.forge-compendium-search-area input[type="text"] {
+    flex: 1;
+    margin: 0 3px;
+    background: rgba(255, 255, 245, 0.8);
+    height: var(--form-field-height);
+    padding: 1px 3px;
+    color: var(--color-text-dark-primary);
+    font-family: inherit;
+    font-size: inherit;
+    text-align: inherit;
+    line-height: inherit;
+    border: 1px solid var(--color-border-light-tertiary);
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+.forge-compendium-search-area button {
+    flex: 0 0 30px;
+    border-radius: 0px;
+    cursor: pointer;
+}
+.forge-compendium-search-area button:last-child {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
 }
 </style>

@@ -49,7 +49,7 @@ export default {
             if (!item.children || (item.children.length == 1 && item.children[0].name == item.name))
                 return [];
                 
-            return item.children;
+            return item.children.filter(c => c.name != item.name || !useSameName);
         }
     },
     computed: {

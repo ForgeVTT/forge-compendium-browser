@@ -32,34 +32,48 @@ export default {
                 const sheets = cfg.sheetClasses[CONST.BASE_DOCUMENT_TYPE] || {};
                 cls = sheets["core.JournalSheet"].cls;
             }
-            this.subsheet = new cls(this.entry.document, { editable: false });
-            this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
-            const templateData = await this.subsheet.getData();
-            const html = await renderTemplate(this.subsheet.template, templateData);
-            this.$refs.entry.innerHTML = html;
-            const subdocument = $(this.$refs.entry);
-            this.subsheet.form = $('form:first', subdocument);
-            this.subsheet._element = subdocument;
+            if (this.entry.document instanceof Scene) {
+                const templateData = {
+                    img: this.entry.data.img,
+                    stats: {}
+                }
 
-            this.subsheet._tabs = this.subsheet.options.tabs.map(t => {
-                t.callback = this.subsheet._onChangeTab.bind(this.subsheet);
-                return new Tabs(t);
-            });
-            this.subsheet._tabs.forEach(t => t.bind(subdocument[0]));
+                // Collect the stats ont he scene
 
-            try {
-                this.subsheet.activateListeners(this.subdocument);
-            } catch {
-                //continue regardless of error
+                const html = await renderTemplate("modules/forge-compendium-browser/templates/scene-entry.html", templateData);
+
+                this.$refs.entry.innerHTML = html;
+            } else {
+                this.subsheet = new cls(this.entry.document, { editable: false });
+                this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
+                const templateData = await this.subsheet.getData();
+                const html = await renderTemplate(this.subsheet.template, templateData);
+
+                this.$refs.entry.innerHTML = html;
+                const subdocument = $(this.$refs.entry);
+                this.subsheet.form = $('form:first', subdocument);
+                this.subsheet._element = subdocument;
+
+                this.subsheet._tabs = this.subsheet.options.tabs.map(t => {
+                    t.callback = this.subsheet._onChangeTab.bind(this.subsheet);
+                    return new Tabs(t);
+                });
+                this.subsheet._tabs.forEach(t => t.bind(subdocument[0]));
+
+                try {
+                    this.subsheet.activateListeners(this.subdocument);
+                } catch {
+                    //continue regardless of error
+                }
+                this.subsheet._disableFields(subdocument[0]);
+
+                //Hooks.callAll('renderJournalSheet', this.subsheet, subdocument, templateData);
+                const parts = this.entry.document.pack.split(".");
+                $(`a[data-pack^="${parts[0]}"]`, this.$refs.entry).on("click", this.openLink.bind(this));
+
+                this.entry.document._sheet = null;  // eslint-disable-line
+                this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
             }
-            this.subsheet._disableFields(subdocument[0]);
-
-            //Hooks.callAll('renderJournalSheet', this.subsheet, subdocument, templateData);
-            const parts = this.entry.document.pack.split(".");
-            $(`a[data-pack^="${parts[0]}"]`, this.$refs.entry).on("click", this.openLink.bind(this));
-
-            this.entry.document._sheet = null;  // eslint-disable-line
-            this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
         }
     },
     computed: {
