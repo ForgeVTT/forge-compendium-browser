@@ -1,0 +1,9 @@
+<form id="forge-compendium-browser-import">
+    <ul>
+    {{#each sections}}
+        <li>
+            <input name="section.{{this.id}}" type="checkbox" /> {{this.count}} {{this.name}}
+        </li>
+    {{/each}}
+    </ul>
+</div>
