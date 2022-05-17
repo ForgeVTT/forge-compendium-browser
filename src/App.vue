@@ -1,26 +1,26 @@
 <template>
   <div id="app" class="window-content">
-    <CompendiumBrowser msg="Forge Compendium Browser"/>
+    <CompendiumBrowser msg="Forge Compendium Browser" />
   </div>
 </template>
 
 <script>
-import CompendiumBrowser from './components/CompendiumBrowser.vue'
+import CompendiumBrowser from "./components/CompendiumBrowser.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    CompendiumBrowser
-  }
-}
+    CompendiumBrowser,
+  },
+};
 </script>
 
 <style>
 @import "./fonts/fontawesome/css/all.min.css";
 body {
-    background-image: url(img/denim.png);
-    background-repeat: repeat;
-    background-size: auto;
+  background-image: url(img/denim.png);
+  background-repeat: repeat;
+  background-size: auto;
 }
 
 #app {
@@ -37,16 +37,16 @@ body {
 }
 
 #app .forge-compendium-library {
-    width: calc(100% - 16px);
-    height: calc(100% - 16px);
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
 }
 
 #app .forge-compendium-library .forge-compendium-banner {
-    width: calc(100% - 20px);
+  width: calc(100% - 20px);
 }
 
 #app .forge-compendium-library .forge-compendium-book .forge-compendium-title {
-    width: calc(100% - 32px);
+  width: calc(100% - 32px);
 }
 
 .window-content {
@@ -71,39 +71,39 @@ body {
 }
 
 .flexrow {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-  .flexcol {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-  }
-  .flexrow > *,
-  .flexcol > * {
-    flex: 1;
-  }
-  .flexrow > .flex0,
-  .flexcol > .flex0 {
-    display: block;
-    flex: 0;
-  }
-  .flexrow > .flex1,
-  .flexcol > .flex1 {
-    flex: 1;
-  }
-  .flexrow > .flex2,
-  .flexcol > .flex2 {
-    flex: 2;
-  }
-  .flexrow > .flex3,
-  .flexcol > .flex3 {
-    flex: 3;
-  }
-  h1,
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.flexcol {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+.flexrow > *,
+.flexcol > * {
+  flex: 1;
+}
+.flexrow > .flex0,
+.flexcol > .flex0 {
+  display: block;
+  flex: 0;
+}
+.flexrow > .flex1,
+.flexcol > .flex1 {
+  flex: 1;
+}
+.flexrow > .flex2,
+.flexcol > .flex2 {
+  flex: 2;
+}
+.flexrow > .flex3,
+.flexcol > .flex3 {
+  flex: 3;
+}
+h1,
 h2,
 h3,
 h4 {
@@ -135,7 +135,7 @@ a:hover {
 a.entity-link,
 a.content-link,
 a.inline-roll {
-  background: #DDD;
+  background: #ddd;
   padding: 1px 4px;
   border: 1px solid var(--color-border-dark-tertiary);
   border-radius: 2px;
@@ -167,10 +167,10 @@ a.inline-roll.blindroll {
 }
 
 img {
-    box-sizing: border-box;
-    border: 1px solid var(--color-border-dark);
-    border-radius: 2px;
-    max-width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border-dark);
+  border-radius: 2px;
+  max-width: 100%;
 }
 /* Paragraph */
 p {
@@ -251,7 +251,7 @@ blockquote em {
   --color-shadow-highlight: #ff6400;
   --color-shadow-dark: #000;
   --color-underline-inactive: #7a7971;
-  --color-underline-active: #44191A;
+  --color-underline-active: #44191a;
   --color-underline-header: #782e22;
   --color-border-light-highlight: #f0f0e0;
   --color-border-light-primary: #b5b3a4;
@@ -298,28 +298,29 @@ blockquote em {
 /*  Fonts                                    */
 /* ----------------------------------------- */
 @font-face {
-  font-family: 'Signika';
-  src: url('fonts/signika/signika-regular.woff2') format('woff2');
+  font-family: "Signika";
+  src: url("fonts/signika/signika-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Signika';
-  src: url('fonts/signika/signika-bold.woff2') format('woff2');
+  font-family: "Signika";
+  src: url("fonts/signika/signika-bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Modesto Condensed';
+  font-family: "Modesto Condensed";
   font-style: normal;
   font-weight: 400;
-  src: url('fonts/modesto-condensed/modesto-condensed.woff2') format('woff2');
+  src: url("fonts/modesto-condensed/modesto-condensed.woff2") format("woff2");
 }
 @font-face {
-  font-family: 'Modesto Condensed';
+  font-family: "Modesto Condensed";
   font-style: normal;
   font-weight: 700;
-  src: url('fonts/modesto-condensed/modesto-condensed-bold.woff2') format('woff2');
+  src: url("fonts/modesto-condensed/modesto-condensed-bold.woff2")
+    format("woff2");
 }
 
 /* ----------------------------------------- */

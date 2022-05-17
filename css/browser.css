@@ -6,32 +6,29 @@
     display: none;
 }
 
-/*
-.window-app .window-content .forge-compendium-container {
-    max-height:100%;
-}
-
-.forge-compendium-browser {
-    max-height: 100%;
-}
-
-.forge-compendium-content {
-    height:100%;
-    overflow: hidden;
-}
-
-.forge-compendium-browser .forge-compendium-book-container {
-    height: calc(100% + 16px);
-    overflow: hidden;
-    margin: -8px;
-}
-
-.forge-compendium-browser .forge-compendium-background {
+.forge-compendium-scene {
+    position: relative;
+    width: 100%;
     height: 100%;
-    background-size: cover;
-    background-position: top center;
 }
 
-.forge-compendium-browser .forge-compendium-list {
+.forge-compendium-scene img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
-*/
+
+.forge-compendium-scene .forge-compendium-scene-stat {
+    position: absolute;
+    bottom: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid #000;
+    border-radius: 8px;
+    max-width: 300px;
+    width: 300px;
+    color: #ffffff;
+    padding: 12px 0px;
+    font-size: 18px;
+    left: 50%;
+    margin-left: -150px;
+}

@@ -37,15 +37,8 @@ export class ForgeCompendiumBrowser {
         ForgeCompendiumBrowser.parseCompendiums();
     }
 
-    static ready() {
-    }
-
     static setting(key) {
         return game.settings.get("forge-compendium-browser", key);
-    }
-
-    static i18n(key) {
-        return game.i18n.localize(key);
     }
 
     static get version() {
@@ -192,7 +185,7 @@ export class ForgeCompendiumBrowser {
                 }
                 realparent.children.push(childData);
 
-                if (section){
+                if (section) {
                     let key = `${pack._source.module}.${pack.name}`;
                     let collection = game.packs.get(key);
                     section.count += (collection?.index?.size || 0);
@@ -252,7 +245,6 @@ export class ForgeCompendiumBrowser {
 
 Hooks.on('init', ForgeCompendiumBrowser.init);
 Hooks.on('setup', ForgeCompendiumBrowser.setup);
-Hooks.on('ready', ForgeCompendiumBrowser.ready);
 
 Hooks.on("renderCompendiumDirectory", (app, html, data) => {
     $('.directory-footer', html).append(
@@ -262,7 +254,7 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
                 .addClass('open-forge-compendium-browser')
                 .attr('type', 'button')
                 .on("click", ForgeCompendiumBrowser.openBrowser)
-                .html('<i class="fas fa-d-and-d-beyond"></i> Open Compendium Browser')
+                .html(`<i class="fas fa-d-and-d-beyond"></i> ${i18n("ForgeCompendiumBrowser.OpenCompendiumBrowser")}`)
             )
     );
 

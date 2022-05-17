@@ -18,25 +18,13 @@ export class CompendiumBrowserApp extends Application {
             resizable: true,
             width: vw - 400,
             height: vh - 200,
-            scrollY: ["ol.directory-list", ".forge-compendium-listing > div"],
+            scrollY: ["ol.forge-compendium-directory-list", ".forge-compendium-listing > div"],
             dragDrop: [{ dragSelector: ".draggable-item" }]
         });
     }
 
     getData(options) {
         let data = super.getData(options);
-
-        //data.books = JSON.stringify(ForgeCompendiumBrowser.books);
-
-        //log("loading", ForgeCompendiumBrowser.books, data.books);
-
         return data;
     }
-    /*
-    async _render(force = false, options = {}) {
-        return super._render(force, options).then(() => {
-            VuePort.render(null, $('.render-compendium-browser', this.element)[0], { data: { books: ForgeCompendiumBrowser.books }, dependencies: ["forge-compendium-browser-vueport"] });
-        });
-    }
-    */
 }

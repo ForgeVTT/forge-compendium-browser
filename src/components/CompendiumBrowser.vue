@@ -5,7 +5,13 @@
       :library="library"
       @select="selectBook"
     ></compendium-library>
-    <compendium-book v-else ref="compendiumBook" :book="book" @exit="selectBook" @link="openLink"></compendium-book>
+    <compendium-book
+      v-else
+      ref="compendiumBook"
+      :book="book"
+      @exit="selectBook"
+      @link="openLink"
+    ></compendium-book>
   </div>
 </template>
 
@@ -19,7 +25,6 @@ export default {
     CompendiumLibrary,
     CompendiumBook,
   },
-  props: {},
   data: () => ({
     library: null,
     book: null,
@@ -34,23 +39,22 @@ export default {
       }
     },
     openLink(bookId, packId, id) {
-        const book = this.library.find(b => b.id == bookId);
-        if (book) {
-            this.book = book;
-            this.$refs.compendiumBook.openLink(packId, id);
-        }
-    }
+      const book = this.library.find((b) => b.id == bookId);
+      if (book) {
+        this.book = book;
+        this.$refs.compendiumBook.openLink(packId, id);
+      }
+    },
   },
   computed: {
     showBook() {
       return this.book != null;
     },
   },
-  watch: {},
   mounted() {
     this.library = game.ForgeCompendiumBrowser.books;
     const lastBook = game.user.getFlag("forge-compendium-browser", "last-book");
-    if (lastBook){
+    if (lastBook) {
       this.selectBook(lastBook);
     }
   },
@@ -66,7 +70,7 @@ export default {
   flex-grow: 0;
 }
 .forge-compendium-browser .compendium-muted {
-    opacity: 0.4;
-    font-weight: bold;
+  opacity: 0.4;
+  font-weight: bold;
 }
 </style>
