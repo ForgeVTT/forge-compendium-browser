@@ -73,8 +73,7 @@ export default {
                 this.subsheet._disableFields(subdocument[0]);
 
                 //Hooks.callAll('renderJournalSheet', this.subsheet, subdocument, templateData);
-                const parts = this.entry.document.pack.split(".");
-                $(`a[data-pack^="${parts[0]}"]`, this.$refs.entry).on("click", this.openLink.bind(this));
+                $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
 
                 this.entry.document._sheet = null;  // eslint-disable-line
                 this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;

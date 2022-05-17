@@ -5,7 +5,7 @@
       :library="library"
       @select="selectBook"
     ></compendium-library>
-    <compendium-book v-else :book="book" @exit="selectBook"></compendium-book>
+    <compendium-book v-else ref="compendiumBook" :book="book" @exit="selectBook" @link="openLink"></compendium-book>
   </div>
 </template>
 
@@ -33,6 +33,13 @@ export default {
         game.user.unsetFlag("forge-compendium-browser", "last-book");
       }
     },
+    openLink(bookId, packId, id) {
+        const book = this.library.find(b => b.id == bookId);
+        if (book) {
+            this.book = book;
+            this.$refs.compendiumBook.openLink(packId, id);
+        }
+    }
   },
   computed: {
     showBook() {

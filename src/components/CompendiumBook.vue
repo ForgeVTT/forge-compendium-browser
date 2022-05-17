@@ -265,14 +265,17 @@ export default {
         openLink(pack, id) {
             //find the other entry and open it.
             const parts = pack.split(".");
-            if (parts.length && parts[0] == this.book.id) {
-                // This is document is from this book, so find it and open it
-                let entity = this.findEntity(this.book, id);
-                if (entity) {
-                    this.entity = entity;
+            if (parts.length){
+                if (parts[0] == this.book.id) {
+                    // This is document is from this book, so find it and open it
+                    const entity = this.findEntity(this.book, id);
+                    if (entity) {
+                        this.selectEntity(entity);
+                    }
+                } else {
+                    // check to see if this is another compendium book
+                    this.$emit("link", parts[0], pack, id);
                 }
-            } else {
-                // TODO: check to see if this is another compendium book
             }
         },
         addToHistory(document) {
