@@ -1,5 +1,5 @@
 <template>
-    <div v-if="listing.length" class="forge-compendium-list" :depth="depth">
+    <div v-if="showListing" class="forge-compendium-list" :depth="depth">
         <div v-for="item in listing" :key="item.id" :data-id="item.id">
             <div class="flexcol" :class="listClass(item)">
                 <div class="forge-compendium-title draggable-item flexrow" :class="item.img ? 'has-image' : ''" @click="openItem(item)" draggable @dragstart="startDrag($event, item)" >
@@ -51,7 +51,9 @@ export default {
         }
     },
     computed: {
-
+        showListing() {
+            return this.listing && this.listing.length;
+        }
     },
     watch: {
     },

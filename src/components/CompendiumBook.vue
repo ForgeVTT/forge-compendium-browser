@@ -27,6 +27,10 @@
                         <i class="fas" :class="section.icon"></i>
                         <span>{{ section.name }}</span>
                     </div>
+                    <div class="navigation-section-link" :class="sectionActive({id:'search'})" @click="openSearch()">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </div>
                 </div>
                 <hr />
             </header>
@@ -61,14 +65,23 @@
                     <div v-if="searchTerm != null" class="forge-compendium-search-area flexcol">
                         <div class="forge-compendium-search-bar flexrow">
                             <input type="text" v-model="searchTerm" @keypress="checkEnter" />
-                            <button type="button" @click="searchBook()"><i class="fas fa-search"></i></button>
-                            <button type="button" @click="searchTerm = null"><i class="fas fa-trash"></i></button>
+                            <button type="button" @click="searchBook()" title="Search"><i class="fas fa-search"></i></button>
+                            <button type="button" @click="clearSearch()" title="Clear search term"><i class="fas fa-trash"></i></button>
                         </div>
                         <div v-if="searchResults.length" class="forge-compendium-search-list">
-                            <table>
-                                <tr v-for="item in searchResults" :key="item.id" :data-id="item.id" @click="selectEntity(item)">
-                                    <td>
+                            <table class="forge-compendium-search-table">
+                                <tr v-for="item in searchResults" :key="item.id" :data-id="item.id" @click="selectFromSearch(item.document)">
+                                    <td class="search-image">
+                                        <img v-if="item.img" :src="item.img" />
+                                    </td>
+                                    <td class="search-section">
+                                        <i class="fas" :class="item.icon" :title="item.section"></i>
+                                    </td>
+                                    <td class="search-name">
                                         {{item.name}}
+                                    </td>
+                                    <td class="search-parent">
+                                        {{item.parent}}
                                     </td>
                                 </tr>
                             </table>
@@ -87,7 +100,7 @@
                                         <i class="fas" :class="section.icon"></i> {{section.count}} {{section.name}}
                                     </li>
                                 </ul>
-                                <div style="text-align: center;">
+                                <div style="text-align: center;display: none;">
                                     <button @click="importModule"><i class="fas fa-download"></i> Import Documents</button>
                                 </div>
                             </div>
@@ -98,7 +111,7 @@
                                 <div class="forge-compendium-icon"><i class="fas" :class="item.icon"></i></div>
                                 <div class="forge-compendium-title">{{item.name}}</div>
                             </div>
-                            <div class="forge-compendium-section flexcol" @click="searchTerm = ''">
+                            <div class="forge-compendium-section flexcol" @click="openSearch()">
                                 <div class="forge-compendium-icon"><i class="fas fa-search"></i></div>
                                 <div class="forge-compendium-title">Search</div>
                             </div>
@@ -142,11 +155,17 @@ export default {
             this.document = null;
             this.searchTerm = null;
         },
+        selectFromSearch(entity) {
+            this.addToHistory({ type: "search", query: this.searchTerm });
+            this.selectEntity(entity);
+        },
         selectEntity(entity) {
             if (!entity)
                 return;
 
-            if (entity.type == "book") {
+            if (entity.type == "search") {
+                this.openSearch(entity.query);
+            } else if (entity.type == "book") {
                 this.clearPath();
             } else if (entity.type == "document") {
                 this.document = entity;
@@ -160,7 +179,7 @@ export default {
         },
         findClosestChapter(dir) {
             const currentChapter = this.currentChapter;
-            if (!currentChapter)
+            if (!currentChapter || !this.currentSection || !this.currentSection.children)
                 return false;
 
             let idx = this.currentSection.children.findIndex(c => c.id == currentChapter.id);
@@ -230,7 +249,7 @@ export default {
             }
         },
         sectionActive(section) {
-            return this.currentSection?.id == section.id ? "active" : "";
+            return this.currentSection?.id == section.id || (this.searchTerm !== null && section.id == "search" && this.currentSection?.id == null) ? "active" : "";
         },
         findEntity(parent, id) {
             if (parent.children) {
@@ -265,7 +284,13 @@ export default {
         viewHistory(dir) {
             this.historyPosition += dir;
             this.historyPosition = Math.min(Math.max(0, this.historyPosition), this.history.length - 1);
-            this.document = this.history[this.historyPosition];
+            const entity = this.history[this.historyPosition];
+            if (entity.type == "search") {
+                this.openSearch(entity.query);
+            } else {
+                this.document = entity;
+                this.folder = entity;
+            }
         },
         canHistory(dir) {
             const position = (this.historyPosition + dir);
@@ -307,6 +332,15 @@ export default {
                 rejectClose: false,
             });
         },
+        openSearch(query = '') {
+            this.searchTerm = query;
+            this.document = null;
+            this.folder = null;
+        },
+        clearSearch() {
+            this.searchTerm = '';
+            this.searchResults = [];
+        },
         checkEnter(e) {
             if (e.keyCode === 13) {
                 this.searchBook();
@@ -320,28 +354,45 @@ export default {
             let type = null;
             let query = this.searchTerm.toLowerCase();
 
+            let searchResult = (entity, idx, text) => {
+                let section = this.book.children.find(s => s.id == entity.parent.section);
+                return {
+                    id: entity.id,
+                    name: entity.name,
+                    img: entity.img,
+                    parent: entity.parent.name,
+                    section: section.name,
+                    icon: section.icon,
+                    document: entity
+                };
+            }
+
             let traverseSearch = (parent) => {
                 let results = [];
 
                 if (parent.type == "document") {
                     if (title != null) {
-                        if(parent.name.toLowerCase().indexOf(title) >= 0) {
-                            results.push(parent);
+                        const idx = parent.name.toLowerCase().indexOf(title)
+                        if (idx >= 0) {
+                            results.push(searchResult(parent, idx, parent.name));
                         }
                     }
                     if (query != null) {
                         try {
                             if (parent.document instanceof JournalEntry) {
-                                if (parent.document.data.content.indexOf(query) >= 0) {
-                                    results.push(parent);
+                                const idx = parent.document.data.content.toLowerCase().indexOf(query);
+                                if (idx >= 0) {
+                                    results.push(searchResult(parent, idx, parent.document.data.content));
                                 }
                             } else if (parent.document instanceof Actor) {
-                                if (parent.document.data.data.details.biography.value.indexOf(query) >= 0) {
-                                    results.push(parent);
+                                const idx = parent.document.data.data.details.biography.value.toLowerCase().indexOf(query);
+                                if (idx >= 0) {
+                                    results.push(searchResult(parent, idx, parent.document.data.data.details.biography.value));
                                 }
                             } else if (parent.document instanceof Item) {
-                                if (parent.document.data.data.description.value.indexOf(query) >= 0) {
-                                    results.push(parent);
+                                const idx = parent.document.data.data.description.value.toLowerCase().indexOf(query);
+                                if (idx >= 0) {
+                                    results.push(searchResult(parent, idx, parent.document.data.data.description.value));
                                 }
                             }
                         } catch {
@@ -816,8 +867,26 @@ export default {
     margin-top: 10px;
     overflow-y: auto;
 }
-.forge-compendium-search-area .forge-compendium-search-list > table {
+.forge-compendium-search-area .forge-compendium-search-table {
     max-height: 100%;
     margin: 0px;
+}
+.forge-compendium-search-area .forge-compendium-search-table tr {
+    cursor: pointer;
+}
+.forge-compendium-search-area .forge-compendium-search-table tr td.search-image {
+    width: 40px;
+    max-height: 40px;
+    text-align: center;
+}
+.forge-compendium-search-area .forge-compendium-search-table tr td.search-section {
+    width: 30px;
+    text-align: center;
+}
+.forge-compendium-search-area .forge-compendium-search-table tr td img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border: 0px;
 }
 </style>
