@@ -10187,6 +10187,39 @@ globalThis.game = {
         getFlag: () => { return "dndbeyond-br"},
         setFlag: () => {},
         unsetFlag: () => {}
+    },
+    i18n: {
+        localize: (key) => { 
+            const keys = {
+                "ForgeCompendiumBrowser.same-name.name": "Auto open with same name",
+                "ForgeCompendiumBrowser.same-name.hint": "Automatically open documents with the same name as the listing name",
+            
+                "ForgeCompendiumBrowser.OpenCompendiumBrowser": "Open Compendium Browser",
+                "ForgeCompendiumBrowser.ForgeCompendiumLibrary": "Forge Compendium Library",
+                "ForgeCompendiumBrowser.LibraryMessage": "This is your library of compendium books.  If you have no books listed, please use the {link} from the Bazaar to import your books.",
+                "ForgeCompendiumBrowser.NoBooksLoaded": "No Books Loaded",
+                "ForgeCompendiumBrowser.CompendiumLibrary": "Compendium Library",
+                "ForgeCompendiumBrowser.Prev": "Prev",
+                "ForgeCompendiumBrowser.Next": "Next",
+                "ForgeCompendiumBrowser.Search": "Search",
+                "ForgeCompendiumBrowser.NoSearchResults": "No Search Results",
+                "ForgeCompendiumBrowser.ImportDocuments": "Import Documents",
+                "ForgeCompendiumBrowser.ImportCompendiumDocuments": "Import Compendium Documents",
+                "ForgeCompendiumBrowser.Import": "Import"
+            }
+            return keys[key] },
+        format: (key, data) => { 
+            const keys = {
+                "ForgeCompendiumBrowser.LibraryMessage": "This is your library of compendium books.  If you have no books listed, please use the {link} from the Bazaar to import your books.",
+            }
+
+            let str = keys[key];
+            const fmt = /\{[^\}]+\}/g;  //eslint-disable-line
+            str = str.replace(fmt, k => {
+                return data[k.slice(1, -1)];
+            });
+            return str;
+        }
     }
 };
 

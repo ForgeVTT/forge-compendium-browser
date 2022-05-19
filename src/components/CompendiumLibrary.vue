@@ -9,11 +9,9 @@
         />
         <div class="flexcol">
           <h2 class="flexcontain">
-            {{ game.i18n.localize("ForgeCompendiumBrowser.ForgeCompendiumLibrary") }}
+            {{ this.i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary") }}
           </h2>
-          <p class="notes flexcontain">
-            {{ game.i18n.localize("ForgeCompendiumBrowser.LibraryMessage") }}
-          </p>
+          <p class="notes flexcontain" v-html="LibraryMessage"></p>
         </div>
       </div>
       <div class="flexrow" style="overflow-y: auto">
@@ -36,7 +34,7 @@
     </div>
     <div v-else class="compendium-information flexrow">
       <h3 class="compendium-muted">
-        {{ game.i18n.localize("ForgeCompendiumBrowser.NoBooksLoaded") }}
+        {{ this.i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
       </h3>
     </div>
   </div>
@@ -58,12 +56,21 @@ export default {
     forgeLink() {
       window.open("https://forge-vtt.com/", "_blank");
     },
+    i18n(key){
+        return game.i18n.localize(key);
+    },
   },
   computed: {
     hasBooks() {
       return this.library && this.library.length > 0;
     },
+    LibraryMessage() {
+        return game.i18n.format("ForgeCompendiumBrowser.LibraryMessage", { link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond importer</a>' })
+    }
   },
+  mounted() {
+      console.log("Game", game);
+  }
 };
 </script>
 
@@ -108,7 +115,7 @@ export default {
 }
 
 .forge-compendium-library .forge-compendium-book {
-  flex: 0 0 210px;
+  flex: 0 0 190px;
   height: 250px;
   margin: 10px;
   position: relative;

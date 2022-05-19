@@ -4,7 +4,7 @@
       <header class="directory-header flexcol">
         <div class="header-action-buttons flexrow">
           <button class="compendium-library" @click="exit">
-            <i class="fas fa-atlas"></i> {{ game.i18n.localize("ForgeCompendiumBrowser.CompendiumLibrary") }}
+            <i class="fas fa-atlas"></i> {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
           </button>
         </div>
         <img
@@ -27,14 +27,14 @@
             :class="canPrevItem"
             @click="changeItem(-1)"
           >
-            <i class="fas fa-chevron-left"></i> {{ game.i18n.localize("ForgeCompendiumBrowser.Prev") }}
+            <i class="fas fa-chevron-left"></i> {{ this.i18n("ForgeCompendiumBrowser.Prev") }}
           </div>
           <div
             class="navigation-button next"
             :class="canNextItem"
             @click="changeItem(1)"
           >
-            {{ game.i18n.localize("ForgeCompendiumBrowser.Next") }} <i class="fas fa-chevron-right"></i>
+            {{ this.i18n("ForgeCompendiumBrowser.Next") }} <i class="fas fa-chevron-right"></i>
           </div>
           <div
             class="navigation-button last"
@@ -63,7 +63,7 @@
             @click="openSearch()"
           >
             <i class="fas fa-search"></i>
-            <span>{{ game.i18n.localize("ForgeCompendiumBrowser.Search") }}</span>
+            <span>{{ this.i18n("ForgeCompendiumBrowser.Search") }}</span>
           </div>
         </div>
         <hr />
@@ -182,7 +182,7 @@
                 </tr>
               </table>
             </div>
-            <div v-else class="no-results">{{ game.i18n.localize("ForgeCompendiumBrowser.NoSearchResults") }}</div>
+            <div v-else class="no-results">{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div>
           </div>
           <div v-else>
             <div class="flexrow flexcontain">
@@ -200,7 +200,7 @@
                 </ul>
                 <div style="text-align: center; display: none">
                   <button @click="importModule">
-                    <i class="fas fa-download"></i> {{ game.i18n.localize("ForgeCompendiumBrowser.ImportDocuments") }}
+                    <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
                 </div>
               </div>
@@ -226,7 +226,7 @@
                 <div class="forge-compendium-icon">
                   <i class="fas fa-search"></i>
                 </div>
-                <div class="forge-compendium-title">{{ game.i18n.localize("ForgeCompendiumBrowser.Search") }}</div>
+                <div class="forge-compendium-title">{{ this.i18n("ForgeCompendiumBrowser.Search") }}</div>
               </div>
             </div>
           </div>
@@ -553,6 +553,9 @@ export default {
 
       this.searchResults = traverseSearch(this.book);
     },
+    i18n(key){
+        return game.i18n.localize(key);
+    },
   },
   computed: {
     canPrevChapter() {
@@ -626,7 +629,7 @@ export default {
     },
     bookName() {
       return this.book.name.toUpperCase();
-    },
+    }
   },
   async mounted() {
     await game.ForgeCompendiumBrowser.indexBook(this.book);

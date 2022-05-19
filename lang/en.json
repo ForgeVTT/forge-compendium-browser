@@ -4,7 +4,7 @@
 
     "ForgeCompendiumBrowser.OpenCompendiumBrowser": "Open Compendium Browser",
     "ForgeCompendiumBrowser.ForgeCompendiumLibrary": "Forge Compendium Library",
-    "ForgeCompendiumBrowser.LibraryMessage": "This is your library of compendium books.  If you have no books listed, please use the <a href=\"https://forge-vtt.com/bazaar#filter=all&type=dndbeyond\" target=\"_blank\">D&amp;D Beyond importer</a> from the Bazaar to import your books.",
+    "ForgeCompendiumBrowser.LibraryMessage": "This is your library of compendium books.  If you have no books listed, please use the {link} from the Bazaar to import your books.",
     "ForgeCompendiumBrowser.NoBooksLoaded": "No Books Loaded",
     "ForgeCompendiumBrowser.CompendiumLibrary": "Compendium Library",
     "ForgeCompendiumBrowser.Prev": "Prev",
