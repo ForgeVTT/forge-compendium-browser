@@ -3,9 +3,9 @@
     <div class="forge-compendium-sidebar flexcol">
       <header class="directory-header flexcol">
         <div class="header-action-buttons flexrow">
-          <button class="compendium-library" @click="exit">
+          <div class="compendium-library" @click="exit">
             <i class="fas fa-atlas"></i> {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
-          </button>
+          </div>
         </div>
         <img
           class="forge-compendium-book-image"
@@ -20,7 +20,7 @@
             :class="canPrevChapter"
             @click="changeChapter(-1)"
           >
-            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-angle-double-left"></i>
           </div>
           <div
             class="navigation-button prev"
@@ -41,7 +41,7 @@
             :class="canNextChapter"
             @click="changeChapter(1)"
           >
-            <i class="fas fa-arrow-right"></i>
+            <i class="fas fa-angle-double-right"></i>
           </div>
         </div>
         <!-- section links -->
@@ -100,9 +100,12 @@
         <ul class="flexrow forge-compendium-breadcrumbs">
           <li v-for="(item, index) in path" :key="item.id">
             <span v-if="index != 0">/</span>
-            <div>{{ item.name }}</div>
+            <div @click="selectEntity(item)">{{ item.name }}</div>
           </li>
         </ul>
+        <div class="forge-entry-import" @click="importEntry">
+            <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.Import") }}
+        </div>
       </h2>
       <compendium-entry
         v-if="document"
@@ -182,7 +185,7 @@
                 </tr>
               </table>
             </div>
-            <div v-else class="no-results">{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div>
+            <div v-else class="no-results"><div>{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div></div>
           </div>
           <div v-else>
             <div class="flexrow flexcontain">
@@ -553,16 +556,22 @@ export default {
 
       this.searchResults = traverseSearch(this.book);
     },
-    i18n(key){
+    i18n(key) {
         return game.i18n.localize(key);
     },
+    importEntry() {
+        const collection = game.collections.get(this.document.collection.documentName);
+        if (collection.importFromCompendium(this.document.collection, this.document.id, {}, { renderSheet: false })) {
+            ui.notifications.info("Document has been imported");
+        }
+    }
   },
   computed: {
     canPrevChapter() {
       return !this.findClosestChapter(-1) ? "disabled" : "";
     },
     canNextChapter() {
-      return !(this.findClosestChapter(1) || !this.currentChapter) ? "disabled" : "";
+      return !this.findClosestChapter(1) || !this.currentChapter ? "disabled" : "";
     },
     canPrevItem() {
       return !this.findClosestItem(-1) ? "disabled" : "";
@@ -869,7 +878,7 @@ export default {
   margin: 10px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.4);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .forge-compendium-content .forge-compendium-info .forge-compendium-section-listing {
@@ -961,6 +970,15 @@ export default {
   width: 100%;
   text-align: center;
   margin-top: 100px;
+} 
+.forge-compendium-search-area .no-results > div{
+        padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    border: 2px solid #eee;
+    width: 300px;
+    margin: auto;
+    font-weight: bold;
 }
 .forge-compendium-search-area .forge-compendium-search-list {
   background-color: rgba(255, 255, 255, 0.8);
@@ -991,5 +1009,39 @@ export default {
   height: 40px;
   object-fit: contain;
   border: 0px;
+}
+
+.forge-entry-import {
+  flex-grow: 0;
+  cursor: pointer;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.forge-entry-import:hover {
+  text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+.compendium-library {
+    cursor: pointer;
+    padding: 6px;
+    color: #ffffff;
+    text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
+    background-color: #363636;
+    *background-color: #222222;
+    background-image: -moz-linear-gradient(top, #444444, #222222);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
+    background-image: -webkit-linear-gradient(top, #444444, #222222);
+    background-image: -o-linear-gradient(top, #444444, #222222);
+    background-image: linear-gradient(to bottom, #444444, #222222);
+    background-repeat: repeat-x;
+    border: 1px solid #000000;
+    border-color: #222222 #222222 #000000;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    margin: 4px;
+}
+.compendium-library:hover {
+    text-shadow: 0 0 8px var(--color-shadow-primary);
+    background-color: #222222;
+    *background-color: #151515;
 }
 </style>

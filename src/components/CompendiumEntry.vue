@@ -36,16 +36,19 @@ export default {
       if (this.entry.document instanceof Scene) {
         const templateData = {
           img: this.entry.document.data.img,
-          stats: {},
+          stats: [],
         };
 
         // Collect the stats on the scene
+        let stats = {};
         for (let collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls",]) {
           if (this.entry.document.data[collection].size) {
             const name = this.entry.document.data[collection].documentClass.documentName;
-            templateData.stats[name] = this.entry.document.data[collection].size;
+            stats[name] = this.entry.document.data[collection].size;
           }
         }
+
+        templateData.stats = Object.keys(stats).map((key) => ({ name: key, value: stats[key]}));
 
         const html = await renderTemplate("modules/forge-compendium-browser/templates/scene-entry.html", templateData);
 

@@ -14,7 +14,7 @@
           <p class="notes flexcontain" v-html="LibraryMessage"></p>
         </div>
       </div>
-      <div class="flexrow" style="overflow-y: auto">
+      <div class="flexrow forge-compendium-library-list">
         <div
           v-for="book in library"
           :key="book.id"
@@ -65,7 +65,7 @@ export default {
       return this.library && this.library.length > 0;
     },
     LibraryMessage() {
-        return game.i18n.format("ForgeCompendiumBrowser.LibraryMessage", { link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond importer</a>' })
+        return game.i18n.format("ForgeCompendiumBrowser.LibraryMessage", { link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>' })
     }
   },
   mounted() {
@@ -159,5 +159,10 @@ export default {
   border-radius: 5px;
   margin: 4px;
   border: 1px solid #000;
+}
+
+.forge-compendium-library-list {
+    overflow-y: auto;
+    align-content: flex-start;
 }
 </style>
