@@ -10150,6 +10150,50 @@ const dndbeyond_br = {
             ]
           }
         ]
+      },
+      {
+        "id": "Scenes",
+        "name": "Scenes",
+        "type": "section",
+        "count": 3,
+        "icon": "fa-map",
+        "children": [
+            {
+                "id": "scenes",
+                "name": "Scenes",
+                "pack": "scenes",
+                "section": "Scenes",
+                "children": [
+                {
+                    "id": "MzkwMTIzMjA4Mjli",
+                    "name": "Map 5.9: Croaker Cave",
+                    "type": "document",
+                    "img": "https://assets.forge-vtt.com/61109bdb5f606615942e2e59/DnDBeyond/wa/5.9-croaker-cave.png",
+                    "sort": 0,
+                    "document": {},
+                    "collection": {}
+                },
+                {
+                    "id": "YjUxZTdhMTk5OTEx",
+                    "name": "Croaker Cave",
+                    "type": "document",
+                    "img": "https://assets.forge-vtt.com/61109bdb5f606615942e2e59/DnDBeyond/wa/5.9-croaker-cave-player.png",
+                    "sort": 0,
+                    "document": {},
+                    "collection": {}
+                },
+                {
+                    "id": "MThiMDg2OTU1MTU0",
+                    "name": "Salsvault",
+                    "type": "document",
+                    "img": "https://assets.forge-vtt.com/61109bdb5f606615942e2e59/DnDBeyond/wa/5.10-salsvault-player.png",
+                    "sort": 0,
+                    "document": {},
+                    "collection": {}
+                }
+                ]
+            }
+        ]
       }
     ],
     "_indexed": false

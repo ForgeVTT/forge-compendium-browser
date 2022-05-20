@@ -68,9 +68,6 @@ export default {
         return game.i18n.format("ForgeCompendiumBrowser.LibraryMessage", { link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>' })
     }
   },
-  mounted() {
-      console.log("Game", game);
-  }
 };
 </script>
 
