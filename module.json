@@ -1,6 +1,6 @@
 {
   "name": "forge-compendium-browser",
-  "title": "Compendium Browser by The Forge",
+  "title": "The Forge: Compendium Browser",
   "description": "A browser for compendiums that have been imported through The Forge's Compendium Importer",
   "version": "1.0.1",
   "minimumCoreVersion": "9",
