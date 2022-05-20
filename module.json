@@ -17,7 +17,7 @@
       "name": "KaKaRoTo"
     }
   ],
-  "esmodules": [
+  "scripts": [
     "dist/ForgeCompendiumBrowserModule.umd.min.js"
   ],
   "packs": [],
