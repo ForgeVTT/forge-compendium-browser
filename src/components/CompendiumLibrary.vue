@@ -1,6 +1,6 @@
 <template>
   <div class="forge-compendium-library">
-    <div v-if="hasBooks" class="forge-compendium-library flexcol">
+    <div class="forge-compendium-library flexcol">
       <div class="forge-compendium-banner flexrow">
         <img
           class="forge-logo"
@@ -14,7 +14,7 @@
           <p class="notes flexcontain" v-html="LibraryMessage"></p>
         </div>
       </div>
-      <div class="flexrow forge-compendium-library-list">
+      <div v-if="hasBooks" class="flexrow forge-compendium-library-list">
         <div
           v-for="book in library"
           :key="book.id"
@@ -31,11 +31,11 @@
           <div class="forge-compendium-title">{{ book.name }}</div>
         </div>
       </div>
+      <div v-else class="compendium-information flexrow">
+        <h3 class="compendium-muted">
+            {{ this.i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
+        </h3>
     </div>
-    <div v-else class="compendium-information flexrow">
-      <h3 class="compendium-muted">
-        {{ this.i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
-      </h3>
     </div>
   </div>
 </template>
@@ -161,5 +161,10 @@ export default {
 .forge-compendium-library-list {
     overflow-y: auto;
     align-content: flex-start;
+}
+.compendium-information {
+    text-align: center;
+    margin: auto;
+    margin-top: 10%;
 }
 </style>
