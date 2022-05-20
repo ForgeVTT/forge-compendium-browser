@@ -70,13 +70,14 @@ export default {
     filterList() {
       if (!this.entity.children) return [];
 
-      return this.entity.children.filter((c) => c.name != this.entity.name);
+      return this.entity.children.filter((c) => c.name != this.entity.name || this.entity.type != "document");
     },
     showChildren() {
       if (
         this.entity.children &&
         this.entity.children.length == 1 &&
-        this.entity.children[0].name == this.entity.name
+        this.entity.children[0].name == this.entity.name &&
+        this.entity.type == "document"
       )
         return false;
 
