@@ -145,7 +145,7 @@ export class ForgeCompendiumBrowser {
             let realparent = parent;
 
             const packs = bookpacks.filter((p) => {
-                return p._source.parent == parent.name;
+                return p._source.parent == parent.id;
             });
             if (packs.length)
                 parent.children = [];
