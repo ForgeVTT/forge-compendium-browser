@@ -1,7 +1,7 @@
 {
   "name": "forge-compendium-browser",
   "title": "The Forge: Compendium Browser",
-  "description": "A browser for compendiums that have been imported through The Forge's Compendium Importer",
+  "description": "Browse your compendium books like they were meant to be viewed. The Forge's Compendium Browser lets you navigate your D&amp;D Beyond imported books in a beautiful and easy to use interface!",
   "version": "1.0.4",
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "9",
@@ -42,6 +42,12 @@
       "type": "module",
       "manifest": "https://raw.githubusercontent.com/ForgeVTT/fvtt-module-vueport/master/module.json"
     }
+  ],
+  "media": [
+      {
+          "type": "cover",
+          "url": "img/cover.png"
+      }
   ],
   "url": "https://github.com/ForgeVTT/forge-compendium-browser",
   "manifest": "https://github.com/ForgeVTT/forge-compendium-browser/releases/latest/download/module.json",
