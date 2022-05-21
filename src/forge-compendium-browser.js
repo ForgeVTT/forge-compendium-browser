@@ -151,16 +151,15 @@ export class ForgeCompendiumBrowser {
                 parent.children = [];
             for (let pack of packs) {
                 if (pack._source.parent == null) {
-                    //If the parent id is null, then these technically need to be added to the entity type parent
-                    let icon = 'fa-book-open';
-                    switch (pack.entity) {
-                        case 'Item': icon = 'fa-suitcase'; break;
-                        case 'Actor': icon = 'fa-user'; break;
-                        case 'Scene': icon = 'fa-map'; break;
-                    }
-
                     realparent = parent.children.find(c => c.id == pack.entity);
                     if (!realparent) {
+                        //If the parent id is null, then these technically need to be added to the entity type parent
+                        let icon = 'fa-book-open';
+                        switch (pack.entity) {
+                            case 'Item': icon = 'fa-suitcase'; break;
+                            case 'Actor': icon = 'fa-user'; break;
+                            case 'Scene': icon = 'fa-map'; break;
+                        }
                         realparent = {
                             id: pack.entity,
                             name: CONFIG[pack.entity].collection.name,
