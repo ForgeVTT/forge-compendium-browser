@@ -2,7 +2,7 @@
   "name": "forge-compendium-browser",
   "title": "The Forge: Compendium Browser",
   "description": "A browser for compendiums that have been imported through The Forge's Compendium Importer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "9",
   "author": "The Forge",
@@ -45,7 +45,7 @@
   ],
   "url": "https://github.com/ForgeVTT/forge-compendium-browser",
   "manifest": "https://github.com/ForgeVTT/forge-compendium-browser/releases/latest/download/module.json",
-  "download": "https://github.com/ForgeVTT/forge-compendium-browser/archive/1.0.0.zip",
+  "download": "https://github.com/ForgeVTT/forge-compendium-browser/releases/latest/download/module.zip",
   "bugs": "https://github.com/ForgeVTT/forge-compendium-browser/issues",
   "allowBugReporter": true
 }
