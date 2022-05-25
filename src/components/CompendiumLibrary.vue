@@ -94,7 +94,7 @@ export default {
   background-repeat: repeat-x;
   border-color: #51a351 #51a351 #387038;
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-  flex: 0 0 150px;
+  flex: 0 0 100px;
   width: 100%;
 }
 
@@ -103,9 +103,9 @@ export default {
 }
 
 .forge-compendium-library .forge-logo {
-  width: 150px;
-  height: 150px;
-  flex: 0 0 150px;
+  width: 100px;
+  height: 100px;
+  flex: 0 0 100px;
   margin-right: 20px;
   cursor: pointer;
   border: none;
