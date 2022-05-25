@@ -491,7 +491,7 @@ export default {
       let query = this.searchTerm.toLowerCase();
 
       // added idx and text here for a future improvement to show highlighted text
-      let searchResult = (entity, idx, text) => {
+      let resultObject = (entity, idx, text) => {
         let section = this.book.children.find((s) => s.id == entity.parent.section);
         return {
           id: entity.id,
@@ -504,14 +504,14 @@ export default {
         };
       };
 
-      let traverseSearch = (parent) => {
-        let results = [];
+      let traverseSearch = (parent, results) => {
+        let searchResult = null;
 
         if (parent.type == "document") {
           if (title != null) {
             const idx = parent.name.toLowerCase().indexOf(title);
             if (idx >= 0) {
-              results.push(searchResult(parent, idx, parent.name));
+              searchResult = resultObject(parent, idx, parent.name);
             }
           }
           if (query != null) {
@@ -519,42 +519,39 @@ export default {
               if (parent.document instanceof JournalEntry) {
                 const idx = parent.document.data.content.toLowerCase().indexOf(query);
                 if (idx >= 0) {
-                  results.push(
-                    searchResult(parent, idx, parent.document.data.content)
-                  );
+                  searchResult = resultObject(parent, idx, parent.document.data.content);
                 }
               } else if (parent.document instanceof Actor) {
                 const idx = parent.document.data.data.details.biography.value.toLowerCase().indexOf(query);
                 if (idx >= 0) {
-                  results.push(
-                    searchResult(parent, idx, parent.document.data.data.details.biography.value)
-                  );
+                  searchResult = resultObject(parent, idx, parent.document.data.data.details.biography.value);
                 }
               } else if (parent.document instanceof Item) {
                 const idx = parent.document.data.data.description.value.toLowerCase().indexOf(query);
                 if (idx >= 0) {
-                  results.push(
-                    searchResult(parent, idx, parent.document.data.data.description.value)
-                  );
+                  searchResult = resultObject(parent, idx, parent.document.data.data.description.value);
                 }
               }
             } catch {
               // continue regardless of error
             }
           }
+          if (searchResult) {
+            results[searchResult.id] = searchResult;
+          }
         }
         if (parent.children && parent.children.length) {
           for (let child of parent.children) {
             if (parent.type == "book" && type != null && child.type != type)
               continue;
-            results = results.concat(traverseSearch(child));
+            traverseSearch(child, results);
           }
         }
-
-        return results;
       };
 
-      this.searchResults = traverseSearch(this.book);
+      let results = {};
+      traverseSearch(this.book, results);
+      this.searchResults = Object.values(results);
     },
     i18n(key) {
         return game.i18n.localize(key);
