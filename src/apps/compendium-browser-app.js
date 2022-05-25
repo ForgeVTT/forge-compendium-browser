@@ -1,8 +1,12 @@
 import { ForgeCompendiumBrowser, log, setting, i18n } from '../forge-compendium-browser.js';
 
 export class CompendiumBrowserApp extends Application {
-    constructor(object, options = {}) {
-        super(object, options);
+    constructor(book, options = {}) {
+        super(null, options);
+
+        if (book) {
+            game.user.setFlag("forge-compendium-browser", "last-book", book);
+        }
     }
 
     static get defaultOptions() {

@@ -2,11 +2,11 @@ import { CompendiumBrowserApp } from "./apps/compendium-browser-app.js";
 import { registerSettings } from "./settings.js";
 
 export let debug = (...args) => {
-    if (debugEnabled > 1) console.log("DEBUG: forge-compendium-browser | ", ...args);
+    if (ForgeCompendiumBrowser.debugEnabled > 1) console.log("DEBUG: forge-compendium-browser | ", ...args);
 };
 export let log = (...args) => console.log("forge-compendium-browser | ", ...args);
 export let warn = (...args) => {
-    if (debugEnabled > 0) console.warn("forge-compendium-browser | ", ...args);
+    if (ForgeCompendiumBrowser.debugEnabled > 0) console.warn("forge-compendium-browser | ", ...args);
 };
 export let error = (...args) => console.error("forge-compendium-browser | ", ...args);
 export let i18n = key => {
@@ -18,9 +18,12 @@ export let setting = key => {
 
 export class ForgeCompendiumBrowser {
     static books = [];
+    static debugEnabled = 1;
 
     static init() {
         registerSettings();
+
+        ForgeCompendiumBrowser.SOCKET = "module.forge-compendium-browser";
 
         Dlopen.register('forge-compendium-browser-vueport', {
             scripts: "/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.umd.min.js",
@@ -39,6 +42,20 @@ export class ForgeCompendiumBrowser {
 
     static setting(key) {
         return game.settings.get("forge-compendium-browser", key);
+    }
+
+    static ready() {
+        game.socket.on(ForgeCompendiumBrowser.SOCKET, ForgeCompendiumBrowser.onMessage);
+    }
+
+    static async onMessage(data) {
+        switch (data.action) {
+            case 'open': {
+                if (data.userid == game.user.id || data.userid == undefined) {
+                    ForgeCompendiumBrowser.openBrowser(data.book);
+                }
+            }
+        }
     }
 
     static get version() {
@@ -182,7 +199,9 @@ export class ForgeCompendiumBrowser {
                     pack: pack.name,
                     section: section.id
                 }
-                realparent.children.push(childData);
+                if (!realparent.children.find(c => c.id == childData.id)) {
+                    realparent.children.push(childData);
+                }
 
                 if (section) {
                     let key = `${pack._source.module}.${pack.name}`;
@@ -211,22 +230,28 @@ export class ForgeCompendiumBrowser {
                     child.children = child.children || [];
 
                     let key = `${book.id}.${child.pack}`;
-                    let collection = game.packs.get(key);
-                    for (let document of await collection.getDocuments()) {
-                        child.children.push({
-                            id: document.id,
-                            name: document.name,
-                            type: "document",
-                            img: document.data.img,
-                            sort: document.data.sort,
-                            document: document,
-                            collection: collection,
-                            parent: child
-                        });
+                    try {
+                        let collection = game.packs.get(key);
+                        for (let document of await collection.getDocuments()) {
+                            if (!child.children.find(c => c.id == document.id)) {
+                                child.children.push({
+                                    id: document.id,
+                                    name: document.name,
+                                    type: "document",
+                                    img: document.data.img,
+                                    sort: document.data.sort,
+                                    document: document,
+                                    collection: collection,
+                                    parent: child
+                                });
+                            }
+                            child.children = child.children.sort((a, b) => {
+                                return a.sort - b.sort;
+                            });
+                        }
+                    } catch(err) {
+                        warn("Error importing compendium", key, err);
                     }
-                    child.children = child.children.sort((a, b) => {
-                        return a.sort - b.sort;
-                    });
                 }
             }
         }
@@ -237,23 +262,24 @@ export class ForgeCompendiumBrowser {
         }
     }
 
-    static openBrowser() {
-        new CompendiumBrowserApp().render(true);
+    static openBrowser(book) {
+        new CompendiumBrowserApp(book).render(true);
     }
 }
 
 Hooks.on('init', ForgeCompendiumBrowser.init);
 Hooks.on('setup', ForgeCompendiumBrowser.setup);
+Hooks.on('ready', ForgeCompendiumBrowser.ready);
 
 Hooks.on("renderCompendiumDirectory", (app, html, data) => {
-    $('.directory-footer', html).append(
+    $('.directory-header', html).append(
         $('<div>')
             .addClass('forge-compendium-actions action-buttons flexrow')
             .append($('<button>')
                 .addClass('open-forge-compendium-browser')
                 .attr('type', 'button')
                 .on("click", ForgeCompendiumBrowser.openBrowser)
-                .html(`<i class="fas fa-d-and-d-beyond"></i> ${i18n("ForgeCompendiumBrowser.OpenCompendiumBrowser")}`)
+                .html(`${i18n("ForgeCompendiumBrowser.OpenCompendiumBrowser")}`)
             )
     );
 
@@ -262,4 +288,39 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
             $(`.compendium-pack[data-pack="${pack._source.module}.${pack.name}"]`, html).addClass('forge-compendium-pack');
         }
     }
+});
+
+Hooks.on("setupTileActions", (app) => {
+    app.registerTileGroup('forge-compendium-browser', "Forge Compendium Browser");
+        app.registerTileAction('forge-compendium-browser', 'Forge Compendium Browser', {
+            name: 'Open Book',
+            ctrls: [
+                {
+                    id: "bookid",
+                    name: "Compendium Book",
+                    list: () => {
+                        let list = {};
+                        for (let book of game.ForgeCompendiumBrowser.books) {
+                            list[book.id] = book.name;
+                        }
+                        return list;
+                    },
+                    type: "list"
+                },
+            ],
+            group: 'forge-compendium-browser',
+            fn: async (args = {}) => {
+                const { action, userid } = args;
+
+                if(userid == game.user.id) {
+                    game.ForgeCompendiumBrowser.openBrowser(action.data.bookid);
+                } else {
+                    game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, (resp) => { } );
+                }
+            },
+            content: async (trigger, action) => {
+                let book = game.ForgeCompendiumBrowser.books.find(b => b.id == action.data.bookid);
+                return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${book.name || 'Unknown'}"</span>`;
+            }
+        });
 });

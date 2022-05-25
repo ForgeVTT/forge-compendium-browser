@@ -24,6 +24,7 @@
   "styles": [
     "css/browser.css"
   ],
+  "socket": true,
   "languages": [
     {
       "lang": "en",
