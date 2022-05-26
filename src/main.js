@@ -10206,6 +10206,13 @@ globalThis.game = {
             switch (key){
                 case "same-name":
                     return true;
+                case "permissions":
+                    return {
+                        "dndbeyond-br": {
+                            default: false,
+                            "kjl345kjhl4235l": true
+                        }
+                    }
             }
         },
         i18n(key) {
@@ -10230,7 +10237,8 @@ globalThis.game = {
     user: {
         getFlag: () => { return "dndbeyond-br"},
         setFlag: () => {},
-        unsetFlag: () => {}
+        unsetFlag: () => {},
+        id: "kjl345kjhl4235l"
     },
     i18n: {
         localize: (key) => { 

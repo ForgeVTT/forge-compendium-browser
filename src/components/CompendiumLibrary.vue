@@ -16,7 +16,7 @@
       </div>
       <div v-if="hasBooks" class="flexrow forge-compendium-library-list">
         <div
-          v-for="book in library"
+          v-for="book in availableBooks"
           :key="book.id"
           class="forge-compendium-book"
           :data-id="book.id"
@@ -56,13 +56,26 @@ export default {
     forgeLink() {
       window.open("https://forge-vtt.com/", "_blank");
     },
-    i18n(key){
+    i18n(key) {
         return game.i18n.localize(key);
     },
   },
   computed: {
     hasBooks() {
-      return this.library && this.library.length > 0;
+      return this.availableBooks && this.availableBooks.length > 0;
+    },
+    availableBooks() {
+      if (!this.library)
+        return null;
+
+      const permissions = game.ForgeCompendiumBrowser.setting("permissions");
+
+      return this.library.filter((book) => {
+          const permission = permissions[book.id];
+          if (permission == undefined)
+            return true;
+          return permission[game.user.id] ?? permission["default"] ?? true;
+      });
     },
     LibraryMessage() {
         return game.i18n.format("ForgeCompendiumBrowser.LibraryMessage", { link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>' })

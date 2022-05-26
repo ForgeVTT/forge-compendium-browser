@@ -1,0 +1,18 @@
+<form id="permission-control">
+    <div class="form-group">
+        <label>{{ localize "PERMISSION.AllPlayers" }}</label>
+        <select name="default">
+            {{selectOptions defaultLevels selected=currentDefault}}
+        </select>
+    </div>
+    <hr/>
+
+    {{#each users}}
+    <div class="form-group">
+        <label>{{this.name}}</label>
+        <select name="{{this.id}}">
+            {{selectOptions ../playerLevels selected=this.allowed}}
+        </select>
+    </div>
+    {{/each}}
+</form>

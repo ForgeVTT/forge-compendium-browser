@@ -13,4 +13,11 @@ export const registerSettings = function () {
 		default: true,
 		type: Boolean,
 	});
+
+    game.settings.register(modulename, "permissions", {
+		scope: "world",
+		config: false,
+		default: {},
+		type: Object,
+	});
 }
