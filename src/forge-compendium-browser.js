@@ -264,7 +264,6 @@ export class ForgeCompendiumBrowser {
 
     static openBrowser(book) {
         ForgeCompendiumBrowser.browser = new CompendiumBrowserApp(book).render(true);
-        //new CompendiumBrowserApp(book).render(true);
     }
 }
 
