@@ -279,7 +279,7 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
                 .addClass('open-forge-compendium-browser')
                 .attr('type', 'button')
                 .on("click", ForgeCompendiumBrowser.openBrowser)
-                .html(`${i18n("ForgeCompendiumBrowser.OpenCompendiumBrowser")}`)
+                .html(`<img src="https://forge-vtt.com/images/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;" /> ${i18n("ForgeCompendiumBrowser.OpenCompendiumBrowser")}`)
             )
     );
 
