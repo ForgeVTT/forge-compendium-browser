@@ -71,6 +71,8 @@ export default {
       const permissions = game.ForgeCompendiumBrowser.setting("permissions");
 
       return this.library.filter((book) => {
+          if (game.user.isGM)
+            return true;
           const permission = permissions[book.id];
           if (permission == undefined)
             return true;
