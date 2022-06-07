@@ -26,8 +26,8 @@ export class ForgeCompendiumBrowser {
         ForgeCompendiumBrowser.SOCKET = "module.forge-compendium-browser";
 
         Dlopen.register('forge-compendium-browser-vueport', {
-            scripts: "/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.umd.min.js",
-            styles: "/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.css",
+            scripts: foundry.utils.getRoute("/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.umd.min.js"),
+            styles: foundry.utils.getRoute("/modules/forge-compendium-browser/dist/ForgeCompendiumBrowserVue.css"),
             dependencies: "vue",
             init: () => Vue.component("ForgeCompendiumBrowser", ForgeCompendiumBrowserVue),
         });
@@ -291,8 +291,8 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
 });
 
 Hooks.on("setupTileActions", (app) => {
-    app.registerTileGroup('forge-compendium-browser', "Forge Compendium Browser");
-        app.registerTileAction('forge-compendium-browser', 'Forge Compendium Browser', {
+    app.registerTileGroup('forge-compendium-browser', "Forge Compendium Library");
+        app.registerTileAction('forge-compendium-browser', 'Forge Compendium Library', {
             name: 'Open Book',
             ctrls: [
                 {

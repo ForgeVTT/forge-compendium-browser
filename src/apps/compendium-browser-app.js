@@ -16,7 +16,7 @@ export class CompendiumBrowserApp extends Application {
     return mergeObject(super.defaultOptions, {
       id: "forge-compendium-browser",
       template: "./modules/forge-compendium-browser/templates/compendium-browser.html",
-      title: "Compendium Browser",
+      title: i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary"),
       classes: ["forge-compendium-browser"],
       popOut: true,
       resizable: true,
