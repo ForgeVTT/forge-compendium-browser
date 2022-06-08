@@ -4,7 +4,7 @@
       <div class="forge-compendium-banner flexrow">
         <img
           class="forge-logo"
-          src="https://forge-vtt.com/images/the-forge-logo-400x400.png"
+          src="/modules/forge-compendium-browser/img/the-forge-logo-400x400.png"
           @click="forgeLink"
         />
         <div class="flexcol">
