@@ -275,7 +275,7 @@ export default {
       this.addToHistory({ type: "search", query: this.searchTerm });
       this.selectEntity(entity);
     },
-    selectEntity(entity) {
+    async selectEntity(entity) {
       if (!entity) return;
 
       if (entity.type == "search") {
@@ -283,6 +283,10 @@ export default {
       } else if (entity.type == "book") {
         this.clearPath();
       } else if (entity.type == "document") {
+        if (!entity.document) {
+          entity.document = await entity.collection.getDocument(entity.id);
+          console.log("Getting document", entity.document, entity);
+        }
         this.document = entity;
         this.addToHistory(entity);
         this.folder = entity;
@@ -636,9 +640,6 @@ export default {
     bookName() {
       return this.book.name.toUpperCase();
     }
-  },
-  async mounted() {
-    await game.ForgeCompendiumBrowser.indexBook(this.book);
   },
 };
 </script>

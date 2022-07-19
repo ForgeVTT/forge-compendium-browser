@@ -27,24 +27,44 @@ export default {
       e.stopPropagation();
     },
     async loadDocument() {
+      console.log("entry", this.entry);
       let cls = this.entry.document._getSheetClass ? this.entry.document._getSheetClass() : null;
-      if (this.entry.document instanceof JournalEntry) {
-        const cfg = CONFIG["JournalEntry"];
-        const sheets = cfg.sheetClasses[CONST.BASE_DOCUMENT_TYPE] || {};
-        cls = sheets["core.JournalSheet"].cls;
+      console.log("here", cls);
+      let document = this.entry.document;
+      console.log("load document", document);
+      if (document instanceof JournalEntry) {
+        if (isNewerVersion(game.version, "9.99999")) {
+          document = this.entry.document.pages.contents[0];
+          console.log("pages", this.entry.document.pages, document, sheets);
+          const cfg = CONFIG["JournalEntryPage"];
+          const sheets = cfg.sheetClasses[document.type] || {};
+          switch (document.type) {
+            case 'image': cls = sheets["core.JournalImagePageSheet"].cls; break;
+            case 'pdf': cls = sheets["core.JournalPDFPageSheet"].cls; break;
+            case 'text': cls = sheets["core.JournalTextPageSheet"].cls; break;
+            case 'video': cls = sheets["core.JournalVideoPageSheet"].cls; break;
+            default: cls = Object.values(sheets[document.type])[0].cls;
+          }
+        } else {
+          const cfg = CONFIG["JournalEntry"];
+          const sheets = cfg.sheetClasses[CONST.BASE_DOCUMENT_TYPE] || {};
+          cls = sheets["core.JournalSheet"].cls;
+        }
+        console.log("here2", cls);
       }
-      if (this.entry.document instanceof Scene) {
+      if (document instanceof Scene) {
         const templateData = {
-          img: this.entry.document.data.img,
+          img: document.img ?? document.data.img,
           stats: [],
         };
 
         // Collect the stats on the scene
         let stats = {};
         for (let collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls",]) {
-          if (this.entry.document.data[collection].size) {
-            const name = this.entry.document.data[collection].documentClass.documentName;
-            stats[name] = this.entry.document.data[collection].size;
+          let collectionData = isNewerVersion(game.version, "9.99999") ? document[collection] : document.data[collection];
+          if (collectionData.size) {
+            const name = collectionData.documentClass.documentName;
+            stats[name] = collectionData.size;
           }
         }
 
@@ -56,7 +76,7 @@ export default {
 
         this.subsheet = { options: { classes: ["scene-entry"] } };
       } else {
-        this.subsheet = new cls(this.entry.document, { editable: false });
+        this.subsheet = new cls(document, { editable: false });
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
         const templateData = await this.subsheet.getData();
         const html = await renderTemplate(this.subsheet.template, templateData);
@@ -82,15 +102,17 @@ export default {
         //Hooks.callAll('renderJournalSheet', this.subsheet, subdocument, templateData);
         $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
 
-        this.entry.document._sheet = null; // eslint-disable-line
+        document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
       }
     },
   },
   computed: {
     documentClasses() {
-      if (!this.subsheet) return "";
-      return this.subsheet.options.classes.join(" ");
+      let classes = this.subsheet?.options?.classes || [];
+      if (game.version.startsWith("10.")) 
+        classes.push("v10");
+      return classes.join(" ");
     },
   },
   watch: {
@@ -99,6 +121,7 @@ export default {
     },
   },
   async mounted() {
+    console.log("mounted", this.entry);
     this.loadDocument();
   },
 };
@@ -125,5 +148,9 @@ export default {
 
 .forge-compendium-entry.journal-sheet form .editor {
   height: 100%;
+}
+
+.forge-compendium-entry.journal-sheet.v10 > header {
+    display: none;
 }
 </style>

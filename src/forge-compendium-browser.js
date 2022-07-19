@@ -59,7 +59,8 @@ export class ForgeCompendiumBrowser {
     }
 
     static get version() {
-        return game.modules.get("forge-compendium-browser").data.version;
+        const module = game.modules.get("forge-compendium-browser");
+        return module.version ?? module.data.version;
     }
 
     static parseCompendiums() {
@@ -67,22 +68,23 @@ export class ForgeCompendiumBrowser {
         //Find all the DnDBeyond modules
         log("Parsing compendiums");
         for (let module of game.modules.values()) {
-            if (module.data.flags["forge-compendium-browser"]?.active && module.active) {
+            const flags = module.flags ?? module.data.flags;
+            if (flags["forge-compendium-browser"]?.active && module.active) {
                 let bookData = {
                     id: module.id,
-                    name: module.data.title,
-                    description: module.data.description,
-                    img: module.data.flags["forge-compendium-browser"]?.cover,
-                    background: module.data.flags["forge-compendium-browser"]?.background,
+                    name: module.title ?? module.data.title,
+                    description: module.description ?? module.data.description,
+                    img: flags["forge-compendium-browser"]?.cover,
+                    background: flags["forge-compendium-browser"]?.background,
                     module: module,
-                    packs: module.data.packs,
+                    packs: module.packs ?? module.data.packs,
                     type: "book",
                 };
 
                 this.getHierarchy(bookData);
 
                 ForgeCompendiumBrowser.books.push(bookData);
-                log(`Found package:${module.data.title}, hiding ${module.packs.length} associated compendiums`);
+                log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length} associated compendiums`);
             }
         }
 
@@ -217,8 +219,11 @@ export class ForgeCompendiumBrowser {
         return processPacks({ version: ForgeCompendiumBrowser.version, children: [] });
     }
 
-    static async indexBook(book) {
-        let indexPacks = async (parent) => {
+    static async indexBook(book, progress) {
+        let totalPacks = 0;
+        let indexedPacks = 0;
+
+        const indexPacks = async (parent) => {
             for (let child of parent.children) {
                 child.parent = parent;
 
@@ -232,15 +237,20 @@ export class ForgeCompendiumBrowser {
                     let key = `${book.id}.${child.pack}`;
                     try {
                         let collection = game.packs.get(key);
-                        for (let document of await collection.getDocuments()) {
+                        if ( !collection.indexed ) await collection.getIndex();
+                        //const documents = await collection.getDocuments();
+                        for (let document of collection.index) {
+                            indexedPacks++;
+                            console.log("document", document);
+                            progress(indexedPacks / totalPacks);
                             if (!child.children.find(c => c.id == document.id)) {
                                 child.children.push({
-                                    id: document.id,
+                                    id: document._id,
                                     name: document.name,
                                     type: "document",
-                                    img: document.data.img,
-                                    sort: document.data.sort,
-                                    document: document,
+                                    img: document.img,
+                                    sort: (isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort),
+                                    index: document,
                                     collection: collection,
                                     parent: child
                                 });
@@ -257,6 +267,11 @@ export class ForgeCompendiumBrowser {
         }
 
         if (!book._indexed) {
+            totalPacks = 0;
+            for (let child of book.children) {
+                totalPacks+= child.count;
+            }
+            indexedPacks = 0;
             await indexPacks(book);
             book._indexed = true;
         }
@@ -285,7 +300,7 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
 
     for (let book of ForgeCompendiumBrowser.books) {
         for (let pack of book.packs) {
-            $(`.compendium-pack[data-pack="${pack._source.module}.${pack.name}"]`, html).addClass('forge-compendium-pack');
+            $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, html).addClass('forge-compendium-pack');
         }
     }
 });
