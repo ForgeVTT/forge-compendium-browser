@@ -9,7 +9,7 @@
           draggable
           @dragstart="startDrag($event, item)"
         >
-          <img v-if="item.img" :src="item.img" class="forge-compendium-image" />
+          <b-img-lazy v-if="item.img" :src="item.img" class="forge-compendium-image" ></b-img-lazy>
           <span>{{ item.name }}</span>
         </div>
         <compendium-list

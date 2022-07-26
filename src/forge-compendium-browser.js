@@ -101,30 +101,39 @@ export class ForgeCompendiumBrowser {
         if (book.hierarchy == undefined) {
             book._cached = false;
             //check for the compendium's hierarchy file
-            book.hierarchy = await this.getHierarchyData(`modules/${book.id}/hierarchy.json`);
+            book.hierarchy = await this.getFileData(`modules/${book.id}/hierarchy.json`);
         }
 
-        if (book.hierarchy && (book.hierarchy.version || "-") != ForgeCompendiumBrowser.version)
+        if (book.hierarchy && (book.hierarchy.version || "-") != ForgeCompendiumBrowser.version && book.dynamic != false)
             book.hierarchy = null; //The version has changed, so reload the hierarchy
 
         if (book.hierarchy == undefined) {
             book._cached = false;
-            book.hierarchy = this.buildHierarchy(book.packs);
 
-            if (book.hierarchy) {
-                let src = "data";
-                if (typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
-                    src = "forgevtt";
+            const moduleData = await this.getFileData(`modules/${book.id}/module.json`);
+            if (!moduleData)
+                return;
+
+            this.buildHierarchy(moduleData.packs).then((hierarchy) => {
+                book.hierarchy = hierarchy;
+
+                if (book.hierarchy) {
+                    let src = "data";
+                    if (typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
+                        src = "forgevtt";
+                    }
+    
+                    FilePicker.upload(src, `modules/${book.id}/`, new File([JSON.stringify(book.hierarchy)], "hierarchy.json"), {}, { notify: false });
                 }
 
-                FilePicker.upload(src, `modules/${book.id}/`, new File([JSON.stringify(book.hierarchy)], "hierarchy.json"), {}, { notify: false });
-            }
+                book.children = duplicate(book.hierarchy.children);
+            });
+        } else {
+            book.children = duplicate(book.hierarchy.children);
         }
-
-        book.children = duplicate(book.hierarchy.children);
     }
 
-    static async getHierarchyData(src) {
+    static async getFileData(src) {
         // Load the referenced translation file
         let err;
         const resp = await fetch(src).catch(e => {
@@ -149,7 +158,7 @@ export class ForgeCompendiumBrowser {
         return json;
     }
 
-    static buildHierarchy(bookpacks) {
+    static async buildHierarchy(bookpacks) {
         //if that doesn't exist then this is old and we need to build from packs
         const checkKeys = (item, key) => {
             if (item.name == key)
@@ -160,16 +169,14 @@ export class ForgeCompendiumBrowser {
                 return true;
         }
 
-        const processPacks = (parent, section) => {
+        const processPacks = async (parent, section) => {
             let realparent = parent;
 
             const packs = bookpacks.filter((p) => {
-                return p._source.parent == parent.id;
+                return p.parent == parent.id;
             });
-            if (packs.length)
-                parent.children = [];
             for (let pack of packs) {
-                if (pack._source.parent == null) {
+                if (pack.parent == null) {
                     realparent = parent.children.find(c => c.id == pack.entity);
                     if (!realparent) {
                         //If the parent id is null, then these technically need to be added to the entity type parent
@@ -198,28 +205,84 @@ export class ForgeCompendiumBrowser {
                 let childData = {
                     id: pack.name,
                     name: pack.label,
-                    pack: pack.name,
-                    section: section.id
+                    type: "folder",
+                    children: []
                 }
                 if (!realparent.children.find(c => c.id == childData.id)) {
                     realparent.children.push(childData);
                 }
 
-                if (section) {
-                    let key = `${pack._source.module}.${pack.name}`;
+                let key = `${pack.module}.${pack.name}`;
+                try {
                     let collection = game.packs.get(key);
-                    section.count += (collection?.index?.size || 0);
+                    if ( !collection.indexed ) {
+                        await collection.getIndex();
+                    }
+                    
+                    let children = [];
+                    for (let index of collection.index) {
+                        let document = index;
+                        let img = document.img;
+                        if (pack.entity == "Scene") {
+                            document = await collection.getDocument(document._id);
+                            try {
+                                const thumb = await ImageHelper.createThumbnail(document.thumb, { width: 48, height: 48 });
+                                img = thumb?.thumb || thumb || document.thumb;
+                            } catch {
+                                img = document.img;
+                            }
+                        }
+
+                        if (!children.find(c => c.id == document.id)) {
+                            children.push({
+                                id: document._id,
+                                name: document.name,
+                                type: "document",
+                                img: img,
+                                sort: (isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort),
+                                packId: key
+                            });
+                        }
+                    }
+                    childData.children = childData.children.concat(children.sort((a, b) => {
+                        return a.sort - b.sort;
+                    }));
+
+                    if (section) {
+                        section.count += (collection?.index?.size || 0);
+                    }
+                } catch(err) {
+                    warn("Error importing compendium", key, err);
                 }
 
-                processPacks(childData, section);
+                await processPacks(childData, section);
             }
             return parent;
         }
 
-        return processPacks({ version: ForgeCompendiumBrowser.version, children: [] });
+        return processPacks({ version: ForgeCompendiumBrowser.version, dynamic: true, children: [] });
     }
 
-    static async indexBook(book, progress) {
+    static async indexBook(book) {
+        const indexPacks = (parent) => {
+            if (parent.children && parent.children.length) {
+                for (let child of parent.children) {
+                    child.parent = parent;
+                    child.section = parent.section || (parent.type == "section" && parent.id);
+
+                    if (child.children)
+                        indexPacks(child);
+                }
+            }
+        }
+
+        if (!book._indexed) {
+            indexPacks(book);
+            book._indexed = true;
+        }
+    }
+
+    /*static async indexBook(book, progress) {
         let totalPacks = 0;
         let indexedPacks = 0;
 
@@ -275,7 +338,7 @@ export class ForgeCompendiumBrowser {
             await indexPacks(book);
             book._indexed = true;
         }
-    }
+    }*/
 
     static openBrowser(book) {
         ForgeCompendiumBrowser.browser = new CompendiumBrowserApp(book).render(true);
@@ -338,4 +401,17 @@ Hooks.on("setupTileActions", (app) => {
                 return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${book.name || 'Unknown'}"</span>`;
             }
         });
+});
+
+Hooks.on('renderModuleManagement', (app, html, data) => {
+    for (let module of game.modules.values()) {
+        const flags = module.flags ?? module.data.flags;
+        if (flags["forge-compendium-browser"]?.active) {
+            console.log((module.id || module.name), $(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));
+            $("<span>")
+                .addClass("tag compendium-library")
+                .html('<img src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">')
+                .insertAfter($(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));
+        }
+    }
 });

@@ -284,7 +284,8 @@ export default {
         this.clearPath();
       } else if (entity.type == "document") {
         if (!entity.document) {
-          entity.document = await entity.collection.getDocument(entity.id);
+          let collection = game.packs.get(entity.packId);
+          entity.document = await collection.getDocument(entity.id);
           console.log("Getting document", entity.document, entity);
         }
         this.document = entity;
@@ -561,7 +562,7 @@ export default {
         return game.i18n.localize(key);
     },
     importEntry() {
-        const collection = game.collections.get(this.document.collection.documentName);
+        const collection = game.collections.get(this.document.packId);
         if (collection.importFromCompendium(this.document.collection, this.document.id, {}, { renderSheet: false })) {
             ui.notifications.info("Document has been imported");
         }

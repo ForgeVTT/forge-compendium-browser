@@ -125,6 +125,8 @@ export default {
 
 .forge-compendium-directory-list .forge-compendium-directory-item header h3 {
   margin: 0px;
+  font-size: 14px;
+  border-bottom: 0px;
 }
 
 .forge-compendium-directory-list .forge-compendium-directory-item header h3 span {
