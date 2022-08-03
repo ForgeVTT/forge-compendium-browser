@@ -102,13 +102,18 @@ export class ForgeCompendiumBrowser {
             book._cached = false;
             //check for the compendium's hierarchy file
             book.hierarchy = await this.getFileData(`modules/${book.id}/hierarchy.json`);
+            console.log("finding hierarchy", book);
         }
 
-        if (book.hierarchy && (book.hierarchy.version || "-") != ForgeCompendiumBrowser.version && book.dynamic != false)
+        if (book.hierarchy && (book.hierarchy.version || "-") != ForgeCompendiumBrowser.version && book.hierarchy.dynamic != false) {
+            console.log("reloading hierarchy", book);
             book.hierarchy = null; //The version has changed, so reload the hierarchy
+        }
 
         if (book.hierarchy == undefined) {
             book._cached = false;
+
+            console.log("building hierarchy", book);
 
             const moduleData = await this.getFileData(`modules/${book.id}/module.json`);
             if (!moduleData)
@@ -188,7 +193,7 @@ export class ForgeCompendiumBrowser {
                         }
                         realparent = {
                             id: pack.entity,
-                            name: CONFIG[pack.entity].collection.name,
+                            name: CONFIG[pack.type].collection.name,
                             type: "section",
                             count: 0,
                             icon: icon,
@@ -216,7 +221,11 @@ export class ForgeCompendiumBrowser {
                 try {
                     let collection = game.packs.get(key);
                     if ( !collection.indexed ) {
-                        await collection.getIndex();
+                        if (pack.entity == "Scene") {
+                            await collection.getDocuments();
+                        } else {
+                            await collection.getIndex();
+                        }
                     }
                     
                     let children = [];
@@ -224,7 +233,7 @@ export class ForgeCompendiumBrowser {
                         let document = index;
                         let img = document.img;
                         if (pack.entity == "Scene") {
-                            document = await collection.getDocument(document._id);
+                            document = await collection.contents.find(c => c.id);
                             try {
                                 const thumb = await ImageHelper.createThumbnail(document.thumb, { width: 48, height: 48 });
                                 img = thumb?.thumb || thumb || document.thumb;
