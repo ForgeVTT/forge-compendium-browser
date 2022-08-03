@@ -28,30 +28,9 @@ export default {
     },
     async loadDocument() {
       console.log("entry", this.entry);
-      let cls = this.entry.document._getSheetClass ? this.entry.document._getSheetClass() : null;
-      console.log("here", cls);
       let document = this.entry.document;
-      console.log("load document", document);
-      if (document instanceof JournalEntry) {
-        if (isNewerVersion(game.version, "9.99999")) {
-          document = this.entry.document.pages.contents[0];
-          console.log("pages", this.entry.document.pages, document, sheets);
-          const cfg = CONFIG["JournalEntryPage"];
-          const sheets = cfg.sheetClasses[document.type] || {};
-          switch (document.type) {
-            case 'image': cls = sheets["core.JournalImagePageSheet"].cls; break;
-            case 'pdf': cls = sheets["core.JournalPDFPageSheet"].cls; break;
-            case 'text': cls = sheets["core.JournalTextPageSheet"].cls; break;
-            case 'video': cls = sheets["core.JournalVideoPageSheet"].cls; break;
-            default: cls = Object.values(sheets[document.type])[0].cls;
-          }
-        } else {
-          const cfg = CONFIG["JournalEntry"];
-          const sheets = cfg.sheetClasses[CONST.BASE_DOCUMENT_TYPE] || {};
-          cls = sheets["core.JournalSheet"].cls;
-        }
-        console.log("here2", cls);
-      }
+      let cls = document._getSheetClass ? document._getSheetClass() : null;
+
       if (document instanceof Scene) {
         const templateData = {
           img: document.img ?? document.data.img,
@@ -76,10 +55,41 @@ export default {
 
         this.subsheet = { options: { classes: ["scene-entry"] } };
       } else {
-        this.subsheet = new cls(document, { editable: false });
-        this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
-        const templateData = await this.subsheet.getData();
-        const html = await renderTemplate(this.subsheet.template, templateData);
+        let html = "";
+        let pages = [];
+        if (document instanceof JournalEntry) {
+          if (document instanceof JournalEntry && isNewerVersion(game.version, "9.99999")) {
+            const cfg = CONFIG["JournalEntryPage"];
+            for (let page of this.entry.document.pages) {
+              const sheets = cfg.sheetClasses[page.type] || {};
+              switch (page.type) {
+                case 'image': pages.push({document: page, cls: sheets["core.JournalImagePageSheet"].cls}); break;
+                case 'pdf': pages.push({document: page, cls: sheets["core.JournalPDFPageSheet"].cls}); break;
+                case 'text': pages.push({document: page, cls: sheets["core.JournalTextPageSheet"].cls}); break;
+                case 'video': pages.push({document: page, cls: sheets["core.JournalVideoPageSheet"].cls}); break;
+                default: pages.push({document: page, cls: Object.values(sheets[document.type])[0].cls});
+              }
+            }
+          } else {
+            const cfg = CONFIG["JournalEntry"];
+            const sheets = cfg.sheetClasses[CONST.BASE_DOCUMENT_TYPE] || {};
+            cls = sheets["core.JournalSheet"].cls;
+            pages.push({document, cls});
+          }
+        } else {
+          pages.push({document, cls});
+        }
+
+        for (let page of pages){
+          this.subsheet = new page.cls(page.document, { editable: false });
+          this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
+          const templateData = await this.subsheet.getData();
+
+          if (templateData.enrichedText instanceof Promise)
+            templateData.enrichedText = await templateData.enrichedText;
+          const template = await renderTemplate(this.subsheet.template, templateData);
+          html += `<article>${template}</article>`;
+        }
 
         this.$refs.entry.innerHTML = html;
         const subdocument = $(this.$refs.entry);
@@ -152,5 +162,16 @@ export default {
 
 .forge-compendium-entry.journal-sheet.v10 > header {
     display: none;
+}
+
+.forge-compendium-entry a.content-link {
+  color: var(--color-text-hyperlink);
+  background: transparent;
+  padding: 0px;
+  border: 0px;
+}
+
+.forge-compendium-entry a.content-link i {
+  color: var(--color-text-hyperlink);
 }
 </style>
