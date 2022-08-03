@@ -100,7 +100,7 @@
         <ul class="flexrow forge-compendium-breadcrumbs">
           <li v-for="(item, index) in path" :key="item.id">
             <span v-if="index != 0">/</span>
-            <div @click="selectEntity(item)">{{ item.name }}</div>
+            <div class="breadcrumb-link" v-on="item.id != document.id ? { click: () => selectEntity(item) } : {}">{{ item.name }}</div>
           </li>
         </ul>
         <div class="forge-entry-import" @click="importEntry">
@@ -201,7 +201,7 @@
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
-                <div style="text-align: center; display: none">
+                <div style="text-align: center;">
                   <button @click="importModule">
                     <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
@@ -276,12 +276,16 @@ export default {
       this.selectEntity(entity);
     },
     async selectEntity(entity) {
+      console.log("Entity", entity);
       if (!entity) return;
 
       if (entity.type == "search") {
         this.openSearch(entity.query);
       } else if (entity.type == "book") {
         this.clearPath();
+      } else if (entity.type == "folder") {
+        if (entity.children[0].name == entity.name && entity.children[0].type == "document")
+          this.selectEntity(entity.children[0]);
       } else if (entity.type == "document") {
         if (!entity.document) {
           let collection = game.packs.get(entity.packId);
@@ -909,6 +913,14 @@ export default {
 }
 .forge-compendium-breadcrumbs li > span {
   padding: 0px 8px;
+}
+
+.forge-compendium-breadcrumbs li:not(:last-child) .breadcrumb-link {
+  cursor: pointer;
+}
+
+.forge-compendium-breadcrumbs li:not(:last-child) .breadcrumb-link:hover {
+  text-shadow: 0 0 8px var(--color-shadow-primary);
 }
 
 .back-button,

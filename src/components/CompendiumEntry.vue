@@ -22,6 +22,8 @@ export default {
       const packId = e.currentTarget.dataset.pack;
       const id = e.currentTarget.dataset.id;
 
+      console.log("Opening a link", id);
+
       this.$emit("link", packId, id);
       e.preventDefault();
       e.stopPropagation();
@@ -110,7 +112,9 @@ export default {
         this.subsheet._disableFields(subdocument[0]);
 
         //Hooks.callAll('renderJournalSheet', this.subsheet, subdocument, templateData);
+        console.log("Load HTML", this.$refs.entry, $(`a.content-link[data-pack]`, this.$refs.entry));
         $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
+        $(`a.content-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
 
         document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
