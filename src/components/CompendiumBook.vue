@@ -562,8 +562,10 @@ export default {
         return game.i18n.localize(key);
     },
     importEntry() {
-        const collection = game.collections.get(this.document.packId);
-        if (collection.importFromCompendium(this.document.collection, this.document.id, {}, { renderSheet: false })) {
+        const collection = this.document.document.collection;
+        const pack = game.packs.get(this.document.packId);
+        console.log("importing", this.document, collection, pack);
+        if (collection && collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true })) {
             ui.notifications.info("Document has been imported");
         }
     }
