@@ -119,7 +119,7 @@ export class ForgeCompendiumBrowser {
             if (!moduleData)
                 return;
 
-            this.buildHierarchy(moduleData.packs).then((hierarchy) => {
+            this.buildHierarchy(moduleData.packs, book).then((hierarchy) => {
                 book.hierarchy = hierarchy;
 
                 if (book.hierarchy) {
@@ -163,7 +163,7 @@ export class ForgeCompendiumBrowser {
         return json;
     }
 
-    static async buildHierarchy(bookpacks) {
+    static async buildHierarchy(bookpacks, book) {
         //if that doesn't exist then this is old and we need to build from packs
         const checkKeys = (item, key) => {
             if (item.name == key)
@@ -194,6 +194,7 @@ export class ForgeCompendiumBrowser {
                         realparent = {
                             id: pack.entity,
                             name: CONFIG[pack.type].collection.name,
+                            packtype: pack.type,
                             type: "section",
                             count: 0,
                             icon: icon,
@@ -217,15 +218,14 @@ export class ForgeCompendiumBrowser {
                     realparent.children.push(childData);
                 }
 
-                let key = `${pack.module}.${pack.name}`;
+                let key = `${book.id}.${pack.name}`;
                 try {
                     let collection = game.packs.get(key);
-                    if ( !collection.indexed ) {
-                        if (pack.entity == "Scene") {
-                            await collection.getDocuments();
-                        } else {
-                            await collection.getIndex();
-                        }
+                    
+                    if (pack.entity == "Scene") {
+                        await collection.getDocuments();
+                    } else if(!collection.indexed) {
+                        await collection.getIndex();
                     }
                     
                     let children = [];
@@ -291,63 +291,95 @@ export class ForgeCompendiumBrowser {
         }
     }
 
-    /*static async indexBook(book, progress) {
-        let totalPacks = 0;
-        let indexedPacks = 0;
+    static async importBook(book, options) {
+        let { progress } = options;
+        let translate = {};
+        let folders = [];
 
-        const indexPacks = async (parent) => {
+        let processChildren = async function(parent, type, parentFolder) {
+            let updates = [];
             for (let child of parent.children) {
-                child.parent = parent;
+                if (child.type == "folder") {
+                    let folderData = new Folder({
+                        name: child.name,
+                        type: type,
+                        folder: parentFolder,
+                        sorting: "m"
+                      });
+                    let folder = await Folder.create(folderData);
+                    folders.push(folder.id);
+                    console.log("Child folder", child, folder);
+                    updates = updates.concat(await processChildren(child, type, folder));
+                } else if( child.type == "document") {
+                    let collection = game.packs.get(child.packId);
+                    let document = await collection.getDocument(child.id);
+                    let data = document.toObject(false);
+                    data._id = randomID();
+                    translate[`${child.packId}.${document.id}`] = data._id;
 
-                if (child.children)
-                    await indexPacks(child);
+                    if (progress)
+                        progress("increase", { type: type });
+                    console.log("Child document", child, translate, data);
 
-                if (child.pack) {
-                    //index the compendium
-                    child.children = child.children || [];
+                    updates.push(data);
+                }
+            }
+            return updates;
+        }
 
-                    let key = `${book.id}.${child.pack}`;
-                    try {
-                        let collection = game.packs.get(key);
-                        if ( !collection.indexed ) await collection.getIndex();
-                        //const documents = await collection.getDocuments();
-                        for (let document of collection.index) {
-                            indexedPacks++;
-                            console.log("document", document);
-                            progress(indexedPacks / totalPacks);
-                            if (!child.children.find(c => c.id == document.id)) {
-                                child.children.push({
-                                    id: document._id,
-                                    name: document.name,
-                                    type: "document",
-                                    img: document.img,
-                                    sort: (isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort),
-                                    index: document,
-                                    collection: collection,
-                                    parent: child
-                                });
+        const updates = await Promise.all(book.hierarchy.children.map(async (c) => {
+            let folderData = new Folder({
+                name: book.name,
+                type: c.packtype,
+                sorting: "m"
+              });
+            let mainfolder = await Folder.create(folderData);
+            folders.push(mainfolder.id);
+            if (progress)
+                progress("reset", { type: c.packtype, max: c.count, message: 'Processing' });
+            console.log("Mapping child", c, mainfolder);
+            let data = await processChildren(c, c.packtype, mainfolder);
+            return {
+                type: c.packtype,
+                data: data
+            };
+        }));
+
+        console.log("Updates", updates);
+
+        await Promise.all(updates.map(async (update) => {
+            let { type, data } = update;
+
+            if (progress)
+                progress("reset", { max: data.length, type: type, message: 'Re-linking' });
+
+            for (let document of data) {
+                if (progress)
+                    progress("increase", {type: type});
+                for (let [key, value] of Object.entries(translate)) {
+                    switch (document.type) {
+                        case "Item": document.system.description.value = document.system.description.value.replaceAll(`Compendium.${key}`, `${document.type}.${value}`); break;
+                        case "Actor": document.system.details.biography = document.system.details.biography.replaceAll(`Compendium.${key}`, `${document.type}.${value}`); break;
+                        case "JournalEntry": {
+                            for (let page of document.pages) {
+                                page.text.content = page.text.content.replaceAll(`Compendium.${key}`, `${document.type}.${value}`); 
                             }
-                            child.children = child.children.sort((a, b) => {
-                                return a.sort - b.sort;
-                            });
-                        }
-                    } catch(err) {
-                        warn("Error importing compendium", key, err);
+                        }break;
                     }
                 }
             }
-        }
 
-        if (!book._indexed) {
-            totalPacks = 0;
-            for (let child of book.children) {
-                totalPacks+= child.count;
+            if (progress)
+                progress("reset", { max: 0, type: type, message: 'Creating' });
+
+            let cls = getDocumentClass(type);
+            //cls.createDocuments(update.data);
+        })).then(() => {
+            if (progress) {
+                progress("finish");
             }
-            indexedPacks = 0;
-            await indexPacks(book);
-            book._indexed = true;
-        }
-    }*/
+        });
+    }
 
     static openBrowser(book) {
         ForgeCompendiumBrowser.browser = new CompendiumBrowserApp(book).render(true);

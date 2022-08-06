@@ -1,9 +1,26 @@
 <form id="forge-compendium-browser-import">
+    <p class="notes">This will import all the documents in this book.  All items will be added to folders with the compendium book name.  This process could take awhile.</p>
     <ul>
         {{#each sections}}
-        <li>
-            <input name="section.{{this.id}}" type="checkbox" /> {{this.count}} {{this.name}}
+        <li data-id="{{this.type}}">
+            <span>{{this.name}}</span>
+            <div class="flexrow">
+                <span class="message">...</span>
+                <div class="progress-bar">
+                    <div class="bar"></div>
+                </div>
+            </div>
         </li>
         {{/each}}
     </ul>
+    <div class="dialog-buttons">
+        <button class="start-import" data-button="ok">
+            <i class="fas fa-download"></i>
+            Import
+        </button>
+        <button class="finish-import" data-button="cancel" style="display: none;">
+            <i class="fas fa-check"></i>
+            Finished!
+        </button>
+    </div>
 </form>

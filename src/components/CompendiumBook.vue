@@ -437,44 +437,68 @@ export default {
       return position < 0 || position > this.history.length - 1 ? "disabled" : "";
     },
     async importModule() {
-      const sections = this.sections.map((s) => ({
-        id: s.id,
-        name: s.name,
-        count: s.count,
-      }));
-      const html = await renderTemplate("modules/forge-compendium-browser/import-documents.html", { sections });
-      Dialog.prompt({
-        title: game.i18n.localize("ForgeCompendiumBrowser.ImportCompendiumDocuments"),
-        content: html,
-        label: game.i18n.localize("ForgeCompendiumBrowser.Import"),
-        callback: (html) => {
-          const form = html.querySelector("#forge-compendium-browser-import");
-          const fd = new FormDataExtended(form);
-          const data = fd.toObject();
+      let sections = this.book.hierarchy.children.map((c) => {
+        return {
+          type: c.packtype,
+          name: c.name,
+          max: 0,
+          count: 0,
+          perc: 0
+        }
+      });
 
-          const doImport = (entry) => {
-            //go through this entry, find all documents and import them
-            if (entry) {
-              if (entry.type == "document") {
-                const collection = game.collections.get(entry.collection.documentName);
-                return collection.importFromCompendium(entry.collection, entry.id, {}, { renderSheet: false });
-              } else if (entry.children && entry.children.length) {
-                for (let child of entry.children) {
-                  doImport(child);
-                }
-              }
-            }
-          };
+      let globalHtml;
 
-          for (let [k, v] of Object.entries(data.sections)) {
-            if (v) {
-              const section = this.sections.find((s) => s.id == k);
-              doImport(section);
-            }
+      let progressFn = (command, options) => {
+        let typeElem = $(`li[data-id="${options.type}"]`, globalHtml);
+        console.log("progress", command, options, globalHtml);
+        if (options?.message)
+          $('.message', typeElem).html(options?.message);
+        if (command == "reset") {
+          let section = sections.find(s => s.type == options.type);
+          console.log("reset", section, options.type);
+          section.max = options?.max ?? 0;
+          section.count = 0;
+          section.perc = 0;
+          $('.progress-bar .bar', typeElem).css({'width': `0%`});
+        }
+        if (command == "increase") {
+          let section = sections.find(s => s.type == options.type);
+          console.log("increase", section, options.type);
+          section.count++;
+          if ((Math.round((section.count / section.max) * 100)) != section.perc) {
+            section.perc = (Math.round((section.count / section.max) * 100));
+            $('.progress-bar .bar', typeElem).css({'width': `${section.perc}%`});
           }
+        }
+        if (command == "finish") {
+          $('.start-import', globalHtml).hide();
+          $('.finish-import', globalHtml).show();
+        }
+      }
+
+      let startImport = function(html) {
+        $('.start-import', html).prop("disabled", true);
+        game.ForgeCompendiumBrowser.importBook(this.book, { progress: progressFn });
+      }
+
+      let closeDialog = function(event) {
+        $(event.currentTarget).closest('.dialog').find('header .close').click();
+      }
+
+      const template = await renderTemplate("modules/forge-compendium-browser/templates/import-documents.html", { sections: sections });
+      new Dialog({
+        title: game.i18n.localize("ForgeCompendiumBrowser.ImportCompendiumDocuments"),
+        content: template,
+        label: game.i18n.localize("ForgeCompendiumBrowser.Import"),
+        buttons: {},
+        render: (html) => {
+          globalHtml = html;
+          $('.start-import', html).on("click", startImport.bind(this, html));
+          $('.finish-import', html).on("click", closeDialog.bind(this));
         },
         rejectClose: false,
-      });
+      }).render(true);
     },
     openSearch(query = "") {
       this.searchTerm = query;

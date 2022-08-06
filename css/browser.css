@@ -36,3 +36,36 @@
 .package-list .package .tag.compendium-library {
     background: #01d610;
 }
+
+#forge-compendium-browser-import .progress-bar {
+    width: 100%;
+    position: relative;
+    height: 20px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+#forge-compendium-browser-import .progress-bar .bar {
+    position: absolute;
+    height: 100%;
+    width: 0px;
+    top: 0px;
+    left: 0px;
+    background-color: royalblue;
+    border-right: 1px solid darkblue;
+    border-radius: 4px;
+}
+
+#forge-compendium-browser-import .start-import {
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px groove var(--color-border-light-secondary);
+    margin: 0;
+}
+
+#forge-compendium-browser-import ul {
+    list-style-type: none; /* Remove bullets */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margins */
+}
