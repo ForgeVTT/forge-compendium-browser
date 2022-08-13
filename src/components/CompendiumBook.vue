@@ -450,8 +450,8 @@ export default {
       let globalHtml;
 
       let progressFn = (command, options) => {
-        let typeElem = $(`li[data-id="${options.type}"]`, globalHtml);
         console.log("progress", command, options, globalHtml);
+        let typeElem = options?.type ? $(`li[data-id="${options.type}"]`, globalHtml) : null;
         if (options?.message)
           $('.message', typeElem).html(options?.message);
         if (command == "reset") {
@@ -474,6 +474,8 @@ export default {
         if (command == "finish") {
           $('.start-import', globalHtml).hide();
           $('.finish-import', globalHtml).show();
+          $('.message', globalHtml).html('');
+          $('.progress-bar .bar', globalHtml).css({'width': `100%`});
         }
       }
 

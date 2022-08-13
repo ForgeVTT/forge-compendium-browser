@@ -355,7 +355,7 @@ export class ForgeCompendiumBrowser {
 
             for (let document of data) {
                 if (progress)
-                    progress("increase", {type: type});
+                    progress("increase", { type: type });
                 for (let [key, value] of Object.entries(translate)) {
                     switch (document.type) {
                         case "Item": document.system.description.value = document.system.description.value.replaceAll(`Compendium.${key}`, `${document.type}.${value}`); break;
@@ -373,7 +373,7 @@ export class ForgeCompendiumBrowser {
                 progress("reset", { max: 0, type: type, message: 'Creating' });
 
             let cls = getDocumentClass(type);
-            //cls.createDocuments(update.data);
+            cls.createDocuments(update.data);
         })).then(() => {
             if (progress) {
                 progress("finish");

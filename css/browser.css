@@ -34,7 +34,7 @@
 }
 
 .package-list .package .tag.compendium-library {
-    background: #01d610;
+    background: #62c462;
 }
 
 #forge-compendium-browser-import .progress-bar {
@@ -68,4 +68,8 @@
     list-style-type: none; /* Remove bullets */
     padding: 0; /* Remove padding */
     margin: 0; /* Remove margins */
+}
+
+#forge-compendium-browser-import .message {
+    font-style: italic;
 }
