@@ -276,7 +276,6 @@ export default {
       this.selectEntity(entity);
     },
     async selectEntity(entity) {
-      console.log("Entity", entity);
       if (!entity) return;
 
       if (entity.type == "search") {
@@ -290,7 +289,6 @@ export default {
         if (!entity.document) {
           let collection = game.packs.get(entity.packId);
           entity.document = await collection.getDocument(entity.id);
-          console.log("Getting document", entity.document, entity);
         }
         this.document = entity;
         this.addToHistory(entity);
@@ -450,25 +448,26 @@ export default {
       let globalHtml;
 
       let progressFn = (command, options) => {
-        console.log("progress", command, options, globalHtml);
         let typeElem = options?.type ? $(`li[data-id="${options.type}"]`, globalHtml) : null;
         if (options?.message)
           $('.message', typeElem).html(options?.message);
-        if (command == "reset") {
+        if (command == "reset" && options?.type) {
           let section = sections.find(s => s.type == options.type);
-          console.log("reset", section, options.type);
-          section.max = options?.max ?? 0;
-          section.count = 0;
-          section.perc = 0;
-          $('.progress-bar .bar', typeElem).css({'width': `0%`});
+          if (section) {
+            section.max = options?.max ?? 0;
+            section.count = 0;
+            section.perc = 0;
+            $('.progress-bar .bar', typeElem).css({'width': `0%`});
+          }
         }
-        if (command == "increase") {
+        if (command == "increase" && options?.type) {
           let section = sections.find(s => s.type == options.type);
-          console.log("increase", section, options.type);
-          section.count++;
-          if ((Math.round((section.count / section.max) * 100)) != section.perc) {
-            section.perc = (Math.round((section.count / section.max) * 100));
-            $('.progress-bar .bar', typeElem).css({'width': `${section.perc}%`});
+          if (section) {
+            section.count++;
+            if ((Math.round((section.count / section.max) * 100)) != section.perc) {
+              section.perc = (Math.round((section.count / section.max) * 100));
+              $('.progress-bar .bar', typeElem).css({'width': `${section.perc}%`});
+            }
           }
         }
         if (command == "finish") {
