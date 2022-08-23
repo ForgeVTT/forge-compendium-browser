@@ -174,104 +174,170 @@ export class ForgeCompendiumBrowser {
                 return true;
         }
 
-        const processPacks = async (parent, section) => {
-            let realparent = parent;
-
-            const packs = bookpacks.filter((p) => {
-                return p.parent == parent.id;
-            });
-            let folderSort = 0;
-            for (let pack of packs) {
-                if (pack.parent == null) {
-                    realparent = parent.children.find(c => c.id == pack.entity);
-                    if (!realparent) {
-                        //If the parent id is null, then these technically need to be added to the entity type parent
-                        let icon = 'fa-book-open';
-                        switch (pack.entity) {
-                            case 'Item': icon = 'fa-suitcase'; break;
-                            case 'Actor': icon = 'fa-user'; break;
-                            case 'Scene': icon = 'fa-map'; break;
-                        }
-                        realparent = {
-                            id: pack.entity,
-                            name: CONFIG[pack.type].collection.name,
-                            packtype: pack.type,
-                            type: "section",
-                            count: 0,
-                            icon: icon,
-                            children: []
-                        };
-                        parent.children.push(realparent);
-                        section = realparent;
-                    }
-                }
-
-                if (!checkKeys(realparent, pack.name))
-                    continue;
-
-                let childData = {
-                    id: pack.name,
-                    name: pack.label,
-                    type: "folder",
-                    children: [],
-                    sort: folderSort++
-                }
-                if (!realparent.children.find(c => c.id == childData.id)) {
-                    realparent.children.push(childData);
-                }
-
-                let key = `${book.id}.${pack.name}`;
-                try {
-                    let collection = game.packs.get(key);
-                    
-                    if (pack.entity == "Scene") {
-                        await collection.getDocuments();
-                    } else if(!collection.indexed) {
-                        await collection.getIndex();
-                    }
-                    
-                    let children = [];
-                    for (let index of collection.index) {
-                        let document = index;
-                        let img = document.img;
-                        if (pack.entity == "Scene") {
-                            document = await collection.contents.find(c => c.id);
-                            try {
-                                const thumb = await ImageHelper.createThumbnail(document.thumb, { width: 48, height: 48 });
-                                img = thumb?.thumb || thumb || document.thumb;
-                            } catch {
-                                img = document.img;
-                            }
-                        }
-
-                        if (!children.find(c => c.id == document.id)) {
-                            children.push({
-                                id: document._id,
-                                name: document.name,
-                                type: "document",
-                                img: img,
-                                sort: (isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort),
-                                packId: key
-                            });
-                        }
-                    }
-                    childData.children = childData.children.concat(children.sort((a, b) => {
-                        return a.sort - b.sort;
-                    }));
-
-                    if (section) {
-                        section.count += (collection?.index?.size || 0);
-                    }
-                } catch(err) {
-                    warn("Error importing compendium", key, err);
-                }
-
-                await processPacks(childData, section);
+        const createFolder = (data, sort) => {
+            let folder = {                 
+                id: data.id || data._id || data.name,
+                name: data.label || data.name,
+                type: "folder",
+                children: [],
+                sort: data.sort instanceof Array ? sort : (data.sort || sort)
             }
-            return parent;
+            folderIndex[folder.id] = folder;
+            return folder;
         }
 
-        return processPacks({ version: ForgeCompendiumBrowser.version, dynamic: true, children: [] });
+        const startsWithNumber = (str) => {
+            return /^\d/.test(str);
+        }
+
+        const getSection = (type) => {
+            let section = hierarchy.children.find(c => c.packtype == type);
+            if (!section) {
+                let icon = 'fa-book-open';
+                switch (type) {
+                    case 'Item': icon = 'fa-suitcase'; break;
+                    case 'Actor': icon = 'fa-user'; break;
+                    case 'Scene': icon = 'fa-map'; break;
+                }
+                section = {
+                    id: type,
+                    name: CONFIG[type]?.collection.name || "Unknown",
+                    packtype: type,
+                    type: "section",
+                    count: 0,
+                    icon: icon,
+                    children: []
+                };
+                hierarchy.children.push(section);
+            }
+            return section;
+        }
+
+        const getEntityFolder = (document, type) => {
+            let folder = folderIndex[document.folder];
+            if (!folder) {
+                let path = getProperty(document, "flags.ddb.path");
+                if (path) {
+                    let section = getSection(type);
+                    folder = section;
+                    for (let part of path) {
+                        let parent = folder;
+                        folder = parent.children.find(c => c.id == part.id);
+                        if (!folder) {
+                            folder = createFolder(part);
+                            parent.children.push(folder);
+                        }
+                    }
+                }
+            }
+
+            return folder;
+        }
+
+        const parseFolders = (folders, parent) => {
+            for (let folder of folders) {
+                let type = folder.type || folder.entity;
+                let _parent = parent || getSection(type);
+                let child = createFolder(folder);
+                _parent.children.push(child);
+                parseFolders(parent.children, child);
+            }
+        }
+
+        const parsePacks = async (packs, parent) => {
+            let folderSort = 0;
+            for (let pack of packs) {
+                let type = pack.type || pack.entity;
+                let _parent = parent || getSection(type);
+                let folder = _parent;
+
+                if (startsWithNumber(pack.name)) {
+                    // If this is the older pack hierarchy, then add this pack as the folder structure
+                    folder = _parent.children.find(f => f.id == pack.name);
+                    if (!folder) {
+                        folder = createFolder(pack, folderSort++);
+                        _parent.children.push(folder);
+                    }
+                }
+
+                // Go through all this pack's entries
+                await parseEntries(pack, folder);
+
+                // If this is an older pack hierarchy, then parse all the packs that are child packs
+                let children = bookpacks.filter((p) => {
+                    return p.parent == pack.id && p.parent != undefined;
+                });
+                if (children.length) {
+                    await parsePacks(children, folder);
+                }
+            }
+        }
+
+        const parseEntries = async (pack, folder) => {
+            let key = `${book.id}.${pack.name}`;
+            try {
+                let type = pack.type || pack.entity;
+                let collection = game.packs.get(key);
+                
+                //if (pack.entity == "Scene") {
+                //    await collection.getDocuments();
+                //} else if(!collection.indexed) {
+                    await collection.getIndex({fields: ["flags", "folder", "img", "thumb"]});
+                //}
+                
+                for (let index of collection.index) {
+                    let document = index;
+                    let img = document.img;
+                    if (pack.entity == "Scene") {
+                        //document = await collection.contents.find(c => c.id);
+                        try {
+                            const thumb = await ImageHelper.createThumbnail(document.thumb, { width: 48, height: 48 });
+                            img = thumb?.thumb || thumb || document.thumb;
+                        } catch {
+                            img = document.img;
+                        }
+                    }
+
+                    // find the folder according to the entry
+                    let _folder = getEntityFolder(document, type) || folder;
+
+                    if (!_folder.children.find(c => c.id == document.id)) {
+                        _folder.children.push({
+                            id: document._id,
+                            name: document.name,
+                            type: "document",
+                            img: img,
+                            sort: (isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort),
+                            packId: key
+                        });
+                    }
+                }
+
+                let section = hierarchy.children.find(c => c.packtype == type);
+                if (section) {
+                    section.count += (collection?.index?.size || 0);
+                }
+            } catch(err) {
+                warn("Error importing compendium", key, err);
+            }
+        }
+
+        // create the base hierarchy
+        let hierarchy = { version: ForgeCompendiumBrowser.version, dynamic: true, children: [] };
+        let folderIndex = {};
+
+        // check for a folders.json
+        let folders = await ForgeCompendiumBrowser.getFileData(`modules/${book.id}/folders.json`);
+        if (folders) {
+            parseFolders(folders);
+        }
+
+        const packs = bookpacks.filter((p) => {
+            return p.parent == undefined;
+        });
+        await parsePacks(packs);
+
+        return hierarchy;
     }
 
     static async indexBook(book) {
@@ -305,20 +371,35 @@ export class ForgeCompendiumBrowser {
             let folderSort = 100000;
             for (let child of parent.children) {
                 if (child.type == "folder") {
-                    let folderData = new Folder({
-                        name: child.name,
-                        type: type,
-                        folder: parentFolder,
-                        sorting: "m",
-                        sort: child.sort ?? folderSort
-                      });
-                    folderSort++;
-                    let folder = await Folder.create(folderData);
+                    let folder;
+                    if (type == "Actor") {
+                        folder = game.folder.find(f => f.folder?.id == parentFolder.id && f.name == child.name);
+                    }
+                    if (!folder) {
+                        let folderData = new Folder({
+                            name: child.name,
+                            type: type,
+                            folder: parentFolder,
+                            sorting: "m",
+                            sort: child.sort ?? folderSort
+                        });
+                        folderSort++;
+                        folder = await Folder.create(folderData);
+                    }
                     folders.push(folder.id);
                     documentData = documentData.concat(await processChildren(child, type, folder));
                 } else if( child.type == "document") {
                     let collection = game.packs.get(child.packId);
                     let document = await collection.getDocument(child.id);
+                    if (type == "Actor") {
+                        const actor = game.actors.find(a => {
+                            let a_ddbid = getProperty(a, "flags.forge-compendium-browser.ddbid");
+                            let b_ddbid = getProperty(document, "flags.forge-compendium-browser.ddbid");
+                            return a.folder?.id == parentFolder.id && ((a_ddbid && b_ddbid && a_ddbid == b_ddbid) || (a.name == document.name));
+                        });
+                        if (actor)
+                            continue;
+                    }
                     let data = document.toObject(false);
                     data._id = randomID();
                     data.folder = parentFolder;
@@ -335,12 +416,18 @@ export class ForgeCompendiumBrowser {
         }
 
         const documentData = await Promise.all(book.hierarchy.children.map(async (c) => {
-            let folderData = new Folder({
-                name: book.name,
-                type: c.packtype,
-                sorting: "m"
-              });
-            let mainfolder = await Folder.create(folderData);
+            let mainfolder;
+            if (c.packtype == "Actor") {
+                mainfolder = game.folders.find(f => f.folder == undefined && f.name == "Monsters");
+            }
+            if (!mainfolder) {
+                let folderData = new Folder({
+                    name: c.packtype == "Actor" ? "Monsters" : book.name,
+                    type: c.packtype,
+                    sorting: "m"
+                });
+                mainfolder = await Folder.create(folderData);
+            }
             folders.push(mainfolder.id);
             if (progress)
                 progress("reset", { type: c.packtype, max: c.count, message: 'Processing' });
@@ -571,7 +658,7 @@ Hooks.on('renderModuleManagement', (app, html, data) => {
             console.log((module.id || module.name), $(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));
             $("<span>")
                 .addClass("tag compendium-library")
-                .html('<img src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">')
+                .html('<img title="Forge Compendium Browser" src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">')
                 .insertAfter($(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));
         }
     }
