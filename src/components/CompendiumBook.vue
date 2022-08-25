@@ -276,6 +276,7 @@ export default {
       this.selectEntity(entity);
     },
     async selectEntity(entity) {
+      console.log("Select an entity", entity);
       if (!entity) return;
 
       if (entity.type == "search") {
@@ -283,8 +284,11 @@ export default {
       } else if (entity.type == "book") {
         this.clearPath();
       } else if (entity.type == "folder") {
-        if (entity.children[0].name == entity.name && entity.children[0].type == "document")
-          this.selectEntity(entity.children[0]);
+        const child = entity.children.find(c => c.name == entity.name && c.type == "document");
+        if (child) 
+          this.selectEntity(child);
+        else 
+          this.folder = entity;
       } else if (entity.type == "document") {
         if (!entity.document) {
           let collection = game.packs.get(entity.packId);
