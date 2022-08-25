@@ -391,19 +391,22 @@ export class ForgeCompendiumBrowser {
                 } else if( child.type == "document") {
                     let collection = game.packs.get(child.packId);
                     let document = await collection.getDocument(child.id);
+                    let key = `${child.packId}.${document.id}`;
                     if (type == "Actor") {
                         const actor = game.actors.find(a => {
                             let a_ddbid = getProperty(a, "flags.forge-compendium-browser.ddbid");
                             let b_ddbid = getProperty(document, "flags.forge-compendium-browser.ddbid");
                             return a.folder?.id == parentFolder.id && ((a_ddbid && b_ddbid && a_ddbid == b_ddbid) || (a.name == document.name));
                         });
-                        if (actor)
+                        if (actor) {
+                            translate[key] = { id: actor.id, uuid: actor.uuid };
                             continue;
+                        }
                     }
                     let data = document.toObject(false);
                     data._id = randomID();
                     data.folder = parentFolder;
-                    setProperty(data, "flags.forge-compendium-browser.originalId", `${child.packId}.${document.id}`);
+                    setProperty(data, "flags.forge-compendium-browser.originalId", key);
 
                     if (progress) {
                         progress("increase", { type: type });
