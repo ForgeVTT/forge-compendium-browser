@@ -116,6 +116,13 @@ export default {
         $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
         $(`a.content-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
 
+        // Remove all the links that point back to this entry, just to clean up
+        $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link, text) => {
+          console.log("Found one", idx, link, text, $(link).html(), this);
+          if ($(link).html() == `<i class="fas fa-book-open"></i>${this.entry.name}`)
+            $(link).remove();
+        });
+
         document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
       }
