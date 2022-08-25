@@ -221,12 +221,18 @@ export class ForgeCompendiumBrowser {
                     let section = getSection(type);
                     folder = section;
                     for (let part of path) {
+                        // If the path is the actual entity id, then we've gone too far.
+                        if (document._id == part.id)
+                            break;
                         let parent = folder;
                         folder = parent.children.find(c => c.id == part.id);
                         if (!folder) {
                             folder = createFolder(part);
                             parent.children.push(folder);
                         }
+                        // Once we've found the parent folder in the path list, then stop going any further
+                        if (document.folder && folder.id == document.folder)
+                            break;
                     }
                 }
             }
@@ -468,18 +474,6 @@ export class ForgeCompendiumBrowser {
                 case "JournalEntry": return (isV10 ? "text.content" : "content");
             }
         } 
-
-        const getReplaceableValue = function(doc) {
-            let type = doc.folder?.type || doc.parent?.folder?.type;
-            console.log("Type", type);
-            if (type == "JournalEntry" && isV10) {
-                return doc.pages.map((page) => { 
-                    return getProperty(page, getDocumentProperty(page))
-                }).filter(p => !!p);
-            } else {
-                return [getProperty(doc, getDocumentProperty(doc))]
-            }
-        }
 
         for (let doc of newDocs) {
             for (let document of doc.data) {
