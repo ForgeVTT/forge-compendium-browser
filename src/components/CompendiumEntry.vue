@@ -34,8 +34,9 @@ export default {
       let cls = document._getSheetClass ? document._getSheetClass() : null;
 
       if (document instanceof Scene) {
+        console.log("Scene", document);
         const templateData = {
-          img: document.img ?? document.data.img,
+          img: document.background?.src ?? document.data.img,
           stats: [],
         };
 

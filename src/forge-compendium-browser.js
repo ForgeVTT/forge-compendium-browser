@@ -379,7 +379,7 @@ export class ForgeCompendiumBrowser {
                 if (child.type == "folder") {
                     let folder;
                     if (type == "Actor") {
-                        folder = game.folder.find(f => f.folder?.id == parentFolder.id && f.name == child.name);
+                        folder = game.folders.find(f => f.folder?.id == parentFolder.id && f.name == child.name);
                     }
                     if (!folder) {
                         let folderData = new Folder({
@@ -528,6 +528,105 @@ export class ForgeCompendiumBrowser {
                         let update = {_id: document._id, pages: pages};
                         updates.push(update);
                     }
+                } else if(type == "Scene") {
+                    // Check the scene's journal entry
+
+                    // Go through the tokens and point them to the right actors.
+                    let tokens = (document.tokens || document.data.tokens || []);
+                    if (progress) {
+                        progress("reset", { max: tokens.length, type: "Scene", message: 'Linking tokens' });
+                        await timeout(1);
+                    }
+                    for (let token of tokens) {
+                        if (progress) {
+                            progress("increase", { type: "Scene" });
+                            await timeout(1);
+                        }
+
+                        let tokenName = getProperty(token, "flags.ddbActorFlags.name") || getProperty(token.data, "flags.ddbActorFlags.name") || token.name;
+                        if (!tokenName)
+                            continue;
+                        // Check to see if it's being imported with this adventure.
+                        console.log("Looking for Token Actor", token.id, tokenName, token);
+                        let actor;
+                        let actorUpdates = newDocs.find(d => d.type == "Actor");
+                        if (actorUpdates) {
+                            actor = actorUpdates.data.find(a => a.name == tokenName);
+                            console.log("Checking actorUpdates", token.id, tokenName, actor);
+                        }
+                        // Check to see if it already exists in the Monsters folder
+                        let folderName = `Monsters | ${tokenName[0].toUpperCase()}`;
+                        console.log("Here1", token.id, tokenName, actor);
+                        let monsterFolder = game.folders.find(f => f.name == folderName && f.folder?.name == "Monsters");
+                        console.log("Here2", token.id, tokenName, actor);
+                        if (!actor && monsterFolder) {
+                            console.log("Here3", token.id, actor);
+                            actor = game.actors.find(a => {
+                                if (a.name != tokenName)
+                                    return false;
+                                console.log("Finding actor", a, tokenName, monsterFolder);
+                                return a.folder?.id == monsterFolder.id;
+                            });
+                            console.log("Here4", token.id, tokenName, actor);
+                        }
+                        // Check to see if it's in the Monsters SRD Compendium
+                        if (!actor) {
+                            console.log("Here5", token.id, tokenName, actor);
+                            let monsterPack = game.packs.get("dnd5e.monsters");
+                            if (monsterPack) {
+                                console.log("Here6", token.id, tokenName, actor);
+                                await monsterPack.getIndex();
+                                console.log("Here7", token.id, tokenName, actor);
+                                let index = monsterPack.index.find(i => i.name == tokenName);
+                                console.log("Here8", token.id, tokenName, actor);
+
+                                console.log("Index", index);
+
+                                if (index) {
+                                    let document = await monsterPack.getDocument(index._id);
+                                    let data = document.toObject(false);
+                                    if (!monsterFolder) {
+                                        let parentFolder = game.folders.find(f => f.name == "Monsters" && f.folder == undefined);
+                                        if (!parentFolder) {
+                                            let folderData = new Folder({
+                                                name: "Monsters",
+                                                type: "Actor",
+                                                folder: null,
+                                                sorting: "m"
+                                            });
+                                            parentFolder = await Folder.create(folderData);
+                                        }
+                                        let folderData = new Folder({
+                                            name: folderName,
+                                            type: "Actor",
+                                            folder: parentFolder,
+                                            sorting: "m"
+                                        });
+                                        monsterFolder = await Folder.create(folderData);
+                                    }
+                                    data.folder = monsterFolder;
+                                    let results = await Actor.createDocuments([data]);
+                                    actor = results[0];
+                                    console.log("Creating a new actor", results, actor, tokenName);
+                                }
+                            }
+                        }
+
+                        console.log("Here9", token.id, tokenName, actor);
+                        if (actor) {
+                            console.log("Here10", token.id, tokenName, actor);
+                            let tokenUpdate = { actorId: actor.id };
+                            if ((!token.texture?.src || token.texture?.src == "icons/svg/mystery-man.svg") && actor?.prototypeToken?.texture?.src)
+                                tokenUpdate.texture = { src: actor?.prototypeToken?.texture?.src };
+                            await token.update(tokenUpdate);
+                            console.log("Here11", token.id, tokenName, actor);
+                        }
+                    }
+                    // Go through notes and point them to the right Journal Entry
+                    /*
+                    for (let note of (document.notes || document.data.notes || [])) {
+                        note.entryId
+                    }*/
                 } else {
                     let repvalue = getProperty(document, getDocumentProperty(document));
                     let original = repvalue;

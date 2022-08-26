@@ -193,15 +193,15 @@
                 class="forge-compendium-description"
                 v-html="book.description"
               ></div>
-              <div class="forge-compendium-contains">
-                <b>Contains:</b>
+              <div class="forge-compendium-contains flexcol">
+                <b style="flex-grow: 0;">Contains:</b>
                 <ul class="forge-compendium-contains-list">
                   <li v-for="section in sections" :key="section.id">
                     <i class="fas" :class="section.icon"></i>
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
-                <div style="text-align: center;">
+                <div style="text-align: center;flex-grow: 0;">
                   <button @click="importModule">
                     <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
