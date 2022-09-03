@@ -10,5 +10,7 @@
   "ForgeCompendiumBrowser.OpenCompendiumBrowser": "Ouvrir la bibliothèque des Compendiums",
   "ForgeCompendiumBrowser.ImportDocuments": "Importer des documents",
   "ForgeCompendiumBrowser.ImportCompendiumDocuments": "Importer des documents de Compendium",
-  "ForgeCompendiumBrowser.Import": "Importer"
+  "ForgeCompendiumBrowser.Import": "Importer",
+  "ForgeCompendiumBrowser.Search": "Recherche",
+  "ForgeCompendiumBrowser.NoSearchResults": "Aucun résultat de recherche"
 }
