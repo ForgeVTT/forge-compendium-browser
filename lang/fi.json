@@ -1,1 +1,13 @@
-{}
+{
+  "ForgeCompendiumBrowser.same-name.name": "Avaa samannimiset automaattisesti",
+  "ForgeCompendiumBrowser.OpenCompendiumBrowser": "Avaa hakemistokirjasto",
+  "ForgeCompendiumBrowser.ForgeCompendiumLibrary": "Forge-hakemistokirjasto",
+  "ForgeCompendiumBrowser.LibraryMessage": "Tämä on kirjastosi hakemistokirjoista.  Jos sinulla ei ole kirjoja listassa, käytä Bazaarin linkkiä {link} kirjojesi tuomiseen.",
+  "ForgeCompendiumBrowser.NoBooksLoaded": "Ei ladattuja kirjoja",
+  "ForgeCompendiumBrowser.CompendiumLibrary": "Hakemistokirjasto",
+  "ForgeCompendiumBrowser.Prev": "Edellinen",
+  "ForgeCompendiumBrowser.Next": "Seuraava",
+  "ForgeCompendiumBrowser.Search": "Etsi",
+  "ForgeCompendiumBrowser.NoSearchResults": "Ei hakutuloksia",
+  "ForgeCompendiumBrowser.Import": "Tuo"
+}
