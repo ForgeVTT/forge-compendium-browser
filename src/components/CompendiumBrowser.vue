@@ -43,16 +43,20 @@ export default {
       if (bookId) {
         const book = this.library.find((b) => b.id == bookId);
         if (book) {
-          this.indexing = true;
-          await game.ForgeCompendiumBrowser.indexBook(book, (progress) => { this.progress = progress; });
-          this.indexing = false;
-          this.progress = 0;
-          this.book = Object.freeze(book);
+          if (!this.isAvailable(book)) {
+            ui.notifications.warn("Please wait, book is still building its index, this may take some time");
+          } else {
+            this.indexing = true;
+            await game.ForgeCompendiumBrowser.indexBook(book, (progress) => { this.progress = progress; });
+            this.indexing = false;
+            this.progress = 0;
+            this.book = Object.freeze(book);
 
-          if (packId || id) {
-            this.$refs.compendiumBook.openLink(packId, id);
+            if (packId || id) {
+              this.$refs.compendiumBook.openLink(packId, id);
+            }
+            game.user.setFlag("forge-compendium-browser", "last-book", bookId);
           }
-          game.user.setFlag("forge-compendium-browser", "last-book", bookId);
         } else {
           this.book = null;
         }
@@ -60,6 +64,9 @@ export default {
         this.book = null;
         game.user.unsetFlag("forge-compendium-browser", "last-book");
       }
+    },
+    isAvailable(book) {
+      return book && book.children && book.children.length;
     },
   },
   computed: {
@@ -71,7 +78,7 @@ export default {
     },
     barWidth() {
       return `width: ${this.progress * 100 }%`;
-    }
+    },
   },
   mounted() {
     this.library = game.ForgeCompendiumBrowser.books;

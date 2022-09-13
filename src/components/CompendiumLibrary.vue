@@ -19,6 +19,7 @@
           v-for="book in availableBooks"
           :key="book.id"
           class="forge-compendium-book"
+          :class="bookClass(book)"
           :data-id="book.id"
           data-type="book"
           @click="selectBook(book.id)"
@@ -58,6 +59,12 @@ export default {
     },
     i18n(key) {
         return game.i18n.localize(key);
+    },
+    bookClass(book) {
+      return !this.isAvailable(book) ? "disabled" : "";
+    },
+    isAvailable(book) {
+      return book && book.children && book.children.length;
     },
   },
   computed: {
@@ -135,7 +142,11 @@ export default {
   opacity: 0.9;
 }
 
-.forge-compendium-library .forge-compendium-book:hover {
+.forge-compendium-library .forge-compendium-book.disabled {
+  filter: grayscale(1);
+}
+
+.forge-compendium-library .forge-compendium-book:not(.disabled):hover {
   opacity: 1;
 }
 
