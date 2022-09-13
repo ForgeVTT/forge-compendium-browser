@@ -119,9 +119,11 @@ export default {
 
         // Remove all the links that point back to this entry, just to clean up
         $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link, text) => {
-          console.log("Found one", idx, link, text, $(link).html(), this);
-          if ($(link).html() == `<i class="fas fa-book-open"></i>${this.entry.name}`)
+          let linkHtml = $(link).html() || "";
+          console.log("Found one", idx, link, linkHtml, $(link).html(), linkHtml.startsWith == '<i class="fas fa-book-open"></i>', linkHtml.endsWith(this.entry.name));
+          if (linkHtml.indexOf('<i class="fas fa-book-open"></i>') >= 0 && linkHtml.indexOf(this.entry.name)) {
             $(link).remove();
+          }
         });
 
         document._sheet = null; // eslint-disable-line
