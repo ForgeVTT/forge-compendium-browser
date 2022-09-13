@@ -3,8 +3,7 @@ import { ForgeCompendiumBrowser } from "./forge-compendium-browser.js";
 export class ImportBook{
     static async importBook(book, options) {
         let { progress } = options;
-        let translate = {};
-        let folders = [];
+        ImportBook.translate = {};
 
         let isV10 = isNewerVersion(game.version, "9.999999");
 
@@ -14,17 +13,17 @@ export class ImportBook{
                 mainfolder = game.folders.find(f => f.folder == undefined && f.name == "Monsters");
             }
             if (!mainfolder) {
-                let folderData = new Folder({
+                let folderData = {
                     name: c.packtype == "Actor" ? "Monsters" : book.name,
                     type: c.packtype,
-                    sorting: "a"
-                });
+                    sorting: c.packtype == "Actor" ? "a" : "m"
+                };
+                folderData[isV10 ? "folder" : "parent"] = null;
                 mainfolder = await Folder.create(folderData);
             }
-            folders.push(mainfolder.id);
             if (progress)
                 progress("reset", { type: c.packtype, max: c.count, message: 'Processing' });
-            let data = await processChildren(c, c.packtype, mainfolder);
+            let data = await ImportBook.processChildren(c, c.packtype, mainfolder, progress);
             return {
                 type: c.packtype,
                 data: data
@@ -66,22 +65,24 @@ export class ImportBook{
                 let type = document.folder?.type || document.parent?.folder?.type;
                 let originalId = getProperty(document, "flags.forge-compendium-browser.originalId");
                 if (originalId) {
-                    translate[originalId] = {id: document._id, uuid: document.uuid};
+                    ImportBook.translate[originalId] = {id: document._id, uuid: document.uuid};
                 }
                 if (document.pages) {
                     for (let page of document.pages) {
                         originalId = getProperty(page, "flags.forge-compendium-browser.originalId");
                         if (originalId) {
-                            translate[originalId] = {id: page._id, uuid: page.uuid, type: type};
+                            ImportBook.translate[originalId] = {id: page._id, uuid: page.uuid, type: type};
                         }
                     }
                 }
             }
         }
-        console.log("Translate", translate);
+        console.log("Translate", ImportBook.translate);
         
         const updates = await Promise.all(newDocs.map(async (update) => {
             let { type, data } = update;
+
+            let isV10 = isNewerVersion(game.version, "9.999999");
 
             if (progress)
                 progress("reset", { max: data.length, type: type, message: (type == "Scene" ? "Linking tokens" : 'Fixing inline links') });
@@ -100,7 +101,7 @@ export class ImportBook{
                         let repvalue = getProperty(page, "text.content");
                         let original = repvalue;
                         if (repvalue) {
-                            for (let [key, id] of Object.entries(translate)) {
+                            for (let [key, id] of Object.entries(ImportBook.translate)) {
                                 let value = `@UUID[${id.uuid}]`;
                                 repvalue = repvalue.replaceAll(`@Compendium[${key}]`, value); 
                             }
@@ -152,20 +153,20 @@ export class ImportBook{
                                     if (!monsterFolder) {
                                         let parentFolder = game.folders.find(f => f.name == "Monsters" && f.folder == undefined);
                                         if (!parentFolder) {
-                                            let folderData = new Folder({
+                                            let folderData = {
                                                 name: "Monsters",
                                                 type: "Actor",
-                                                folder: null,
                                                 sorting: "m"
-                                            });
+                                            };
+                                            folderData[isV10 ? "folder" : "parent"] = null;
                                             parentFolder = await Folder.create(folderData);
                                         }
-                                        let folderData = new Folder({
+                                        let folderData = {
                                             name: folderName,
                                             type: "Actor",
-                                            folder: parentFolder,
                                             sorting: "m"
-                                        });
+                                        };
+                                        folderData[isV10 ? "folder" : "parent"] = parentFolder;
                                         monsterFolder = await Folder.create(folderData);
                                     }
                                     data.folder = monsterFolder;
@@ -192,7 +193,7 @@ export class ImportBook{
                     let repvalue = getProperty(document, getDocumentProperty(document));
                     let original = repvalue;
                     if (repvalue) {
-                        for (let [key, id] of Object.entries(translate)) {
+                        for (let [key, id] of Object.entries(ImportBook.translate)) {
                             let value = (isV10 ? `@UUID[${id.uuid}]` : `@${id.type}[${id.id}]`);
                             repvalue = repvalue.replaceAll(`@Compendium[${key}]`, value); 
                         }
@@ -245,9 +246,11 @@ export class ImportBook{
         });
     }
 
-    static async processChildren(parent, type, parentFolder) {
+    static async processChildren(parent, type, parentFolder, progress) {
         let documentData = [];
         let folderSort = 100000;
+        let isV10 = isNewerVersion(game.version, "9.999999");
+        
         for (let child of parent.children) {
             if (child.type == "folder") {
                 let folder;
@@ -255,18 +258,18 @@ export class ImportBook{
                     folder = game.folders.find(f => f.folder?.id == parentFolder.id && f.name == child.name);
                 }
                 if (!folder) {
-                    let folderData = new Folder({
+                    let folderData = {
                         name: child.name,
                         type: type,
-                        folder: parentFolder,
                         sorting: "m",
                         sort: child.sort ?? folderSort
-                    });
+                    };
+                    folderData[isV10 ? "folder" : "parent"] = parentFolder;
+
                     folderSort++;
                     folder = await Folder.create(folderData);
                 }
-                folders.push(folder.id);
-                documentData = documentData.concat(await processChildren(child, type, folder));
+                documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
             } else if( child.type == "document") {
                 let collection = game.packs.get(child.packId);
                 let document = await collection.getDocument(child.id);
@@ -278,7 +281,7 @@ export class ImportBook{
                         return a.folder?.id == parentFolder.id && ((a_ddbid && b_ddbid && a_ddbid == b_ddbid) || (a.name == document.name));
                     });
                     if (actor) {
-                        translate[key] = { id: actor.id, uuid: actor.uuid };
+                        ImportBook.translate[key] = { id: actor.id, uuid: actor.uuid };
                         continue;
                     }
                 } else if (type == "Scene") {
