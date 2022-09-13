@@ -48,6 +48,7 @@ export class Hierarchy {
                 }
 
                 book.children = duplicate(book.hierarchy.children);
+                ui.notifications.info(`${book.name}, hierarchy has finished building.`);
             });
         } else {
             book.children = duplicate(book.hierarchy.children);
@@ -72,11 +73,12 @@ export class Hierarchy {
         // check for a folders.json
         let folders = await ForgeCompendiumBrowser.getFileData(`modules/${book.id}/folders.json`);
         if (folders) {
-            parseFolders(folders);
+            if (folder instanceof Array) {
+                parseFolders(folders);
+            } else {
+                Hierarchy.folderSort = folders;
+            }
         }
-
-        // check for a foldersort.json
-        Hierarchy.folderSort = await ForgeCompendiumBrowser.getFileData(`modules/${book.id}/foldersort.json`) || {};
 
         const packs = bookpacks.filter((p) => {
             return p.parent == undefined;
@@ -213,6 +215,7 @@ export class Hierarchy {
         let key = `${book.id}.${pack.name}`;
         try {
             let type = pack.type || pack.entity;
+            console.log("Finding compendium", key);
             let collection = game.packs.get(key);
             
             //if (pack.entity == "Scene") {

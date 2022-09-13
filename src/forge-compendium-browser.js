@@ -80,6 +80,7 @@ export class ForgeCompendiumBrowser {
                     background: flags["forge-compendium-browser"]?.background,
                     module: module,
                     packs: module.packs ?? module.data.packs,
+                    children: [],
                     type: "book",
                 };
 
