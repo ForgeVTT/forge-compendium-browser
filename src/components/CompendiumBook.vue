@@ -668,7 +668,7 @@ export default {
       }
     },
     backgroundStyle() {
-      if (!this.book) 
+      if (!this.book || !this.book.background) 
         return "";
 
       return `background-image:url(${this.book.background})`;
