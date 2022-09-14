@@ -72,7 +72,7 @@ export class ForgeCompendiumBrowser {
         for (let module of game.modules.values()) {
             const flags = module.flags ?? module.data.flags;
             if (flags["forge-compendium-browser"]?.active && module.active) {
-                let bookData = {
+                let book = {
                     id: module.id,
                     name: module.title ?? module.data.title,
                     description: module.description ?? module.data.description,
@@ -84,9 +84,9 @@ export class ForgeCompendiumBrowser {
                     type: "book",
                 };
 
-                Hierarchy.getHierarchy(bookData);
+                new Hierarchy(book);
 
-                ForgeCompendiumBrowser.books.push(bookData);
+                ForgeCompendiumBrowser.books.push(book);
                 log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length} associated compendiums`);
             }
         }
@@ -212,8 +212,7 @@ Hooks.on('renderModuleManagement', (app, html, data) => {
     for (let module of game.modules.values()) {
         const flags = module.flags ?? module.data.flags;
         if (flags["forge-compendium-browser"]?.active) {
-            console.log((module.id || module.name), $(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));
-            $("<span>")
+               $("<span>")
                 .addClass("tag compendium-library")
                 .html('<img title="Forge Compendium Browser" src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">')
                 .insertAfter($(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));

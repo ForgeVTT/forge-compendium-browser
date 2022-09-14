@@ -1,108 +1,119 @@
 import { ForgeCompendiumBrowser, log, warn, error, i18n, setting } from "./forge-compendium-browser.js";
 
 export class Hierarchy {
-    static folderCache = {};
-    static folderSort = {};
-    static hierarchy = {};
+    book;
+
+    constructor(book) {
+        this.book = book;
+        this.getHierarchy();
+    }
 
     static startsWithNumber (str) {
         return /^\d/.test(str);
     }
 
-    static async getHierarchy(book) {
-        book._cached = true;
+    static checkKeys = (item, key) => {
+        if (item.name == key)
+            return false;
+        if (item.parent)
+            return Hierarchy.checkKeys(item.parent, key);
+        else
+            return true;
+    }
+
+    async getHierarchy() {
+        this.book._cached = true;
         //check the hierarchy cache
-        book.hierarchy = ForgeCompendiumBrowser.hierarchyCache[book.id];
+        this.book.hierarchy = ForgeCompendiumBrowser.hierarchyCache[this.book.id];
 
-        if (book.hierarchy == undefined) {
-            book._cached = false;
+        if (this.book.hierarchy == undefined) {
+            this.book._cached = false;
             //check for the compendium's hierarchy file
-            book.hierarchy = await ForgeCompendiumBrowser.getFileData(`modules/${book.id}/hierarchy.json`);
-            console.log("finding hierarchy", book);
+            this.book.hierarchy = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/hierarchy.json`);
+            console.log("finding hierarchy", this.book);
         }
 
-        if (book.hierarchy && (book.hierarchy.version || "-") != ForgeCompendiumBrowser.version && book.hierarchy.dynamic != false) {
-            console.log("reloading hierarchy", book);
-            book.hierarchy = null; //The version has changed, so reload the hierarchy
+        if (this.book.hierarchy && (this.book.hierarchy.version || "-") != ForgeCompendiumBrowser.version && this.book.hierarchy.dynamic != false) {
+            console.log("reloading hierarchy", this.book);
+            this.book.hierarchy = null; //The version has changed, so reload the hierarchy
         }
 
-        if (book.hierarchy == undefined) {
-            book._cached = false;
+        if (this.book.hierarchy == undefined) {
+            this.book._cached = false;
 
-            console.log("building hierarchy", book);
+            console.log("building hierarchy", this.book);
 
-            const moduleData = await ForgeCompendiumBrowser.getFileData(`modules/${book.id}/module.json`);
+            const moduleData = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/module.json`);
             if (!moduleData)
                 return;
 
-            Hierarchy.build(book, moduleData.packs).then((hierarchy) => {
-                book.hierarchy = hierarchy;
+            this.book.hierarchy = await this.build(moduleData.packs)
 
-                if (book.hierarchy) {
-                    let src = "data";
-                    if (typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
-                        src = "forgevtt";
-                    }
-    
-                    FilePicker.upload(src, `modules/${book.id}/`, new File([JSON.stringify(book.hierarchy)], "hierarchy.json"), {}, { notify: false });
+            delete this.hierarchy;
+
+            if (this.book.hierarchy) {
+                let src = "data";
+                if (typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
+                    src = "forgevtt";
                 }
 
-                book.children = duplicate(book.hierarchy.children);
-                ui.notifications.info(`${book.name}, hierarchy has finished building.`);
-            });
+                FilePicker.upload(src, `modules/${this.book.id}/`, new File([JSON.stringify(this.book.hierarchy)], "hierarchy.json"), {}, { notify: false });
+            }
+
+            this.book.children = duplicate(this.book.hierarchy.children);
+            ui.notifications.info(`${this.book.name}, hierarchy has finished building.`);
+
+            return this.book.hierarchy;
         } else {
-            book.children = duplicate(book.hierarchy.children);
+            this.book.children = duplicate(this.book.hierarchy.children);
+            return this.book.hierarchy;
         }
     }
 
-    static async build(book, bookpacks) {
-        //if that doesn't exist then this is old and we need to build from packs
-        const checkKeys = (item, key) => {
-            if (item.name == key)
-                return false;
-            if (item.parent)
-                return checkKeys(item.parent, key);
-            else
-                return true;
-        }
+    async build(bookpacks) {
+        this.hierarchy = {};
+        this.folderCache = {};
+        this.folderSort = {};
 
         // create the base hierarchy
-        Hierarchy.hierarchy = { version: ForgeCompendiumBrowser.version, dynamic: true, children: [] };
-        Hierarchy.folderCache = {};
+        this.hierarchy = { version: ForgeCompendiumBrowser.version, dynamic: true, children: [] };
 
         // check for a folders.json
-        let folders = await ForgeCompendiumBrowser.getFileData(`modules/${book.id}/folders.json`);
+        let folders = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/folders.json`);
         if (folders) {
             if (folder instanceof Array) {
-                parseFolders(folders);
+                this.parseFolders(folders);
             } else {
-                Hierarchy.folderSort = folders;
+                this.folderSort = folders;
             }
         }
 
         const packs = bookpacks.filter((p) => {
             return p.parent == undefined;
         });
-        await Hierarchy.parsePacks(book, packs, packs, null);
+        await this.parsePacks(packs, packs, null);
 
-        return Hierarchy.hierarchy;
+        delete this.folderCache;
+        delete this.folderSort;
+
+        return this.hierarchy;
     }
 
-    static parseFolders (folders, parent) {
+    parseFolders (folders, parent) {
         for (let folder of folders) {
             let type = folder.type || folder.entity;
-            let _parent = parent || getSection(type);
-            let child = createFolder(folder);
+            let _parent = parent || this.getSection(type);
+            let child = this.createFolder(folder);
             _parent.children.push(child);
-            parseFolders(parent.children, child);
+            this.parseFolders(parent.children, child);
         }
     }
 
-    static async parsePacks (book, bookpacks, packs, parent) {
+    async parsePacks (bookpacks, packs, parent) {
         let sort = 0;
         for (let pack of packs) {
             let type = pack.type || pack.entity;
-            let _parent = parent || Hierarchy.getSection(type);
+            let _parent = parent || this.getSection(type);
             let folder = _parent;
 
             if (Hierarchy.startsWithNumber(pack.name)) {
@@ -110,27 +121,27 @@ export class Hierarchy {
                 folder = _parent.children.find(f => f.id == pack.name);
                 if (!folder) {
                     let data = { id: pack.name, name: pack.label, sort: pack.sort || sort };
-                    folder = Hierarchy.createFolder(data, sort);
+                    folder = this.createFolder(data, sort);
                     sort += 1000;
                     _parent.children.push(folder);
                 }
             }
 
             // Go through all this pack's entries
-            await Hierarchy.parseEntries(book, pack, folder);
+            await this.parseEntries(pack, folder);
 
             // If this is an older pack hierarchy, then parse all the packs that are child packs
             let children = bookpacks.filter((p) => {
                 return p.parent == pack.id && p.parent != undefined;
             });
             if (children.length) {
-                await Hierarchy.parsePacks(book, bookpacks, children, folder);
+                await this.parsePacks(bookpacks, children, folder);
             }
         }
     }
 
-    static getSection (type) {
-        let section = Hierarchy.hierarchy.children.find(c => c.packtype == type);
+    getSection (type) {
+        let section = this.hierarchy.children.find(c => c.packtype == type);
         if (!section) {
             let icon = 'fa-book-open';
             switch (type) {
@@ -147,12 +158,12 @@ export class Hierarchy {
                 icon: icon,
                 children: []
             };
-            Hierarchy.hierarchy.children.push(section);
+            this.hierarchy.children.push(section);
         }
         return section;
     }
 
-    static createFolder (data, sort) {
+    createFolder (data, sort) {
         let folder = {                 
             id: data.id || data._id,
             name: data.name,
@@ -160,16 +171,16 @@ export class Hierarchy {
             children: [],
             sort: data.sort instanceof Array ? sort[0] : (data.sort || sort)
         }
-        Hierarchy.folderCache[folder.id] = folder;
+        this.folderCache[folder.id] = folder;
         return folder;
     }
 
-    static getEntityFolder (document, type) {
-        let folder = Hierarchy.folderCache[document.folder];
+    getEntityFolder (document, type) {
+        let folder = this.folderCache[document.folder];
         if (!folder) {
             let path = getProperty(document, "flags.ddb.path");
             if (path) {
-                let section = Hierarchy.getSection(type);
+                let section = this.getSection(type);
                 folder = section;
                 if (typeof path == "string")
                     path = path.split("\\");
@@ -185,8 +196,8 @@ export class Hierarchy {
                     folder = parent.children.find(c => c.id == part.id || (part.id == undefined && c.name == part.name));
                     if (!folder) {
                         let key = path.slice(0, i + 1).join("\\");
-                        let sort = Hierarchy.folderSort[key];
-                        folder = Hierarchy.createFolder(part, sort);
+                        let sort = this.folderSort[key];
+                        folder = this.createFolder(part, sort);
                         parent.children.push(folder);
                     }
                     // Once we've found the parent folder in the path list, then stop going any further
@@ -199,30 +210,13 @@ export class Hierarchy {
         return folder;
     }
 
-    /*
-    static parseFolders (folders, parent) {
-        for (let folder of folders) {
-            let type = folder.type || folder.entity;
-            let _parent = parent || Hierarchy.getSection(type);
-            let child = Hierarchy.createFolder(folder);
-            _parent.children.push(child);
-            Hierarchy.parseFolders(parent.children, child);
-        }
-    }
-    */
-
-    static async parseEntries (book, pack, folder) {
-        let key = `${book.id}.${pack.name}`;
+    async parseEntries (pack, folder) {
+        let key = `${this.book.id}.${pack.name}`;
         try {
             let type = pack.type || pack.entity;
-            console.log("Finding compendium", key);
             let collection = game.packs.get(key);
             
-            //if (pack.entity == "Scene") {
-            //    await collection.getDocuments();
-            //} else if(!collection.indexed) {
-                await collection.getIndex({fields: ["flags", "folder", "img", "thumb"]});
-            //}
+            await collection.getIndex({fields: ["flags", "folder", "img", "thumb"]});
             
             for (let index of collection.index) {
                 let document = index;
@@ -238,7 +232,7 @@ export class Hierarchy {
                 }
 
                 // find the folder according to the entry
-                let _folder = Hierarchy.getEntityFolder(document, type) || folder;
+                let _folder = this.getEntityFolder(document, type) || folder;
 
                 if (!_folder.children.find(c => c.id == document.id)) {
                     _folder.children.push({
@@ -252,7 +246,7 @@ export class Hierarchy {
                 }
             }
 
-            let section = Hierarchy.hierarchy.children.find(c => c.packtype == type);
+            let section = this.hierarchy.children.find(c => c.packtype == type);
             if (section) {
                 section.count += (collection?.index?.size || 0);
             }
