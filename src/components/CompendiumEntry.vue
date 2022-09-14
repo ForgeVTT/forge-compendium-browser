@@ -34,7 +34,6 @@ export default {
       let cls = document._getSheetClass ? document._getSheetClass() : null;
 
       if (document instanceof Scene) {
-        console.log("Scene", document);
         const templateData = {
           img: document.background?.src ?? document.data.img,
           stats: [],
@@ -112,15 +111,12 @@ export default {
         }
         this.subsheet._disableFields(subdocument[0]);
 
-        //Hooks.callAll('renderJournalSheet', this.subsheet, subdocument, templateData);
-        console.log("Load HTML", this.$refs.entry, $(`a.content-link[data-pack]`, this.$refs.entry));
         $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
         $(`a.content-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
 
         // Remove all the links that point back to this entry, just to clean up
         $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link, text) => {
           let linkHtml = $(link).html() || "";
-          console.log("Found one", idx, link, linkHtml, $(link).html(), linkHtml.startsWith == '<i class="fas fa-book-open"></i>', linkHtml.endsWith(this.entry.name));
           if (linkHtml.indexOf('<i class="fas fa-book-open"></i>') >= 0 && linkHtml.indexOf(this.entry.name)) {
             $(link).remove();
           }
@@ -145,7 +141,6 @@ export default {
     },
   },
   async mounted() {
-    console.log("mounted", this.entry);
     this.loadDocument();
   },
 };
@@ -175,7 +170,11 @@ export default {
 }
 
 .forge-compendium-entry.journal-sheet.v10 > header {
-    display: none;
+  display: none;
+}
+
+.forge-compendium-entry.journal-sheet .journal-page-content .compendium-image img {
+  border: 0px;
 }
 
 .forge-compendium-entry a.content-link {

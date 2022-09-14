@@ -201,7 +201,7 @@
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
-                <div style="text-align: center;flex-grow: 0;">
+                <div style="text-align: center;flex-grow: 0;display: none;">
                   <button @click="importModule">
                     <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
@@ -597,7 +597,6 @@ export default {
     importEntry() {
         const collection = this.document.document.collection;
         const pack = game.packs.get(this.document.packId);
-        console.log("importing", this.document, collection, pack);
         if (collection && collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true })) {
             ui.notifications.info("Document has been imported");
         }

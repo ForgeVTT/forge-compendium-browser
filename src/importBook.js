@@ -30,8 +30,6 @@ export class ImportBook{
             };
         }));
 
-        console.log("Document Data", documentData);
-
         function timeout(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
@@ -77,8 +75,7 @@ export class ImportBook{
                 }
             }
         }
-        console.log("Translate", ImportBook.translate);
-        
+
         const updates = await Promise.all(newDocs.map(async (update) => {
             let { type, data } = update;
 
@@ -172,7 +169,6 @@ export class ImportBook{
                                     data.folder = monsterFolder;
                                     let results = await Actor.createDocuments([data]);
                                     actor = results[0];
-                                    console.log("Creating a new actor", results, actor, tokenName);
                                 }
                             }
                         }
@@ -210,8 +206,6 @@ export class ImportBook{
             return update;
         }));
 
-        console.log("Updates", updates);
-        
         await Promise.all(updates.map(async (update) => {
             if (update && update.data.length) {
                 if (update.type == "JournalEntry" && isV10) {
@@ -250,7 +244,7 @@ export class ImportBook{
         let documentData = [];
         let folderSort = 100000;
         let isV10 = isNewerVersion(game.version, "9.999999");
-        
+
         for (let child of parent.children) {
             if (child.type == "folder") {
                 let folder;
