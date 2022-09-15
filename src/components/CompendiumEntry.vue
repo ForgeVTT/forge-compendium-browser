@@ -111,9 +111,6 @@ export default {
         }
         this.subsheet._disableFields(subdocument[0]);
 
-        $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
-        $(`a.content-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
-
         // Remove all the links that point back to this entry, just to clean up
         $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link, text) => {
           let linkHtml = $(link).html() || "";
@@ -121,6 +118,32 @@ export default {
             $(link).remove();
           }
         });
+
+        $(`a[href^="ddb://"]`, this.$refs.entry).each((idx, link, text) => {
+          let linkHtml = $(link).html() || "";
+          let href = $(link).attr('href');
+          if (href.startsWith("ddb://compendium")) {
+            try {
+              let bookid = href.replace("ddb://compendium/", "").split("/")[0];
+
+              $(link).addClass("content-link").removeAttr("href").attr("data-pack", `dndbeyond-${bookid}`);
+            } catch { 
+              // don't bother with the catch
+            }
+          } else {
+            if (href.startsWith("ddb://spells"))
+              href = "https://www.dndbeyond.com/spells/"+ linkHtml.replaceAll(" ", "-");
+            else {
+              href = href
+                .replace("ddb://", "https://www.dndbeyond.com/")
+                .replace("magicitems", "magic-items") + "-" + linkHtml.replaceAll(" ", "-");
+            }
+            $(link).attr('href', href).attr("target", "_blank");
+          }
+        });
+
+        $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
+        $(`a.content-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
 
         document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
