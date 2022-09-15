@@ -40,10 +40,12 @@ export default {
       }
     },
     startDrag(event, item) {
+      console.log("Start Drag", item);
       const dragData = {
         id: item.id,
-        pack: item.document.pack,
-        type: item.document.documentName,
+        uuid: `Compendium.${item.packId}.${item.id}`,
+        pack: item.packId,
+        type: item.section,
       };
 
       event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
