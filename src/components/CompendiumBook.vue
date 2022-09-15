@@ -262,7 +262,20 @@ export default {
     searchTerm: null,
     searchResults: [],
   }),
+  watch: {
+    book() {
+      this.reset();
+    }
+  },
   methods: {
+    reset() {
+      this.folder = null;
+      this.document = null;
+      this.history = [];
+      this.historyPosition = 0;
+      this.searchTerm = null;
+      this.searchResults = [];
+    },
     exit() {
       this.$emit("exit");
     },
@@ -402,6 +415,7 @@ export default {
     },
     openLink(pack, id) {
       //find the other entry and open it.
+      console.log("Open Link", pack, id);
       const parts = pack.split(".");
       if (parts.length) {
         if (parts[0] == this.book.id) {
