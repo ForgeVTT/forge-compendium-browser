@@ -144,6 +144,7 @@ export default {
 
 .forge-compendium-library .forge-compendium-book.disabled {
   filter: grayscale(1);
+  cursor: wait;
 }
 
 .forge-compendium-library .forge-compendium-book:not(.disabled):hover {
