@@ -1,6 +1,6 @@
 <template>
   <div v-if="showListing" class="forge-compendium-list" :depth="depth">
-    <div v-for="item in listing" :key="item.id" :data-id="item.id">
+    <div v-for="item in sortedList" :key="item.id" :data-id="item.id">
       <div class="flexcol" :class="listClass">
         <div
           class="forge-compendium-title draggable-item flexrow"
@@ -40,7 +40,6 @@ export default {
       }
     },
     startDrag(event, item) {
-      console.log("Start Drag", item);
       const dragData = {
         id: item.id,
         uuid: `Compendium.${item.packId}.${item.id}`,
@@ -69,6 +68,9 @@ export default {
     listClass() {
       return this.depth == 0 ? "forge-compendium-item" : "";
     },
+    sortedList() {
+      return [...this.listing].sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });
+    }
   },
 };
 </script>
