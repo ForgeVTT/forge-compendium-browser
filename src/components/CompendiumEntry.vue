@@ -114,7 +114,7 @@ export default {
         // Remove all the links that point back to this entry, just to clean up
         $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link, text) => {
           let linkHtml = $(link).html() || "";
-          if (linkHtml.indexOf('<i class="fas fa-book-open"></i>') >= 0 && linkHtml.indexOf(this.entry.name)) {
+          if (linkHtml.indexOf('<i class="fas fa-book-open"></i>') >= 0 && linkHtml.indexOf(this.entry.name) >= 0) {
             $(link).remove();
           }
         });
