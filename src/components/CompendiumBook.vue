@@ -544,7 +544,7 @@ export default {
 
       // added idx and text here for a future improvement to show highlighted text
       let resultObject = (entity, idx, text) => {
-        let section = this.book.children.find((s) => s.id == entity.parent.section);
+        let section = entity.parent.type == "section" ? entity.parent : this.book.children.find((s) => s.id == entity.parent.section);
         return {
           id: entity.id,
           name: entity.name,
