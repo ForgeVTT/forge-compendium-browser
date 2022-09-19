@@ -196,7 +196,7 @@ export default {
   display: none;
 }
 
-.forge-compendium-entry.journal-sheet .journal-page-content .compendium-image img {
+.forge-compendium-entry.journal-sheet .journal-page-content img {
   border: 0px;
 }
 

@@ -217,6 +217,7 @@ export class Hierarchy {
             let collection = game.packs.get(key);
             
             await collection.getIndex({fields: ["flags", "folder", "img", "thumb"]});
+            //let documents = await collection.getDocuments();
             
             for (let index of collection.index) {
                 let document = index;
