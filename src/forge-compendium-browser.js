@@ -175,37 +175,37 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
 
 Hooks.on("setupTileActions", (app) => {
     app.registerTileGroup('forge-compendium-browser', "Forge Compendium Library");
-        app.registerTileAction('forge-compendium-browser', 'Forge Compendium Library', {
-            name: 'Open Book',
-            ctrls: [
-                {
-                    id: "bookid",
-                    name: "Compendium Book",
-                    list: () => {
-                        let list = {};
-                        for (let book of game.ForgeCompendiumBrowser.books) {
-                            list[book.id] = book.name;
-                        }
-                        return list;
-                    },
-                    type: "list"
+    app.registerTileAction('forge-compendium-browser', 'Forge Compendium Library', {
+        name: 'Open Book',
+        ctrls: [
+            {
+                id: "bookid",
+                name: "Compendium Book",
+                list: () => {
+                    let list = {};
+                    for (let book of game.ForgeCompendiumBrowser.books) {
+                        list[book.id] = book.name;
+                    }
+                    return list;
                 },
-            ],
-            group: 'forge-compendium-browser',
-            fn: async (args = {}) => {
-                const { action, userid } = args;
-
-                if(userid == game.user.id) {
-                    game.ForgeCompendiumBrowser.openBrowser(action.data.bookid);
-                } else {
-                    game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, (resp) => { } );
-                }
+                type: "list"
             },
-            content: async (trigger, action) => {
-                let book = game.ForgeCompendiumBrowser.books.find(b => b.id == action.data.bookid);
-                return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${book.name || 'Unknown'}"</span>`;
+        ],
+        group: 'forge-compendium-browser',
+        fn: async (args = {}) => {
+            const { action, userid } = args;
+
+            if(userid == game.user.id) {
+                game.ForgeCompendiumBrowser.openBrowser(action.data.bookid);
+            } else {
+                game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, (resp) => { } );
             }
-        });
+        },
+        content: async (trigger, action) => {
+            let book = game.ForgeCompendiumBrowser.books.find(b => b.id == action.data.bookid);
+            return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${book.name || 'Unknown'}"</span>`;
+        }
+    });
 });
 
 Hooks.on('renderModuleManagement', (app, html, data) => {
