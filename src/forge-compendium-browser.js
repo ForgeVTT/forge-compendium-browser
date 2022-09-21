@@ -66,7 +66,6 @@ export class ForgeCompendiumBrowser {
     }
 
     static parseCompendiums() {
-        ForgeCompendiumBrowser.hierarchyCache = {};
         //Find all the DnDBeyond modules
         log("Parsing compendiums");
         for (let module of game.modules.values()) {
