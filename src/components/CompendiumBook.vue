@@ -1027,13 +1027,13 @@ export default {
   margin-top: 100px;
 } 
 .forge-compendium-search-area .no-results > div{
-        padding: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    border: 2px solid #eee;
-    width: 300px;
-    margin: auto;
-    font-weight: bold;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  border: 2px solid #eee;
+  width: 300px;
+  margin: auto;
+  font-weight: bold;
 }
 .forge-compendium-search-area .forge-compendium-search-list {
   background-color: rgba(255, 255, 255, 0.8);
@@ -1076,27 +1076,27 @@ export default {
   text-shadow: 0 0 8px var(--color-shadow-primary);
 }
 .compendium-library {
-    cursor: pointer;
-    padding: 6px;
-    color: #ffffff;
-    text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
-    background-color: #363636;
-    *background-color: #222222;
-    background-image: -moz-linear-gradient(top, #444444, #222222);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
-    background-image: -webkit-linear-gradient(top, #444444, #222222);
-    background-image: -o-linear-gradient(top, #444444, #222222);
-    background-image: linear-gradient(to bottom, #444444, #222222);
-    background-repeat: repeat-x;
-    border: 1px solid #000000;
-    border-color: #222222 #222222 #000000;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-    border-radius: 4px;
-    margin: 4px;
+  cursor: pointer;
+  padding: 6px;
+  color: #ffffff;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
+  background-color: #363636;
+  *background-color: #222222;
+  background-image: -moz-linear-gradient(top, #444444, #222222);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
+  background-image: -webkit-linear-gradient(top, #444444, #222222);
+  background-image: -o-linear-gradient(top, #444444, #222222);
+  background-image: linear-gradient(to bottom, #444444, #222222);
+  background-repeat: repeat-x;
+  border: 1px solid #000000;
+  border-color: #222222 #222222 #000000;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  margin: 4px;
 }
 .compendium-library:hover {
-    text-shadow: 0 0 8px var(--color-shadow-primary);
-    background-color: #222222;
-    *background-color: #151515;
+  text-shadow: 0 0 8px var(--color-shadow-primary);
+  background-color: #222222;
+  *background-color: #151515;
 }
 </style>
