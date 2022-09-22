@@ -569,19 +569,33 @@ export default {
           if (query != null) {
             try {
               if (parent.document instanceof JournalEntry) {
-                const idx = parent.document.data.content.toLowerCase().indexOf(query);
-                if (idx >= 0) {
-                  searchResult = resultObject(parent, idx, parent.document.data.content);
+                if (isNewerVersion(game.version, "9.99999")) {
+                  for (let page of parent.pages) {
+                    let field = page.content;
+                    const idx = field.toLowerCase().indexOf(query);
+                    if (idx >= 0) {
+                      searchResult = resultObject(parent, idx, field);
+                      break;
+                    }
+                  }
+                } else {
+                  let field = parent.document.data.content;
+                  const idx = field.toLowerCase().indexOf(query);
+                  if (idx >= 0) {
+                    searchResult = resultObject(parent, idx, field);
+                  }
                 }
               } else if (parent.document instanceof Actor) {
-                const idx = parent.document.data.data.details.biography.value.toLowerCase().indexOf(query);
+                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.details.biography.value : parent.document.data.data.details.biography.value;
+                const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
-                  searchResult = resultObject(parent, idx, parent.document.data.data.details.biography.value);
+                  searchResult = resultObject(parent, idx, field);
                 }
               } else if (parent.document instanceof Item) {
-                const idx = parent.document.data.data.description.value.toLowerCase().indexOf(query);
+                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.description.value : parent.document.data.data.description.value
+                const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
-                  searchResult = resultObject(parent, idx, parent.document.data.data.description.value);
+                  searchResult = resultObject(parent, idx, field);
                 }
               }
             } catch {

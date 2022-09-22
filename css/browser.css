@@ -12,15 +12,32 @@
     height: 100%;
 }
 
+.forge-compendium-scene .background {
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    filter: blur(5px);
+    opacity: 0.5;
+    z-index: 100;
+}
+
 .forge-compendium-scene img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    border: 0px;
+    z-index: 200;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
 .forge-compendium-scene .forge-compendium-scene-stat {
     position: absolute;
-    bottom: 20px;
+    bottom: 0px;
+    left: 0px;
     background-color: rgba(0, 0, 0, 0.8);
     border: 2px solid #000;
     border-radius: 8px;
@@ -29,8 +46,7 @@
     color: #ffffff;
     padding: 12px 0px;
     font-size: 18px;
-    left: 50%;
-    margin-left: -150px;
+    z-index: 300;
 }
 
 .package-list .package .tag.compendium-library {
