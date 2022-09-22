@@ -248,7 +248,7 @@ export class Hierarchy {
                 // find the folder according to the entry
                 let _folder = this.getEntityFolder(document, type) || folder;
 
-                if (!_folder.children.find(c => c.id == document.id)) {
+                if (!_folder.children.find(c => c.id == document._id)) {
                     _folder.children.push({
                         id: document._id,
                         name: document.name,
