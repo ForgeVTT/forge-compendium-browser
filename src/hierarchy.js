@@ -48,7 +48,7 @@ export class Hierarchy {
                     src = "forgevtt";
                 }
 
-                FilePicker.upload(src, `modules/${this.book.id}/`, new File([JSON.stringify(this.book.hierarchy)], "hierarchy.json"), {}, { notify: false });
+                await FilePicker.upload(src, `modules/${this.book.id}/`, new File([JSON.stringify(this.book.hierarchy)], "hierarchy.json"), {}, { notify: false });
             }
 
             this.book.children = duplicate(this.book.hierarchy.children);
