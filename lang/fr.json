@@ -1,0 +1,16 @@
+{
+  "ForgeCompendiumBrowser.same-name.name": "Ouverture automatique avec le même nom",
+  "ForgeCompendiumBrowser.same-name.hint": "Ouvrir automatiquement les documents portant le même nom que le nom de la liste",
+  "ForgeCompendiumBrowser.ForgeCompendiumLibrary": "Bibliothèque de Compendiums de The Forge",
+  "ForgeCompendiumBrowser.LibraryMessage": "Ceci est votre bibliothèque de livres de compendium. Si vous n'avez pas de livres listés, veuillez utiliser le {link} du Bazaar pour importer vos livres.",
+  "ForgeCompendiumBrowser.NoBooksLoaded": "Aucun livre chargé",
+  "ForgeCompendiumBrowser.CompendiumLibrary": "Bibliothèque de Compendium",
+  "ForgeCompendiumBrowser.Prev": "Prec",
+  "ForgeCompendiumBrowser.Next": "Suiv",
+  "ForgeCompendiumBrowser.OpenCompendiumBrowser": "Ouvrir la bibliothèque des Compendiums",
+  "ForgeCompendiumBrowser.ImportDocuments": "Importer des documents",
+  "ForgeCompendiumBrowser.ImportCompendiumDocuments": "Importer des documents de Compendium",
+  "ForgeCompendiumBrowser.Import": "Importer",
+  "ForgeCompendiumBrowser.Search": "Recherche",
+  "ForgeCompendiumBrowser.NoSearchResults": "Aucun résultat de recherche"
+}

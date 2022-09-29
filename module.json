@@ -30,6 +30,16 @@
       "lang": "en",
       "name": "English",
       "path": "lang/en.json"
+    },
+    {
+      "lang": "fi",
+      "name": "Suomi",
+      "path": "lang/fi.json"
+    },
+    {
+      "lang": "pt_BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt_BR.json"
     }
   ],
   "dependencies": [
@@ -45,10 +55,10 @@
     }
   ],
   "media": [
-      {
-          "type": "cover",
-          "url": "img/cover.png"
-      }
+    {
+      "type": "cover",
+      "url": "img/cover.png"
+    }
   ],
   "url": "https://github.com/ForgeVTT/forge-compendium-browser",
   "manifest": "https://github.com/ForgeVTT/forge-compendium-browser/releases/latest/download/module.json",
