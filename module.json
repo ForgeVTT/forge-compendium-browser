@@ -2,9 +2,13 @@
   "name": "forge-compendium-browser",
   "title": "The Forge: Compendium Library",
   "description": "Browse your compendium books like they were meant to be viewed. The Forge's Compendium Library lets you navigate your D&amp;D Beyond imported books in a beautiful and easy to use interface!",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "9",
+  "compatibleCoreVersion": "10",
+  "compatibility": {
+    "minimum": "9",
+    "verified": "10"
+  },
   "author": "The Forge",
   "authors": [
     {
@@ -42,6 +46,20 @@
       "path": "lang/pt_BR.json"
     }
   ],
+  "relationships": {
+    "requires": [
+      {
+        "id": "dlopen",
+        "type": "module",
+        "manifest": "https://raw.githubusercontent.com/ForgeVTT/fvtt-module-dlopen/master/module.json"
+      },
+      {
+        "id": "vueport",
+        "type": "module",
+        "manifest": "https://raw.githubusercontent.com/ForgeVTT/fvtt-module-vueport/master/module.json"
+      }
+    ]
+  },
   "dependencies": [
     {
       "name": "dlopen",
