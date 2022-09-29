@@ -31,24 +31,24 @@
   "socket": true,
   "languages": [
     {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
+		"lang": "en",
+		"name": "English",
+		"path": "lang/en.json"
+    },
+	{
+		"lang": "fr",
+		"name": "Français",
+		"path": "lang/fr.json"
     },
     {
-      "lang": "fr",
-      "name": "Français",
-      "path": "lang/fr.json"
+		"lang": "fi",
+		"name": "Suomi",
+		"path": "lang/fi.json"
     },
     {
-      "lang": "fi",
-      "name": "Suomi",
-      "path": "lang/fi.json"
-    },
-    {
-      "lang": "pt_BR",
-      "name": "Português (Brasil)",
-      "path": "lang/pt_BR.json"
+		"lang": "pt-BR",
+		"name": "Português",
+		"path": "lang/pt-BR.json"
     }
   ],
   "relationships": {
