@@ -1,6 +1,6 @@
 <template>
   <div v-if="showListing" class="forge-compendium-list" :depth="depth">
-    <div v-for="item in listing" :key="item.id" :data-id="item.id">
+    <div v-for="item in sortedList" :key="item.id" :data-id="item.id">
       <div class="flexcol" :class="listClass">
         <div
           class="forge-compendium-title draggable-item flexrow"
@@ -9,7 +9,7 @@
           draggable
           @dragstart="startDrag($event, item)"
         >
-          <img v-if="item.img" :src="item.img" class="forge-compendium-image" />
+          <img v-if="item.img" :data-src="item.img" class="lazy forge-compendium-image" />
           <span>{{ item.name }}</span>
         </div>
         <compendium-list
@@ -42,22 +42,24 @@ export default {
     startDrag(event, item) {
       const dragData = {
         id: item.id,
-        pack: item.document.pack,
-        type: item.document.documentName,
+        uuid: `Compendium.${item.packId}.${item.id}`,
+        pack: item.packId,
+        type: item.section,
       };
 
       event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
     },
     filteredList(item) {
       const useSameName = game.ForgeCompendiumBrowser.setting("same-name");
-      if (!item.children || (item.children.length == 1 && item.children[0].name == item.name))
+      if (!item.children || (item.children.length == 1 && item.children[0].name == item.name)) {
         return [];
+      }
 
       return item.children.filter((c) => c.name != item.name || !useSameName);
     },
     hasImage(item) {
         return item.img ? 'has-image' : '';
-    }
+    },
   },
   computed: {
     showListing() {
@@ -66,6 +68,9 @@ export default {
     listClass() {
       return this.depth == 0 ? "forge-compendium-item" : "";
     },
+    sortedList() {
+      return [...this.listing].sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });
+    }
   },
 };
 </script>

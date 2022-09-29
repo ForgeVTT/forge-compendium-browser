@@ -70,7 +70,7 @@ export default {
     filterList() {
       if (!this.entity.children) return [];
 
-      return this.entity.children.filter((c) => c.name != this.entity.name || c.type != "document");
+      return this.entity.children.filter((c) => c.name != this.entity.name || c.type != "document").sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });
     },
     showChildren() {
       if (this.entity.children &&
@@ -125,6 +125,8 @@ export default {
 
 .forge-compendium-directory-list .forge-compendium-directory-item header h3 {
   margin: 0px;
+  font-size: 14px;
+  border-bottom: 0px;
 }
 
 .forge-compendium-directory-list .forge-compendium-directory-item header h3 span {

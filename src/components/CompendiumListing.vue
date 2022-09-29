@@ -23,10 +23,46 @@ export default {
   props: {
     listing: Object,
   },
+  data() {
+    return {
+      observer: null,        
+    };
+  },
   methods: {
     selectItem(item) {
       this.$emit("select", item);
     },
+    observeImages() {
+      this.$nextTick(function () {
+        let lazyloadImages = document.querySelectorAll(".lazy");
+        let observer = this.observer;
+        lazyloadImages.forEach(function(image) {
+          observer.observe(image);
+        });
+      });
+    }
+  },
+  created() {
+    this.observer = new IntersectionObserver(function(entries, observer) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var image = entry.target;
+          image.src = image.dataset.src;
+          image.classList.remove("lazy");
+          observer.unobserve(image);
+        }
+      });
+    });
+  },
+  mounted() {
+    this.observeImages();
+  },
+  updated() {
+    this.observer.disconnect();
+    this.observeImages();
+  },
+  beforeDestroy() {
+    this.observer.disconnect();
   },
 };
 </script>

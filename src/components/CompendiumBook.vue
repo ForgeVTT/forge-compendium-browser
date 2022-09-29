@@ -100,7 +100,7 @@
         <ul class="flexrow forge-compendium-breadcrumbs">
           <li v-for="(item, index) in path" :key="item.id">
             <span v-if="index != 0">/</span>
-            <div @click="selectEntity(item)">{{ item.name }}</div>
+            <div class="breadcrumb-link" v-on="item.id != document.id ? { click: () => selectEntity(item) } : {}">{{ item.name }}</div>
           </li>
         </ul>
         <div class="forge-entry-import" @click="importEntry">
@@ -193,15 +193,15 @@
                 class="forge-compendium-description"
                 v-html="book.description"
               ></div>
-              <div class="forge-compendium-contains">
-                <b>Contains:</b>
+              <div class="forge-compendium-contains flexcol">
+                <b style="flex-grow: 0;">Contains:</b>
                 <ul class="forge-compendium-contains-list">
                   <li v-for="section in sections" :key="section.id">
                     <i class="fas" :class="section.icon"></i>
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
-                <div style="text-align: center; display: none">
+                <div style="text-align: center;flex-grow: 0;display: none;">
                   <button @click="importModule">
                     <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
@@ -262,7 +262,20 @@ export default {
     searchTerm: null,
     searchResults: [],
   }),
+  watch: {
+    book() {
+      this.reset();
+    }
+  },
   methods: {
+    reset() {
+      this.folder = null;
+      this.document = null;
+      this.history = [];
+      this.historyPosition = 0;
+      this.searchTerm = null;
+      this.searchResults = [];
+    },
     exit() {
       this.$emit("exit");
     },
@@ -275,14 +288,25 @@ export default {
       this.addToHistory({ type: "search", query: this.searchTerm });
       this.selectEntity(entity);
     },
-    selectEntity(entity) {
+    async selectEntity(entity) {
+      console.log("Select an entity", entity);
       if (!entity) return;
 
       if (entity.type == "search") {
         this.openSearch(entity.query);
       } else if (entity.type == "book") {
         this.clearPath();
+      } else if (entity.type == "folder") {
+        const child = entity.children.find(c => c.name == entity.name && c.type == "document");
+        if (child) 
+          this.selectEntity(child);
+        else 
+          this.folder = entity;
       } else if (entity.type == "document") {
+        if (!entity.document) {
+          let collection = game.packs.get(entity.packId);
+          entity.document = await collection.getDocument(entity.id);
+        }
         this.document = entity;
         this.addToHistory(entity);
         this.folder = entity;
@@ -391,6 +415,7 @@ export default {
     },
     openLink(pack, id) {
       //find the other entry and open it.
+      console.log("Open Link", pack, id);
       const parts = pack.split(".");
       if (parts.length) {
         if (parts[0] == this.book.id) {
@@ -428,44 +453,71 @@ export default {
       return position < 0 || position > this.history.length - 1 ? "disabled" : "";
     },
     async importModule() {
-      const sections = this.sections.map((s) => ({
-        id: s.id,
-        name: s.name,
-        count: s.count,
-      }));
-      const html = await renderTemplate("modules/forge-compendium-browser/import-documents.html", { sections });
-      Dialog.prompt({
-        title: game.i18n.localize("ForgeCompendiumBrowser.ImportCompendiumDocuments"),
-        content: html,
-        label: game.i18n.localize("ForgeCompendiumBrowser.Import"),
-        callback: (html) => {
-          const form = html.querySelector("#forge-compendium-browser-import");
-          const fd = new FormDataExtended(form);
-          const data = fd.toObject();
+      let sections = this.book.hierarchy.children.map((c) => {
+        return {
+          type: c.packtype,
+          name: c.name,
+          max: 0,
+          count: 0,
+          perc: 0
+        }
+      });
 
-          const doImport = (entry) => {
-            //go through this entry, find all documents and import them
-            if (entry) {
-              if (entry.type == "document") {
-                const collection = game.collections.get(entry.collection.documentName);
-                return collection.importFromCompendium(entry.collection, entry.id, {}, { renderSheet: false });
-              } else if (entry.children && entry.children.length) {
-                for (let child of entry.children) {
-                  doImport(child);
-                }
-              }
-            }
-          };
+      let globalHtml;
 
-          for (let [k, v] of Object.entries(data.sections)) {
-            if (v) {
-              const section = this.sections.find((s) => s.id == k);
-              doImport(section);
+      let progressFn = (command, options) => {
+        let typeElem = options?.type ? $(`li[data-id="${options.type}"]`, globalHtml) : null;
+        if (options?.message)
+          $('.message', typeElem).html(options?.message);
+        if (command == "reset" && options?.type) {
+          let section = sections.find(s => s.type == options.type);
+          if (section) {
+            section.max = options?.max ?? 0;
+            section.count = 0;
+            section.perc = 0;
+            $('.progress-bar .bar', typeElem).css({'width': `0%`});
+          }
+        }
+        if (command == "increase" && options?.type) {
+          let section = sections.find(s => s.type == options.type);
+          if (section) {
+            section.count++;
+            if ((Math.round((section.count / section.max) * 100)) != section.perc) {
+              section.perc = (Math.round((section.count / section.max) * 100));
+              $('.progress-bar .bar', typeElem).css({'width': `${section.perc}%`});
             }
           }
+        }
+        if (command == "finish") {
+          $('.start-import', globalHtml).hide();
+          $('.finish-import', globalHtml).show();
+          $('.message', globalHtml).html('');
+          $('.progress-bar .bar', globalHtml).css({'width': `100%`});
+        }
+      }
+
+      let startImport = function(html) {
+        $('.start-import', html).prop("disabled", true);
+        game.ForgeCompendiumBrowser.importBook(this.book, { progress: progressFn });
+      }
+
+      let closeDialog = function(event) {
+        $(event.currentTarget).closest('.dialog').find('header .close').click();
+      }
+
+      const template = await renderTemplate("modules/forge-compendium-browser/templates/import-documents.html", { sections: sections });
+      new Dialog({
+        title: game.i18n.localize("ForgeCompendiumBrowser.ImportCompendiumDocuments"),
+        content: template,
+        label: game.i18n.localize("ForgeCompendiumBrowser.Import"),
+        buttons: {},
+        render: (html) => {
+          globalHtml = html;
+          $('.start-import', html).on("click", startImport.bind(this, html));
+          $('.finish-import', html).on("click", closeDialog.bind(this));
         },
         rejectClose: false,
-      });
+      }).render(true);
     },
     openSearch(query = "") {
       this.searchTerm = query;
@@ -492,7 +544,7 @@ export default {
 
       // added idx and text here for a future improvement to show highlighted text
       let resultObject = (entity, idx, text) => {
-        let section = this.book.children.find((s) => s.id == entity.parent.section);
+        let section = entity.parent.type == "section" ? entity.parent : this.book.children.find((s) => s.id == entity.parent.section);
         return {
           id: entity.id,
           name: entity.name,
@@ -517,19 +569,33 @@ export default {
           if (query != null) {
             try {
               if (parent.document instanceof JournalEntry) {
-                const idx = parent.document.data.content.toLowerCase().indexOf(query);
-                if (idx >= 0) {
-                  searchResult = resultObject(parent, idx, parent.document.data.content);
+                if (isNewerVersion(game.version, "9.99999")) {
+                  for (let page of parent.pages) {
+                    let field = page.content;
+                    const idx = field.toLowerCase().indexOf(query);
+                    if (idx >= 0) {
+                      searchResult = resultObject(parent, idx, field);
+                      break;
+                    }
+                  }
+                } else {
+                  let field = parent.document.data.content;
+                  const idx = field.toLowerCase().indexOf(query);
+                  if (idx >= 0) {
+                    searchResult = resultObject(parent, idx, field);
+                  }
                 }
               } else if (parent.document instanceof Actor) {
-                const idx = parent.document.data.data.details.biography.value.toLowerCase().indexOf(query);
+                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.details.biography.value : parent.document.data.data.details.biography.value;
+                const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
-                  searchResult = resultObject(parent, idx, parent.document.data.data.details.biography.value);
+                  searchResult = resultObject(parent, idx, field);
                 }
               } else if (parent.document instanceof Item) {
-                const idx = parent.document.data.data.description.value.toLowerCase().indexOf(query);
+                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.description.value : parent.document.data.data.description.value
+                const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
-                  searchResult = resultObject(parent, idx, parent.document.data.data.description.value);
+                  searchResult = resultObject(parent, idx, field);
                 }
               }
             } catch {
@@ -557,8 +623,9 @@ export default {
         return game.i18n.localize(key);
     },
     importEntry() {
-        const collection = game.collections.get(this.document.collection.documentName);
-        if (collection.importFromCompendium(this.document.collection, this.document.id, {}, { renderSheet: false })) {
+        const collection = this.document.document.collection;
+        const pack = game.packs.get(this.document.packId);
+        if (collection && collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true })) {
             ui.notifications.info("Document has been imported");
         }
     }
@@ -628,7 +695,7 @@ export default {
       }
     },
     backgroundStyle() {
-      if (!this.book) 
+      if (!this.book || !this.book.background) 
         return "";
 
       return `background-image:url(${this.book.background})`;
@@ -636,9 +703,6 @@ export default {
     bookName() {
       return this.book.name.toUpperCase();
     }
-  },
-  async mounted() {
-    await game.ForgeCompendiumBrowser.indexBook(this.book);
   },
 };
 </script>
@@ -907,6 +971,14 @@ export default {
   padding: 0px 8px;
 }
 
+.forge-compendium-breadcrumbs li:not(:last-child) .breadcrumb-link {
+  cursor: pointer;
+}
+
+.forge-compendium-breadcrumbs li:not(:last-child) .breadcrumb-link:hover {
+  text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+
 .back-button,
 .forward-button {
   flex: 0 0 30px;
@@ -969,13 +1041,13 @@ export default {
   margin-top: 100px;
 } 
 .forge-compendium-search-area .no-results > div{
-        padding: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    border: 2px solid #eee;
-    width: 300px;
-    margin: auto;
-    font-weight: bold;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  border: 2px solid #eee;
+  width: 300px;
+  margin: auto;
+  font-weight: bold;
 }
 .forge-compendium-search-area .forge-compendium-search-list {
   background-color: rgba(255, 255, 255, 0.8);
@@ -1018,27 +1090,27 @@ export default {
   text-shadow: 0 0 8px var(--color-shadow-primary);
 }
 .compendium-library {
-    cursor: pointer;
-    padding: 6px;
-    color: #ffffff;
-    text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
-    background-color: #363636;
-    *background-color: #222222;
-    background-image: -moz-linear-gradient(top, #444444, #222222);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
-    background-image: -webkit-linear-gradient(top, #444444, #222222);
-    background-image: -o-linear-gradient(top, #444444, #222222);
-    background-image: linear-gradient(to bottom, #444444, #222222);
-    background-repeat: repeat-x;
-    border: 1px solid #000000;
-    border-color: #222222 #222222 #000000;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-    border-radius: 4px;
-    margin: 4px;
+  cursor: pointer;
+  padding: 6px;
+  color: #ffffff;
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
+  background-color: #363636;
+  *background-color: #222222;
+  background-image: -moz-linear-gradient(top, #444444, #222222);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
+  background-image: -webkit-linear-gradient(top, #444444, #222222);
+  background-image: -o-linear-gradient(top, #444444, #222222);
+  background-image: linear-gradient(to bottom, #444444, #222222);
+  background-repeat: repeat-x;
+  border: 1px solid #000000;
+  border-color: #222222 #222222 #000000;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  border-radius: 4px;
+  margin: 4px;
 }
 .compendium-library:hover {
-    text-shadow: 0 0 8px var(--color-shadow-primary);
-    background-color: #222222;
-    *background-color: #151515;
+  text-shadow: 0 0 8px var(--color-shadow-primary);
+  background-color: #222222;
+  *background-color: #151515;
 }
 </style>

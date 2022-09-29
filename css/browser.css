@@ -12,15 +12,32 @@
     height: 100%;
 }
 
+.forge-compendium-scene .background {
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    filter: blur(5px);
+    opacity: 0.5;
+    z-index: 100;
+}
+
 .forge-compendium-scene img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    border: 0px;
+    z-index: 200;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
 .forge-compendium-scene .forge-compendium-scene-stat {
     position: absolute;
-    bottom: 20px;
+    bottom: 0px;
+    left: 0px;
     background-color: rgba(0, 0, 0, 0.8);
     border: 2px solid #000;
     border-radius: 8px;
@@ -29,6 +46,46 @@
     color: #ffffff;
     padding: 12px 0px;
     font-size: 18px;
-    left: 50%;
-    margin-left: -150px;
+    z-index: 300;
+}
+
+.package-list .package .tag.compendium-library {
+    background: #62c462;
+}
+
+#forge-compendium-browser-import .progress-bar {
+    width: 100%;
+    position: relative;
+    height: 20px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+#forge-compendium-browser-import .progress-bar .bar {
+    position: absolute;
+    height: 100%;
+    width: 0px;
+    top: 0px;
+    left: 0px;
+    background-color: royalblue;
+    border-right: 1px solid darkblue;
+    border-radius: 4px;
+}
+
+#forge-compendium-browser-import .start-import {
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px groove var(--color-border-light-secondary);
+    margin: 0;
+}
+
+#forge-compendium-browser-import ul {
+    list-style-type: none; /* Remove bullets */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margins */
+}
+
+#forge-compendium-browser-import .message {
+    font-style: italic;
 }
