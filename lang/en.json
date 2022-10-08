@@ -1,7 +1,6 @@
 {
     "ForgeCompendiumBrowser.same-name.name": "Auto open with same name",
     "ForgeCompendiumBrowser.same-name.hint": "Automatically open documents with the same name as the listing name",
-
     "ForgeCompendiumBrowser.OpenCompendiumBrowser": "Open Compendium Library",
     "ForgeCompendiumBrowser.ForgeCompendiumLibrary": "Forge Compendium Library",
     "ForgeCompendiumBrowser.LibraryMessage": "This is your library of compendium books.  If you have no books listed, please use the {link} from the Bazaar to import your books.",
