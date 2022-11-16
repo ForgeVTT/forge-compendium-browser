@@ -65,7 +65,7 @@ export class ForgeCompendiumBrowser {
         return module.version ?? module.data.version;
     }
 
-    static parseCompendiums() {
+    static async parseCompendiums() {
         //Find all the DnDBeyond modules
         log("Parsing compendiums");
         for (let module of game.modules.values()) {
@@ -83,7 +83,8 @@ export class ForgeCompendiumBrowser {
                     type: "book",
                 };
 
-                new Hierarchy(book);
+                let hierarchy = new Hierarchy(book);
+                await hierarchy.getHierarchy();
 
                 ForgeCompendiumBrowser.books.push(book);
                 log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length} associated compendiums`);
@@ -96,7 +97,7 @@ export class ForgeCompendiumBrowser {
         let err;
         let resp;
         try {
-            resp = await fetch(src).catch(e => {
+            resp = await fetch(src, {cache: "no-cache"}).catch(e => {
                 err = e;
                 return null;
             });

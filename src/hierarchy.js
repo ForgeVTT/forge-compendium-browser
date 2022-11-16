@@ -5,7 +5,6 @@ export class Hierarchy {
 
     constructor(book) {
         this.book = book;
-        this.getHierarchy();
     }
 
     static startsWithNumber (str) {
@@ -74,7 +73,7 @@ export class Hierarchy {
         // check for a folders.json
         let folders = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/folders.json`);
         if (folders) {
-            if (folder instanceof Array) {
+            if (folders instanceof Array) {
                 this.parseFolders(folders);
             } else {
                 this.folderSort = folders;
@@ -188,33 +187,41 @@ export class Hierarchy {
     getEntityFolder (document, type) {
         let folder = this.folderCache[document.folder];
         if (!folder) {
-            let path = getProperty(document, "flags.ddb.path");
+            let path = getProperty(document, "flags.forge-compendium-browser.path");
             if (path) {
                 const section = this.getSection(type);
                 folder = section;
                 if (typeof path == "string") {
-                    path = path.split("\\");
+                    path = path.split("/");
                 }
-                for (let i = 0; i < path.length; i++) {
-                    let part = path[i];
-                    if (typeof part == "string"){
-                        part = { name: part };
+                if (path instanceof Array) {
+                    // traverse the path to make sure all folders are present
+                    for (let i = 0; i < path.length; i++) {
+                        let part = path[i];
+                        if (typeof part == "string") {
+                            part = { name: part };
+                        }
+                        // If the path is the actual entity id, then we've gone too far.
+                        if (document._id == part.id)
+                            break;
+                        
+                        // see if we can find the folder
+                        let parent = folder;
+                        const name = decodeURIComponent(part.name);
+                        folder = parent.children.find(c => c.id == part.id || (part.id == undefined && c.name == name));
+                        if (!folder) {
+                            // Get the key to find the sort information
+                            const key = path.slice(0, i + 1).map(p => p.name).join("/");
+                            const typeData = this.folderSort[type];
+                            const folderData = typeData && typeData[key];
+                            // create the folder
+                            folder = this.createHierarchyFolder({ id: part.id, name: folderData?.label || name }, folderData?.sort);
+                            parent.children.push(folder);
+                        }
+                        // Once we've found the parent folder in the path list, then stop going any further
+                        if (document.folder && folder.id == document.folder)
+                            break;
                     }
-                    // If the path is the actual entity id, then we've gone too far.
-                    if (document._id == part.id)
-                        break;
-                    
-                    let parent = folder;
-                    folder = parent.children.find(c => c.id == part.id || (part.id == undefined && c.name == part.name));
-                    if (!folder) {
-                        let key = path.slice(0, i + 1).join("\\");
-                        let sort = this.folderSort[key];
-                        folder = this.createHierarchyFolder(part, sort);
-                        parent.children.push(folder);
-                    }
-                    // Once we've found the parent folder in the path list, then stop going any further
-                    if (document.folder && folder.id == document.folder)
-                        break;
                 }
             }
         }
