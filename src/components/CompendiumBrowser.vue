@@ -58,7 +58,7 @@ export default {
             game.user.setFlag("forge-compendium-browser", "last-book", bookId);
           }
         } else if(typeof bookId == "string") {
-          ui.notifications.warn("You don't have access to this compendium book.");
+          ui.notifications.warn(`You don't have access to this compendium book. (${bookId})`);
           this.book = null;
         }
       } else {

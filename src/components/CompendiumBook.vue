@@ -201,7 +201,7 @@
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
-                <div style="text-align: center;flex-grow: 0;display: none;">
+                <div style="text-align: center;flex-grow: 0;">
                   <button @click="importModule">
                     <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
@@ -453,39 +453,29 @@ export default {
       return position < 0 || position > this.history.length - 1 ? "disabled" : "";
     },
     async importModule() {
-      let sections = this.book.hierarchy.children.map((c) => {
-        return {
-          type: c.packtype,
-          name: c.name,
+      let progress = {
           max: 0,
           count: 0,
           perc: 0
         }
-      });
 
       let globalHtml;
 
       let progressFn = (command, options) => {
-        let typeElem = options?.type ? $(`li[data-id="${options.type}"]`, globalHtml) : null;
+        let progressElem = $(`li.progress`, globalHtml);
         if (options?.message)
-          $('.message', typeElem).html(options?.message);
-        if (command == "reset" && options?.type) {
-          let section = sections.find(s => s.type == options.type);
-          if (section) {
-            section.max = options?.max ?? 0;
-            section.count = 0;
-            section.perc = 0;
-            $('.progress-bar .bar', typeElem).css({'width': `0%`});
-          }
+          $('.message', progressElem).html(options?.message);
+        if (command == "reset") {
+          progress.max = options?.max ?? 0;
+          progress.count = 0;
+          progress.perc = 0;
+          $('.progress-bar .bar', progressElem).css({'width': `0%`});
         }
-        if (command == "increase" && options?.type) {
-          let section = sections.find(s => s.type == options.type);
-          if (section) {
-            section.count++;
-            if ((Math.round((section.count / section.max) * 100)) != section.perc) {
-              section.perc = (Math.round((section.count / section.max) * 100));
-              $('.progress-bar .bar', typeElem).css({'width': `${section.perc}%`});
-            }
+        if (command == "increase") {
+          progress.count++;
+          if ((Math.round((progress.count / progress.max) * 100)) != progress.perc) {
+            progress.perc = (Math.round((progress.count / progress.max) * 100));
+            $('.progress-bar .bar', progressElem).css({'width': `${progress.perc}%`});
           }
         }
         if (command == "finish") {
@@ -505,7 +495,7 @@ export default {
         $(event.currentTarget).closest('.dialog').find('header .close').click();
       }
 
-      const template = await renderTemplate("modules/forge-compendium-browser/templates/import-documents.html", { sections: sections });
+      const template = await renderTemplate("modules/forge-compendium-browser/templates/import-documents.html");
       new Dialog({
         title: game.i18n.localize("ForgeCompendiumBrowser.ImportCompendiumDocuments"),
         content: template,
@@ -883,6 +873,10 @@ export default {
 .forge-compendium-content .forge-compendium-contains .forge-compendium-contains-list {
   list-style: none;
   padding-left: 10px;
+}
+
+.forge-compendium-content .forge-compendium-contains .forge-compendium-contains-list li {
+  margin-bottom: 5px;
 }
 
 .forge-compendium-content .forge-compendium-contains i {

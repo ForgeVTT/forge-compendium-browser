@@ -7,7 +7,8 @@ export class ImportBook{
 
         let isV10 = isNewerVersion(game.version, "9.999999");
 
-        const documentData = await Promise.all(book.hierarchy.children.map(async (c) => {
+        const documentData = {};
+        for (let c of book.hierarchy.children) {
             let mainfolder;
             if (c.packtype == "Actor") {
                 mainfolder = game.folders.find(f => f.folder == undefined && f.name == "Monsters");
@@ -21,74 +22,117 @@ export class ImportBook{
                 folderData[isV10 ? "folder" : "parent"] = null;
                 mainfolder = await Folder.create(folderData);
             }
+            console.log("Processing", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
             if (progress)
-                progress("reset", { type: c.packtype, max: c.count, message: 'Processing' });
+                progress("reset", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
             let data = await ImportBook.processChildren(c, c.packtype, mainfolder, progress);
-            return {
-                type: c.packtype,
-                data: data
-            };
-        }));
 
-        function timeout(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
+            documentData[c.packtype] = data;
         }
 
-        let newDocs = await Promise.all(documentData.map(async (document) => {
+        if (isV10) { 
+            // v10 lets us set the document id when creating, so we can update all the related ids before saving.
+            ImportBook.updateDocumentKeys(documentData, progress);
+        }
+
+        let newDocs = {};
+        for (let [type, documents] of Object.entries(documentData)){
             if (progress)
-                progress("reset", { max: 1, type: document.type, message: 'Creating' });
+                progress("reset", { max: 1, type, message: `Creating ${type}` });
 
-            let cls = getDocumentClass(document.type);
-            let docs = await cls.createDocuments(document.data, { render: false });
+            let cls = getDocumentClass(type);
+            let docs = await cls.createDocuments(documents, { render: false, keepId: true });
 
             if (progress)
-                progress("increase", { type: document.type });
+                progress("increase", { type: type });
 
-            return { type: document.type, data: docs };
-        }));
+            newDocs[type] = docs;
+        }
 
-        await timeout(1);
+        if (!isV10) {
+            // v9 doesn't allow us to create documents with specific IDs, therefore we have to go through after creation to collect the new IDs and replace the IDs witht he old ones.
+            let docUpdates = ImportBook.updateDocumentKeys(newDocs, progress);
 
-        const getDocumentProperty = function(document) {
-            let type = document.folder?.type || document.parent?.folder?.type;
-            switch (type) {
-                case "Item": return "system.description.value";
-                case "Actor": return "system.details.biography.value";
-                case "JournalEntry": return (isV10 ? "text.content" : "content");
-            }
-        } 
+            //  Update the document changes with the inline link keys
+            for (let [type, data] of Object.entries(docUpdates)) {
+                if (data && data.length) {
+                    if (type == "JournalEntry" && isV10) {
+                        if (progress)
+                            progress("reset", { max: data.length, type, message: `Updating ${type}` });
 
-        for (let doc of newDocs) {
-            for (let document of doc.data) {
-                let type = document.folder?.type || document.parent?.folder?.type;
-                let originalId = getProperty(document, "flags.forge-compendium-browser.originalId");
-                if (originalId) {
-                    ImportBook.translate[originalId] = {id: document._id, uuid: document.uuid};
+                        for (let page of data) {
+                            await page.object.update({"text.content": page.value});
+
+                            if (progress)
+                                progress("increase", { type });
+                        }
+                    } else {
+                        if (progress)
+                            progress("reset", { max: 1, type, message: `Updating ${type}` });
+
+                        let cls = getDocumentClass(type);
+                        await cls.updateDocuments(data, { render: false });
+
+                        if (progress)
+                            progress("increase", { type });
+                    }
                 }
-                if (document.pages) {
-                    for (let page of document.pages) {
-                        originalId = getProperty(page, "flags.forge-compendium-browser.originalId");
-                        if (originalId) {
-                            ImportBook.translate[originalId] = {id: page._id, uuid: page.uuid, type: type};
+            }
+        }
+
+        if (progress) {
+            progress("finish");
+        }
+        // refresh the directory listing, for some reason they're not being refreshed.
+        for (let dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
+            ui[dir].render();
+        }
+    }
+
+    static getDocumentProperty(document) {
+        let isV10 = isNewerVersion(game.version, "9.999999");
+        let type = document.folder?.type || document.parent?.folder?.type;
+        switch (type) {
+            case "Item": return "system.description.value";
+            case "Actor": return "system.details.biography.value";
+            case "JournalEntry": return (isV10 ? "text.content" : "content");
+        }
+    } 
+
+    static async updateDocumentKeys(newDocs, progress) {
+        let isV10 = isNewerVersion(game.version, "9.999999");
+        if (!isV10) {
+            // Collect the original ID since v9 didn't create documents with a provided ID
+            for (let doc of newDocs) {
+                for (let document of doc.data) {
+                    let type = document.folder?.type || document.parent?.folder?.type;
+                    let originalId = getProperty(document, "flags.forge-compendium-browser.originalId");
+                    if (originalId) {
+                        ImportBook.translate[originalId] = { id: document._id, uuid: document.uuid };
+                    }
+                    if (document.pages) {
+                        for (let page of document.pages) {
+                            originalId = getProperty(page, "flags.forge-compendium-browser.originalId");
+                            if (originalId) {
+                                ImportBook.translate[originalId] = { id: page._id, uuid: page.uuid, type: type };
+                            }
                         }
                     }
                 }
             }
         }
 
-        const updates = await Promise.all(newDocs.map(async (update) => {
-            let { type, data } = update;
-
-            let isV10 = isNewerVersion(game.version, "9.999999");
-
+        console.log("translations", ImportBook.translate);
+        // Go through the documents and see if there are any inline links that need replacing
+        let docUpdates = {};
+        for (let [type, data] of Object.entries(newDocs)) {
             if (progress)
-                progress("reset", { max: data.length, type: type, message: (type == "Scene" ? "Linking tokens" : 'Fixing inline links') });
+                progress("reset", { max: data.length, type, message: (type == "Scene" ? "Linking tokens in scenes" : `Fixing inline links in ${type}`) });
 
             let updates = [];
             for (let document of data) {
                 if (progress) {
-                    progress("increase", { type: type });
-                    await timeout(1);
+                    progress("increase", { type });
                 }
 
                 let type = document.folder?.type || document.parent?.folder?.type;
@@ -103,16 +147,19 @@ export class ImportBook{
                                 repvalue = repvalue.replaceAll(`@Compendium[${key}]`, value); 
                             }
                             if (repvalue != original) {
-                                let update = { object: page, "value": repvalue };
-                                updates.push(update);
+                                isChanged = true;
+                                if (isV10)
+                                    setProperty(page, "text.content", repvalue);
+                                else
+                                    updates.push({ object: page, "value": repvalue });
                             }
                         }
                     }
-                    if (isChanged) {
-                        let update = {_id: document._id, pages: pages};
+                    if (isChanged && !isV10) {
+                        let update = { _id: document._id, pages: pages };
                         updates.push(update);
                     }
-                } else if(type == "Scene") {
+                } else if (type == "Scene") {
                     // Check the scene's journal entry
 
                     // Go through the tokens and point them to the right actors.
@@ -186,7 +233,8 @@ export class ImportBook{
                         //note.entryId
                     }
                 } else {
-                    let repvalue = getProperty(document, getDocumentProperty(document));
+                    let prop = ImportBook.getDocumentProperty(document)
+                    let repvalue = getProperty(document, prop);
                     let original = repvalue;
                     if (repvalue) {
                         for (let [key, id] of Object.entries(ImportBook.translate)) {
@@ -194,50 +242,22 @@ export class ImportBook{
                             repvalue = repvalue.replaceAll(`@Compendium[${key}]`, value); 
                         }
                         if (repvalue != original) {
-                            let update = {_id: document._id};
-                            update[getDocumentProperty(document)] = repvalue;
-                            updates.push(update);
+                            if (isV10)
+                                setProperty(document, prop, repvalue);
+                            else {
+                                let update = { _id: document._id };
+                                update[prop] = repvalue;
+                                updates.push(update);
+                            }
                         }
                     }
                 }
             }
 
-            update.data = updates;
-            return update;
-        }));
+            docUpdates[type] = updates;
+        }
 
-        await Promise.all(updates.map(async (update) => {
-            if (update && update.data.length) {
-                if (update.type == "JournalEntry" && isV10) {
-                    if (progress)
-                        progress("reset", { max: update.data.length, type: update.type, message: 'Updating' });
-
-                    for (let page of update.data) {
-                        await page.object.update({"text.content": page.value});
-
-                        if (progress)
-                            progress("increase", { type: update.type });
-                    }
-                } else {
-                    if (progress)
-                        progress("reset", { max: 1, type: update.type, message: 'Updating' });
-
-                    let cls = getDocumentClass(update.type);
-                    await cls.updateDocuments(update.data, { render: false });
-
-                    if (progress)
-                        progress("increase", { type: update.type });
-                }
-            }
-        })).then(() => {
-            if (progress) {
-                progress("finish");
-            }
-            // refresh the directory listing, for some reason they're not being refreshed.
-            for (let dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
-                ui[dir].render();
-            }
-        });
+        return docUpdates;
     }
 
     static async processChildren(parent, type, parentFolder, progress) {
@@ -264,7 +284,7 @@ export class ImportBook{
                     folder = await Folder.create(folderData);
                 }
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
-            } else if( child.type == "document") {
+            } else if (child.type == "document") {
                 let collection = game.packs.get(child.packId);
                 let document = await collection.getDocument(child.id);
                 let key = `${child.packId}.${document.id}`;
@@ -285,9 +305,16 @@ export class ImportBook{
                     }
                 }
                 let data = document.toObject(false);
-                data._id = randomID();
                 data.folder = parentFolder;
-                setProperty(data, "flags.forge-compendium-browser.originalId", key);
+                if (data.name == "")
+                    console.log("Here");
+
+                data._id = randomID();
+                if (!isV10) {
+                    setProperty(data, "flags.forge-compendium-browser.originalId", key);
+                } else {
+                    ImportBook.translate[key] = { id: data._id, uuid: `${document.documentName}.${data._id}` };
+                }
 
                 if (progress) {
                     progress("increase", { type: type });
