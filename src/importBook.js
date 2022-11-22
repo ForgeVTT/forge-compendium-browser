@@ -11,7 +11,7 @@ export class ImportBook{
         for (let c of book.hierarchy.children) {
             let mainfolder;
             if (c.packtype == "Actor") {
-                mainfolder = game.folders.find(f => f.folder == undefined && f.name == "Monsters");
+                mainfolder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"] == undefined && f.name == "Monsters");
             }
             if (!mainfolder) {
                 let folderData = {
@@ -103,9 +103,9 @@ export class ImportBook{
         let isV10 = isNewerVersion(game.version, "9.999999");
         if (!isV10) {
             // Collect the original ID since v9 didn't create documents with a provided ID
-            for (let doc of newDocs) {
-                for (let document of doc.data) {
-                    let type = document.folder?.type || document.parent?.folder?.type;
+            for (let [type, documents] of Object.entries(newDocs)) {
+                for (let document of documents) {
+                    let docType = document.folder?.type || document.parent?.folder?.type || type;
                     let originalId = getProperty(document, "flags.forge-compendium-browser.originalId");
                     if (originalId) {
                         ImportBook.translate[originalId] = { id: document._id, uuid: document.uuid };
@@ -114,7 +114,7 @@ export class ImportBook{
                         for (let page of document.pages) {
                             originalId = getProperty(page, "flags.forge-compendium-browser.originalId");
                             if (originalId) {
-                                ImportBook.translate[originalId] = { id: page._id, uuid: page.uuid, type: type };
+                                ImportBook.translate[originalId] = { id: page._id, uuid: page.uuid, type: docType };
                             }
                         }
                     }
@@ -122,7 +122,6 @@ export class ImportBook{
             }
         }
 
-        console.log("translations", ImportBook.translate);
         // Go through the documents and see if there are any inline links that need replacing
         let docUpdates = {};
         for (let [type, data] of Object.entries(newDocs)) {
@@ -269,13 +268,13 @@ export class ImportBook{
             if (child.type == "folder") {
                 let folder;
                 if (type == "Actor") {
-                    folder = game.folders.find(f => f.folder?.id == parentFolder.id && f.name == child.name);
+                    folder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"]?.id == parentFolder.id && f.name == child.name);
                 }
                 if (!folder) {
                     let folderData = {
                         name: child.name,
                         type: type,
-                        sorting: "m",
+                        sorting: type == "Actor" ? "a" : "m",
                         sort: child.sort ?? folderSort
                     };
                     folderData[isV10 ? "folder" : "parent"] = parentFolder;
@@ -286,7 +285,13 @@ export class ImportBook{
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
             } else if (child.type == "document") {
                 let collection = game.packs.get(child.packId);
-                let document = await collection.getDocument(child.id);
+                if (!collection.contents.length) {
+                    let documents = await collection.getDocuments();
+                }
+                let document = collection.get(child.id);
+                if (!document)
+                    continue;
+
                 let key = `${child.packId}.${document.id}`;
                 if (type == "Actor") {
                     const actor = game.actors.find(a => {
@@ -306,8 +311,6 @@ export class ImportBook{
                 }
                 let data = document.toObject(false);
                 data.folder = parentFolder;
-                if (data.name == "")
-                    console.log("Here");
 
                 data._id = randomID();
                 if (!isV10) {
