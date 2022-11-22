@@ -90,6 +90,8 @@ export class ForgeCompendiumBrowser {
                 log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length} associated compendiums`);
             }
         }
+
+        ForgeCompendiumBrowser.clearPacks();
     }
 
     static async getFileData(src) {
@@ -148,6 +150,14 @@ export class ForgeCompendiumBrowser {
     static openBrowser(book) {
         ForgeCompendiumBrowser.browser = new CompendiumBrowserApp(book).render(true);
     }
+
+    static clearPacks() {
+        for (let book of ForgeCompendiumBrowser.books) {
+            for (let pack of book.packs) {
+                $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, ui.compendium.element).addClass('forge-compendium-pack');
+            }
+        }
+    }
 }
 
 Hooks.on('init', ForgeCompendiumBrowser.init);
@@ -166,11 +176,7 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
             )
     );
 
-    for (let book of ForgeCompendiumBrowser.books) {
-        for (let pack of book.packs) {
-            $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, html).addClass('forge-compendium-pack');
-        }
-    }
+    ForgeCompendiumBrowser.clearPacks();
 });
 
 Hooks.on("setupTileActions", (app) => {
