@@ -235,8 +235,17 @@ export class Hierarchy {
             const type = pack.type || pack.entity;
             let collection = game.packs.get(key);
             
-            await collection.getIndex({fields: ["flags", "folder", "img", "thumb"]});
-            //let documents = await collection.getDocuments();
+            // Make sure to keep checking in case the data store isn't ready yet.
+            let count = 0;
+            do {
+                try {
+                    await collection.getIndex({fields: ["flags", "folder", "img", "thumb"]});
+                    //let documents = await collection.getDocuments();
+                } catch {
+                    count++;
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            } while(!collection.indexed && count < 10)
             
             for (let index of collection.index) {
                 let document = index;
