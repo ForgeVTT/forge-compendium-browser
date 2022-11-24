@@ -544,6 +544,7 @@ export default {
       }
     },
     searchBook() {
+      const isV10 = isNewerVersion(game.version, "9.999999");
       if (this.searchTerm.length < 3) {
         this.searchResults = [];
       }
@@ -554,11 +555,15 @@ export default {
 
       // added idx and text here for a future improvement to show highlighted text
       let resultObject = (entity, idx, text) => {
-        let section = entity.parent.type == "section" ? entity.parent : this.book.children.find((s) => s.id == entity.parent.section);
+        const section = entity.parent.type == "section" ? entity.parent : this.book.children.find((s) => s.id == entity.parent.section);
+        let img = entity.img;
+        if (isV10 && img && img.indexOf("systems/dnd5e/icons")) {
+          img = img.replace("systems/dnd5e/icons", "images/icons");
+        }
         return {
           id: entity.id,
           name: entity.name,
-          img: entity.img,
+          img: img,
           parent: entity.parent.name,
           section: section.name,
           icon: section.icon,
