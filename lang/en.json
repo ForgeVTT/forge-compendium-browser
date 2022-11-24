@@ -13,5 +13,13 @@
     "ForgeCompendiumBrowser.ImportDocuments": "Import Documents",
     "ForgeCompendiumBrowser.ImportCompendiumDocuments": "Import Compendium Documents",
     "ForgeCompendiumBrowser.Import": "Import",
-    "ForgeCompendiumBrowser.AllPlayers": "All Players"
+    "ForgeCompendiumBrowser.AllPlayers": "All Players",
+    "ForgeCompendiumBrowser.Ownership": "Ownership",
+    "ForgeCompendiumBrowser.Contains": "Contains",
+    "ForgeCompendiumBrowser.ConfigurePermissions": "Configure Permissions",
+    "ForgeCompendiumBrowser.Allowed": "Allowed",
+    "ForgeCompendiumBrowser.NotAllowed": "Not Allowed",
+    "ForgeCompendiumBrowser.Default": "Default",
+    "ForgeCompendiumBrowser.SaveChanges": "Save Changes",
+    "ForgeCompendiumBrowser.Everyone": "Everyone"
 }
