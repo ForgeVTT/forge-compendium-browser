@@ -53,42 +53,7 @@ export class CompendiumBrowserApp extends Application {
           if (!book)
             return;
 
-          const permissions = duplicate(game.ForgeCompendiumBrowser.setting("permissions") || {});
-          const permission = permissions[book.id] || {};
-
-          const data = {
-            defaultLevels: { "true": "Allowed", "false": "Not Allowed" },
-            playerLevels: { "null": "Default", "true": "Allowed", "false": "Not Allowed" },
-            currentDefault: permission["default"] == undefined || permission["default"] ? "true" : "false",
-            users: game.users.filter(u => !u.isGM).map(u => {
-              return {
-                id: u.id,
-                name: u.name,
-                allowed: permission[u.id] == undefined ? "null" : permission[u.id] ? "true" : "false",
-              }
-            })
-          };
-
-          const html = await renderTemplate("./modules/forge-compendium-browser/templates/permissions.html", data);
-          Dialog.prompt({
-            title: `Configure Permissions: ${book.name}`,
-            content: html,
-            label: "Save Changes",
-            callback: (html) => {
-              const form = $("#permission-control", html)[0];
-              const fd = new FormDataExtended(form);
-
-              const changes = fd.toObject();
-
-              for (let [key, value] of Object.entries(changes)) {
-                permission[key] = value == "null" ? null : value == "true";
-              }
-
-              permissions[book.id] = permission;
-              game.settings.set("forge-compendium-browser", "permissions", permissions);
-            },
-            rejectClose: false,
-          });
+          ForgeCompendiumBrowser.showPermissions(book);
         }
       }
     ];

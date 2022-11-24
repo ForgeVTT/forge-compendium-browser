@@ -66,6 +66,8 @@ export class ForgeCompendiumBrowser {
     }
 
     static async parseCompendiums() {
+        const permissions = game.ForgeCompendiumBrowser.setting("permissions") || {};
+
         //Find all the DnDBeyond modules
         log("Parsing compendiums");
         for (let module of game.modules.values()) {
@@ -81,6 +83,7 @@ export class ForgeCompendiumBrowser {
                     packs: module.packs ?? module.data.packs,
                     children: [],
                     type: "book",
+                    permissions: permissions[module.id] || {},
                 };
 
                 let hierarchy = new Hierarchy(book);
@@ -158,6 +161,47 @@ export class ForgeCompendiumBrowser {
             }
         }
     }
+
+    static async showPermissions(book) {
+        const isV10 = isNewerVersion(game.version, "9.999999");
+
+        const permissions = duplicate(game.ForgeCompendiumBrowser.setting("permissions") || {});
+        const permission = permissions[book.id] || {};
+    
+        const data = {
+          defaultLevels: { "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
+          playerLevels: { "null": i18n("ForgeCompendiumBrowser.Default"), "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
+          currentDefault: permission["default"] == undefined || permission["default"] ? "true" : "false",
+          users: game.users.filter(u => !u.isGM).map(u => {
+            return {
+              id: u.id,
+              name: u.name,
+              allowed: permission[u.id] == undefined ? "null" : permission[u.id] ? "true" : "false",
+            }
+          })
+        };
+    
+        const html = await renderTemplate("./modules/forge-compendium-browser/templates/permissions.html", data);
+        Dialog.prompt({
+          title: `${i18n("ForgeCompendiumBrowser.ConfigurePermissions")}: ${book.name}`,
+          content: html,
+          label: i18n("ForgeCompendiumBrowser.SaveChanges"),
+          callback: (html) => {
+            const form = $("#permission-control", html)[0];
+            const fd = new FormDataExtended(form);
+    
+            const changes = isV10 ? fd.object : fd.toObject();
+    
+            for (let [key, value] of Object.entries(changes)) {
+              permission[key] = value == "null" ? null : value == "true";
+            }
+    
+            permissions[book.id] = book.permissions = permission;
+            game.settings.set("forge-compendium-browser", "permissions", permissions);
+          },
+          rejectClose: false,
+        });
+      }
 }
 
 Hooks.on('init', ForgeCompendiumBrowser.init);
@@ -220,8 +264,20 @@ Hooks.on('renderModuleManagement', (app, html, data) => {
         if (flags["forge-compendium-browser"]?.active) {
                $("<span>")
                 .addClass("tag compendium-library")
-                .html('<img title="Forge Compendium Browser" src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">')
+                .html(`<img title="${i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary")}" src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">`)
                 .insertAfter($(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));
+        }
+    }
+});
+
+// If the permissions change, make sure to update the book
+Hooks.on('updateSetting', (setting, data, options, userId) => {
+    if (setting.key == "forge-compendium-browser.permissions") {
+        for (let [bookId, permission] of Object.entries(setting.value)) {
+            let book = ForgeCompendiumBrowser.books.find(b => b.id == bookId);
+            if (book) {
+                book.permissions = permission;
+            }
         }
     }
 });
