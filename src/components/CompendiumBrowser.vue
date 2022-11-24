@@ -41,7 +41,7 @@ export default {
   methods: {
     async selectBook(bookId, packId, id) {
       if (bookId) {
-        const book = this.library.find((b) => b.id == bookId);
+        const book = this.library.find((b) => b.id === bookId);
         if (book) {
           if (!this.isAvailable(book)) {
             ui.notifications.warn("Please wait, book is still building its index, this may take some time");
@@ -57,7 +57,7 @@ export default {
             }
             game.user.setFlag("forge-compendium-browser", "last-book", bookId);
           }
-        } else if(typeof bookId == "string") {
+        } else if(typeof bookId === "string") {
           ui.notifications.warn(`You don't have access to this compendium book. (${bookId})`);
           this.book = null;
         }

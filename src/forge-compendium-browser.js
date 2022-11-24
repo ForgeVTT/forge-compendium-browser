@@ -53,7 +53,7 @@ export class ForgeCompendiumBrowser {
     static async onMessage(data) {
         switch (data.action) {
             case 'open': {
-                if (data.userid == game.user.id || data.userid == undefined) {
+                if (data.userid === game.user.id || data.userid == undefined) {
                     ForgeCompendiumBrowser.openBrowser(data.book);
                 }
             }
@@ -132,7 +132,7 @@ export class ForgeCompendiumBrowser {
             if (parent.children && parent.children.length) {
                 for (let child of parent.children) {
                     child.parent = parent;
-                    child.section = parent.section || (parent.type == "section" && parent.id);
+                    child.section = parent.section || (parent.type === "section" && parent.id);
 
                     if (child.children)
                         indexPacks(child);
@@ -193,7 +193,7 @@ export class ForgeCompendiumBrowser {
             const changes = isV10 ? fd.object : fd.toObject();
     
             for (let [key, value] of Object.entries(changes)) {
-              permission[key] = value == "null" ? null : value == "true";
+              permission[key] = value === "null" ? null : value === "true";
             }
     
             permissions[book.id] = book.permissions = permission;
@@ -245,14 +245,14 @@ Hooks.on("setupTileActions", (app) => {
         fn: async (args = {}) => {
             const { action, userid } = args;
 
-            if(userid == game.user.id) {
+            if(userid === game.user.id) {
                 game.ForgeCompendiumBrowser.openBrowser(action.data.bookid);
             } else {
                 game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, (resp) => { } );
             }
         },
         content: async (trigger, action) => {
-            let book = game.ForgeCompendiumBrowser.books.find(b => b.id == action.data.bookid);
+            let book = game.ForgeCompendiumBrowser.books.find(b => b.id === action.data.bookid);
             return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${book.name || 'Unknown'}"</span>`;
         }
     });
@@ -272,9 +272,9 @@ Hooks.on('renderModuleManagement', (app, html, data) => {
 
 // If the permissions change, make sure to update the book
 Hooks.on('updateSetting', (setting, data, options, userId) => {
-    if (setting.key == "forge-compendium-browser.permissions") {
+    if (setting.key === "forge-compendium-browser.permissions") {
         for (let [bookId, permission] of Object.entries(setting.value)) {
-            let book = ForgeCompendiumBrowser.books.find(b => b.id == bookId);
+            let book = ForgeCompendiumBrowser.books.find(b => b.id === bookId);
             if (book) {
                 book.permissions = permission;
             }

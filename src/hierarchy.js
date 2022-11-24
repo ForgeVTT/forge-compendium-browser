@@ -12,7 +12,7 @@ export class Hierarchy {
     }
 
     static checkKeys = (item, key) => {
-        if (item.name == key)
+        if (item.name === key)
             return false;
         if (item.parent)
             return Hierarchy.checkKeys(item.parent, key);
@@ -26,7 +26,7 @@ export class Hierarchy {
         console.log("finding hierarchy", this.book);
 
         // If the Compendium Library version is greater than the current hierarchy, and it's allowed to update, then clear the hierarchy and reload
-        if (this.book.hierarchy && (this.book.hierarchy.version || "-") != ForgeCompendiumBrowser.version && this.book.hierarchy.dynamic != false) {
+        if (this.book.hierarchy && (this.book.hierarchy.version || "-") !== ForgeCompendiumBrowser.version && this.book.hierarchy.dynamic !== false) {
             console.log("reloading hierarchy", this.book);
             this.book.hierarchy = null; //The version has changed, so reload the hierarchy
         }
@@ -43,7 +43,7 @@ export class Hierarchy {
 
             if (this.book.hierarchy) {
                 let src = "data";
-                if (typeof ForgeVTT != "undefined" && ForgeVTT.usingTheForge) {
+                if (typeof ForgeVTT !== "undefined" && ForgeVTT.usingTheForge) {
                     src = "forgevtt";
                 }
 
@@ -116,7 +116,7 @@ export class Hierarchy {
             // The old packs started with a number, check if it's the old format
             if (olderPackStructure) {
                 // If this is the older pack hierarchy, then add this pack as the folder structure
-                folder = _parent.children.find(f => f.id == pack.name);
+                folder = _parent.children.find(f => f.id === pack.name);
                 if (!folder) {
                     let data = { 
                         id: pack.name, 
@@ -135,7 +135,7 @@ export class Hierarchy {
             if (olderPackStructure) {
                 // If this is an older pack hierarchy, then parse all the packs that are child packs
                 let children = this.bookpacks.filter((p) => {
-                    return p.parent == pack.id && p.parent != undefined;
+                    return p.parent === pack.id && p.parent != undefined;
                 });
                 if (children.length) {
                     await this.parsePacks(children, folder);
@@ -146,7 +146,7 @@ export class Hierarchy {
 
     // Try and find the section, and create it if it doesn't exist
     getSection (type) {
-        let section = this.hierarchy.children.find(c => c.packtype == type);
+        let section = this.hierarchy.children.find(c => c.packtype === type);
         if (!section) {
             let icon = 'fa-book-open';
             switch (type) {
@@ -191,24 +191,24 @@ export class Hierarchy {
             if (path) {
                 const section = this.getSection(type);
                 folder = section;
-                if (typeof path == "string") {
+                if (typeof path === "string") {
                     path = path.split("/");
                 }
                 if (path instanceof Array) {
                     // traverse the path to make sure all folders are present
                     for (let i = 0; i < path.length; i++) {
                         let part = path[i];
-                        if (typeof part == "string") {
+                        if (typeof part === "string") {
                             part = { name: part };
                         }
                         // If the path is the actual entity id, then we've gone too far.
-                        if (document._id == part.id)
+                        if (document._id === part.id)
                             break;
                         
                         // see if we can find the folder
                         let parent = folder;
                         const name = decodeURIComponent(part.name);
-                        folder = parent.children.find(c => c.id == part.id || (part.id == undefined && c.name == name));
+                        folder = parent.children.find(c => c.id === part.id || (part.id == undefined && c.name === name));
                         if (!folder) {
                             // Get the key to find the sort information
                             const key = path.slice(0, i + 1).map(p => p.name).join("/");
@@ -219,7 +219,7 @@ export class Hierarchy {
                             parent.children.push(folder);
                         }
                         // Once we've found the parent folder in the path list, then stop going any further
-                        if (document.folder && folder.id == document.folder)
+                        if (document.folder && folder.id === document.folder)
                             break;
                     }
                 }
@@ -250,7 +250,7 @@ export class Hierarchy {
             for (let index of collection.index) {
                 let document = index;
                 let img = document.img;
-                if (pack.entity == "Scene") {
+                if (pack.entity === "Scene") {
                     //document = await collection.contents.find(c => c.id);
                     try {
                         // If this is a Scene then create a thumbnail to speed up loading the Book
@@ -264,7 +264,7 @@ export class Hierarchy {
                 // find the folder according to the entry
                 let _folder = this.getEntityFolder(document, type) || folder;
 
-                if (!_folder.children.find(c => c.id == document._id)) {
+                if (!_folder.children.find(c => c.id === document._id)) {
                     _folder.children.push({
                         id: document._id,
                         name: document.name,
@@ -276,7 +276,7 @@ export class Hierarchy {
                 }
             }
 
-            let section = this.hierarchy.children.find(c => c.packtype == type);
+            let section = this.hierarchy.children.find(c => c.packtype === type);
             if (section) {
                 section.count += (collection?.index?.size || 0);
             }

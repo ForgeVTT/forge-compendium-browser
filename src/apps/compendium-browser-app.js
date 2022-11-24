@@ -48,7 +48,7 @@ export class CompendiumBrowserApp extends Application {
         callback: async (bookid) => {
           let id = $(bookid).data()["id"];
 
-          const book = game.ForgeCompendiumBrowser.books.find(b => b.id == id);
+          const book = game.ForgeCompendiumBrowser.books.find(b => b.id === id);
 
           if (!book)
             return;

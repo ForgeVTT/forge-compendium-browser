@@ -33,9 +33,9 @@ export default {
   },
   methods: {
     openItem(item) {
-      if (item.type == "document") {
+      if (item.type === "document") {
         this.$emit("open", item);
-      } else if (item.children && item.children.length && item.children[0].name == item.name) {
+      } else if (item.children && item.children.length && item.children[0].name === item.name) {
         this.$emit("open", item.children[0]);
       }
     },
@@ -51,11 +51,11 @@ export default {
     },
     filteredList(item) {
       const useSameName = game.ForgeCompendiumBrowser.setting("same-name");
-      if (!item.children || (item.children.length == 1 && item.children[0].name == item.name)) {
+      if (!item.children || (item.children.length === 1 && item.children[0].name === item.name)) {
         return [];
       }
 
-      return item.children.filter((c) => c.name != item.name || !useSameName);
+      return item.children.filter((c) => c.name !== item.name || !useSameName);
     },
     hasImage(item) {
         return item.img ? 'has-image' : '';
@@ -66,7 +66,7 @@ export default {
       return this.listing && this.listing.length;
     },
     listClass() {
-      return this.depth == 0 ? "forge-compendium-item" : "";
+      return this.depth === 0 ? "forge-compendium-item" : "";
     },
     sortedList() {
       return [...this.listing].sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });

@@ -99,8 +99,8 @@
         <!-- breadcrumbs -->
         <ul class="flexrow forge-compendium-breadcrumbs">
           <li v-for="(item, index) in path" :key="item.id">
-            <span v-if="index != 0">/</span>
-            <div class="breadcrumb-link" v-on="item.id != document.id ? { click: () => selectEntity(item) } : {}">{{ item.name }}</div>
+            <span v-if="index !== 0">/</span>
+            <div class="breadcrumb-link" v-on="item.id !== document.id ? { click: () => selectEntity(item) } : {}">{{ item.name }}</div>
           </li>
         </ul>
         <div class="forge-entry-import" @click="importEntry">
@@ -309,17 +309,17 @@ export default {
       console.log("Select an entity", entity);
       if (!entity) return;
 
-      if (entity.type == "search") {
+      if (entity.type === "search") {
         this.openSearch(entity.query);
-      } else if (entity.type == "book") {
+      } else if (entity.type === "book") {
         this.clearPath();
-      } else if (entity.type == "folder") {
-        const child = entity.children.find(c => c.name == entity.name && c.type == "document");
+      } else if (entity.type === "folder") {
+        const child = entity.children.find(c => c.name === entity.name && c.type === "document");
         if (child) 
           this.selectEntity(child);
         else 
           this.folder = entity;
-      } else if (entity.type == "document") {
+      } else if (entity.type === "document") {
         if (!entity.document) {
           let collection = game.packs.get(entity.packId);
           entity.document = await collection.getDocument(entity.id);
@@ -329,7 +329,7 @@ export default {
         this.folder = entity;
       } else if (entity) {
         this.folder = entity;
-        if (entity.type == "section") this.document = null;
+        if (entity.type === "section") this.document = null;
       }
     },
     findClosestChapter(dir) {
@@ -341,7 +341,7 @@ export default {
       )
         return false;
 
-      let idx = this.currentSection.children.findIndex((c) => c.id == currentChapter.id);
+      let idx = this.currentSection.children.findIndex((c) => c.id === currentChapter.id);
       idx += dir;
       // If there is an entry with the same name as the current chapter, then use that to display as the entity.
       const chapter = this.currentSection.children[idx];
@@ -359,11 +359,11 @@ export default {
       this.selectEntity(entry || chapter);
     },
     moveUpParent(id, parent, dir, checkedEntities) {
-      if (!parent || parent.type == "book") 
+      if (!parent || parent.type === "book") 
         return null;
 
       // Haven't found any children, so go up a parent and move to the next one
-      let pidx = parent.children.findIndex((c) => c.id == id);
+      let pidx = parent.children.findIndex((c) => c.id === id);
       if (!checkedEntities.includes(parent.id)) {
         let entity = this.findDocument(pidx + dir, parent, dir, checkedEntities);
         if (entity) 
@@ -381,7 +381,7 @@ export default {
             if (entity) 
                 return entity;
           }
-        } else if (parent.children[i].type == "document") {
+        } else if (parent.children[i].type === "document") {
           return parent.children[i];
         }
       }
@@ -393,7 +393,7 @@ export default {
       if (idx == undefined) {
         if (!this.document) 
             return null;
-        idx = this.document.parent.children.findIndex((i) => i.id == this.document.id);
+        idx = this.document.parent.children.findIndex((i) => i.id === this.document.id);
       }
 
       let newChild = this.findDocument(idx + dir, this.document.parent, dir, checkedEntities);
@@ -405,21 +405,21 @@ export default {
     },
     changeItem(dir) {
       let entity = this.findClosestItem(dir);
-      if (entity && entity.type == "document") {
+      if (entity && entity.type === "document") {
         this.selectEntity(entity);
       }
     },
     sectionActive(section) {
-      return this.currentSection?.id == section.id ||
-        (this.searchTerm !== null &&
-          section.id == "search" &&
-          this.currentSection?.id == null)
+      return this.currentSection?.id === section.id ||
+        (this.searchTerm != null &&
+          section.id === "search" &&
+          this.currentSection?.id === null)
         ? "active"
         : "";
     },
     findEntity(parent, id) {
       if (parent.children) {
-        let entity = parent.children.find((c) => c.id == id);
+        let entity = parent.children.find((c) => c.id === id);
         if (entity) 
             return entity;
         for (let child of parent.children) {
@@ -435,7 +435,7 @@ export default {
       console.log("Open Link", pack, id);
       const parts = pack.split(".");
       if (parts.length) {
-        if (parts[0] == this.book.id) {
+        if (parts[0] === this.book.id) {
           // This is document is from this book, so find it and open it
           const entity = this.findEntity(this.book, id);
           if (entity) {
@@ -458,7 +458,7 @@ export default {
       this.historyPosition += dir;
       this.historyPosition = Math.min(Math.max(0, this.historyPosition), this.history.length - 1);
       const entity = this.history[this.historyPosition];
-      if (entity.type == "search") {
+      if (entity.type === "search") {
         this.openSearch(entity.query);
       } else {
         this.document = entity;
@@ -473,36 +473,41 @@ export default {
       game.ForgeCompendiumBrowser.showPermissions(this.book);
     },
     async importModule() {
-      let progress = {
-          max: 0,
-          count: 0,
-          perc: 0
-        }
+      let max = 0;
+      let count = 0;
+      let lastPerc = 0;
 
-      let globalHtml;
+      let dialogHtml;
 
-      let progressFn = (command, options) => {
-        let progressElem = $(`li.progress`, globalHtml);
-        if (options?.message)
-          $('.message', progressElem).html(options?.message);
-        if (command == "reset") {
-          progress.max = options?.max ?? 0;
-          progress.count = 0;
-          progress.perc = 0;
-          $('.progress-bar .bar', progressElem).css({'width': `0%`});
+      const progressFn = (command, options) => {
+        const progressElem = $("li.progress", dialogHtml);
+        // If there's a message included, then update the message text
+        if (options?.message) {
+          $('.message', progressElem).html(options.message);
         }
-        if (command == "increase") {
-          progress.count++;
-          if ((Math.round((progress.count / progress.max) * 100)) != progress.perc) {
-            progress.perc = (Math.round((progress.count / progress.max) * 100));
-            $('.progress-bar .bar', progressElem).css({'width': `${progress.perc}%`});
+        // reset command to restart progress bar for an action
+        if (command === "reset") {
+          max = options?.max ?? 0;
+          count = 0;
+          lastPerc = 0;
+          $('.progress-bar .bar', progressElem).css({'width': '0%'});
+
+        // increase command to increase the progress bar by one
+        } else if (command === "increase") {
+          count++;
+          // only update the interface if this addition has changed the percent
+          const currentPerc = (Math.round((count / max) * 100));
+          if (currentPerc !== lastPerc) {
+            lastPerc = currentPerc;
+            $('.progress-bar .bar', progressElem).css({'width': `${lastPerc}%`});
           }
-        }
-        if (command == "finish") {
-          $('.start-import', globalHtml).hide();
-          $('.finish-import', globalHtml).show();
-          $('.message', globalHtml).html('');
-          $('.progress-bar .bar', globalHtml).css({'width': `100%`});
+
+        // finish command when the process is done and the dialog needs to be cleaned up
+        } else if (command === "finish") {
+          $('.start-import', dialogHtml).hide();
+          $('.finish-import', dialogHtml).show();
+          $('.message', dialogHtml).html('');
+          $('.progress-bar .bar', dialogHtml).css({'width': "100%"});
         }
       }
 
@@ -522,7 +527,7 @@ export default {
         label: game.i18n.localize("ForgeCompendiumBrowser.Import"),
         buttons: {},
         render: (html) => {
-          globalHtml = html;
+          dialogHtml = html;
           $('.start-import', html).on("click", startImport.bind(this, html));
           $('.finish-import', html).on("click", closeDialog.bind(this));
         },
@@ -555,7 +560,7 @@ export default {
 
       // added idx and text here for a future improvement to show highlighted text
       let resultObject = (entity, idx, text) => {
-        const section = entity.parent.type == "section" ? entity.parent : this.book.children.find((s) => s.id == entity.parent.section);
+        const section = entity.parent.type === "section" ? entity.parent : this.book.children.find((s) => s.id === entity.parent.section);
         let img = entity.img;
         if (isV10 && img && img.indexOf("systems/dnd5e/icons")) {
           img = img.replace("systems/dnd5e/icons", "images/icons");
@@ -574,7 +579,7 @@ export default {
       let traverseSearch = (parent, results) => {
         let searchResult = null;
 
-        if (parent.type == "document") {
+        if (parent.type === "document") {
           if (title != null) {
             const idx = parent.name.toLowerCase().indexOf(title);
             if (idx >= 0) {
@@ -623,7 +628,7 @@ export default {
         }
         if (parent.children && parent.children.length) {
           for (let child of parent.children) {
-            if (parent.type == "book" && type != null && child.type != type)
+            if (parent.type === "book" && type != null && child.type !== type)
               continue;
             traverseSearch(child, results);
           }
@@ -664,9 +669,9 @@ export default {
       items.push(item);
       while (item.parent) {
         item = item.parent;
-        if (item.type != "book") {
+        if (item.type !== "book") {
           let canAdd = true;
-          if (game.ForgeCompendiumBrowser.setting("same-name") && item.name == items[items.length - 1].name) {
+          if (game.ForgeCompendiumBrowser.setting("same-name") && item.name === items[items.length - 1].name) {
             //Don't double up on the names if the user doesn't want to see them
             canAdd = false;
           }
@@ -692,18 +697,18 @@ export default {
         return null;
       } else {
         let section = this.document || this.folder;
-        while (section.type != "section" && section.parent) {
+        while (section.type !== "section" && section.parent) {
           section = section.parent;
         }
         return section;
       }
     },
     currentChapter() {
-      if (!this.folder || this.folder.type == "section") {
+      if (!this.folder || this.folder.type === "section") {
         return null;
       } else {
         let chapter = this.folder;
-        while (chapter.parent && chapter.parent.type != "section") {
+        while (chapter.parent && chapter.parent.type !== "section") {
           chapter = chapter.parent;
         }
         return chapter;
@@ -725,7 +730,7 @@ export default {
 
       const currentDefault = permission["default"] == undefined || permission["default"] ? "true" : "false";
       const playerPermissions = Object.entries(permission).map(([k, v]) => {
-        if (k == "default" || v == currentDefault || v == undefined) return null;
+        if (k === "default" || v === currentDefault || v == undefined) return null;
         const user = game.users.get(k);
         const value = v ? "true" : "false";
         return `${user.name}: ${levels[value]}`;
