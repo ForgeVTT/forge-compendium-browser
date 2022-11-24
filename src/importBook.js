@@ -5,16 +5,16 @@ export class ImportBook{
         let { progress } = options;
         ImportBook.translate = {};
 
-        let isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = isNewerVersion(game.version, "9.999999");
 
         const documentData = {};
-        for (let c of book.hierarchy.children) {
+        for (const c of book.hierarchy.children) {
             let mainfolder;
             if (c.packtype === "Actor") {
                 mainfolder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"] == undefined && f.name === "Monsters");
             }
             if (!mainfolder) {
-                let folderData = {
+                const folderData = {
                     name: c.packtype === "Actor" ? "Monsters" : book.name,
                     type: c.packtype,
                     sorting: c.packtype === "Actor" ? "a" : "m"
@@ -23,9 +23,10 @@ export class ImportBook{
                 mainfolder = await Folder.create(folderData);
             }
             console.log("Processing", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
-            if (progress)
+            if (progress) {
                 progress("reset", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
-            let data = await ImportBook.processChildren(c, c.packtype, mainfolder, progress);
+            }
+            const data = await ImportBook.processChildren(c, c.packtype, mainfolder, progress);
 
             documentData[c.packtype] = data;
         }
@@ -35,46 +36,50 @@ export class ImportBook{
             ImportBook.updateDocumentKeys(documentData, progress);
         }
 
-        let newDocs = {};
-        for (let [type, documents] of Object.entries(documentData)){
-            if (progress)
+        const newDocs = {};
+        for (const [type, documents] of Object.entries(documentData)){
+            if (progress) {
                 progress("reset", { max: 1, type, message: `Creating ${type}` });
+            }
 
-            let cls = getDocumentClass(type);
-            let docs = await cls.createDocuments(documents, { render: false, keepId: true });
+            const cls = getDocumentClass(type);
+            const docs = await cls.createDocuments(documents, { render: false, keepId: true });
 
-            if (progress)
+            if (progress) {
                 progress("increase", { type: type });
+            }
 
             newDocs[type] = docs;
         }
 
         if (!isV10) {
             // v9 doesn't allow us to create documents with specific IDs, therefore we have to go through after creation to collect the new IDs and replace the IDs witht he old ones.
-            let docUpdates = ImportBook.updateDocumentKeys(newDocs, progress);
+            const docUpdates = ImportBook.updateDocumentKeys(newDocs, progress);
 
             //  Update the document changes with the inline link keys
-            for (let [type, data] of Object.entries(docUpdates)) {
+            for (const [type, data] of Object.entries(docUpdates)) {
                 if (data && data.length) {
                     if (type === "JournalEntry" && isV10) {
                         if (progress)
                             progress("reset", { max: data.length, type, message: `Updating ${type}` });
 
-                        for (let page of data) {
+                        for (const page of data) {
                             await page.object.update({"text.content": page.value});
 
                             if (progress)
                                 progress("increase", { type });
                         }
                     } else {
-                        if (progress)
+                        if (progress) {
                             progress("reset", { max: 1, type, message: `Updating ${type}` });
+                        }
 
-                        let cls = getDocumentClass(type);
+                        const cls = getDocumentClass(type);
                         await cls.updateDocuments(data, { render: false });
 
-                        if (progress)
+                        if (progress) {
                             progress("increase", { type });
+                        }
                     }
                 }
             }
@@ -84,14 +89,14 @@ export class ImportBook{
             progress("finish");
         }
         // refresh the directory listing, for some reason they're not being refreshed.
-        for (let dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
+        for (const dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
             ui[dir].render();
         }
     }
 
     static getDocumentProperty(document) {
-        let isV10 = isNewerVersion(game.version, "9.999999");
-        let type = document.folder?.type || document.parent?.folder?.type;
+        const isV10 = isNewerVersion(game.version, "9.999999");
+        const type = document.folder?.type || document.parent?.folder?.type;
         switch (type) {
             case "Item": return "system.description.value";
             case "Actor": return "system.details.biography.value";
@@ -100,18 +105,18 @@ export class ImportBook{
     } 
 
     static async updateDocumentKeys(newDocs, progress) {
-        let isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = isNewerVersion(game.version, "9.999999");
         if (!isV10) {
             // Collect the original ID since v9 didn't create documents with a provided ID
-            for (let [type, documents] of Object.entries(newDocs)) {
-                for (let document of documents) {
-                    let docType = document.folder?.type || document.parent?.folder?.type || type;
+            for (const [type, documents] of Object.entries(newDocs)) {
+                for (const document of documents) {
+                    const docType = document.folder?.type || document.parent?.folder?.type || type;
                     let originalId = getProperty(document, "flags.forge-compendium-browser.originalId");
                     if (originalId) {
                         ImportBook.translate[originalId] = { id: document._id, uuid: document.uuid };
                     }
                     if (document.pages) {
-                        for (let page of document.pages) {
+                        for (const page of document.pages) {
                             originalId = getProperty(page, "flags.forge-compendium-browser.originalId");
                             if (originalId) {
                                 ImportBook.translate[originalId] = { id: page._id, uuid: page.uuid, type: docType };
@@ -123,26 +128,27 @@ export class ImportBook{
         }
 
         // Go through the documents and see if there are any inline links that need replacing
-        let docUpdates = {};
-        for (let [type, data] of Object.entries(newDocs)) {
-            if (progress)
+        const docUpdates = {};
+        for (const [type, data] of Object.entries(newDocs)) {
+            if (progress) {
                 progress("reset", { max: data.length, type, message: (type === "Scene" ? "Linking tokens in scenes" : `Fixing inline links in ${type}`) });
+            }
 
-            let updates = [];
-            for (let document of data) {
+            const updates = [];
+            for (const document of data) {
                 if (progress) {
                     progress("increase", { type });
                 }
 
-                let type = document.folder?.type || document.parent?.folder?.type;
+                const type = document.folder?.type || document.parent?.folder?.type;
                 if (type === "JournalEntry" && isV10) {
                     let isChanged = false;
-                    for (let page of document.pages) {
+                    for (const page of document.pages) {
                         let repvalue = getProperty(page, "text.content");
-                        let original = repvalue;
+                        const original = repvalue;
                         if (repvalue) {
-                            for (let [key, id] of Object.entries(ImportBook.translate)) {
-                                let value = `@UUID[${id.uuid}]`;
+                            for (const [key, id] of Object.entries(ImportBook.translate)) {
+                                const value = `@UUID[${id.uuid}]`;
                                 repvalue = repvalue.replaceAll(`@Compendium[${key}]`, value); 
                             }
                             if (repvalue !== original) {
@@ -155,26 +161,26 @@ export class ImportBook{
                         }
                     }
                     if (isChanged && !isV10) {
-                        let update = { _id: document._id, pages: pages };
-                        updates.push(update);
+                        updates.push({ _id: document._id, pages: pages });
                     }
                 } else if (type === "Scene") {
                     // Check the scene's journal entry
+                    // TODO: check the scene's journal entry to link to the correct journal entry
 
                     // Go through the tokens and point them to the right actors.
-                    let tokens = (document.tokens || document.data.tokens || []);
-                    for (let token of tokens) {
-                        let tokenName = getProperty(token, "flags.ddbActorFlags.name") || getProperty(token.data, "flags.ddbActorFlags.name") || token.name;
+                    const tokens = (document.tokens || document.data.tokens || []);
+                    for (const token of tokens) {
+                        const tokenName = getProperty(token, "flags.ddbActorFlags.name") || getProperty(token.data, "flags.ddbActorFlags.name") || token.name;
                         if (!tokenName)
                             continue;
                         // Check to see if it's being imported with this adventure.
                         let actor;
-                        let actorUpdates = newDocs.find(d => d.type === "Actor");
+                        const actorUpdates = newDocs.find(d => d.type === "Actor");
                         if (actorUpdates) {
                             actor = actorUpdates.data.find(a => a.name === tokenName);
                         }
                         // Check to see if it already exists in the Monsters folder
-                        let folderName = `Monsters | ${tokenName[0].toUpperCase()}`;
+                        const folderName = `Monsters | ${tokenName[0].toUpperCase()}`;
                         let monsterFolder = game.folders.find(f => f.name === folderName && f.folder?.name === "Monsters");
                         if (!actor && monsterFolder) {
                             actor = game.actors.find(a => {
@@ -185,26 +191,26 @@ export class ImportBook{
                         }
                         // Check to see if it's in the Monsters SRD Compendium
                         if (!actor) {
-                            let monsterPack = game.packs.get("dnd5e.monsters");
+                            const monsterPack = game.packs.get("dnd5e.monsters");
                             if (monsterPack) {
                                 await monsterPack.getIndex();
-                                let index = monsterPack.index.find(i => i.name === tokenName);
+                                const index = monsterPack.index.find(i => i.name === tokenName);
 
                                 if (index) {
-                                    let document = await monsterPack.getDocument(index._id);
-                                    let data = document.toObject(false);
+                                    const document = await monsterPack.getDocument(index._id);
+                                    const data = document.toObject(false);
                                     if (!monsterFolder) {
                                         let parentFolder = game.folders.find(f => f.name === "Monsters" && f.folder == undefined);
                                         if (!parentFolder) {
-                                            let folderData = {
+                                            const parentFolderData = {
                                                 name: "Monsters",
                                                 type: "Actor",
                                                 sorting: "m"
                                             };
-                                            folderData[isV10 ? "folder" : "parent"] = null;
-                                            parentFolder = await Folder.create(folderData);
+                                            parentFolderData[isV10 ? "folder" : "parent"] = null;
+                                            parentFolder = await Folder.create(parentFolderData);
                                         }
-                                        let folderData = {
+                                        const folderData = {
                                             name: folderName,
                                             type: "Actor",
                                             sorting: "m"
@@ -213,38 +219,38 @@ export class ImportBook{
                                         monsterFolder = await Folder.create(folderData);
                                     }
                                     data.folder = monsterFolder;
-                                    let results = await Actor.createDocuments([data]);
+                                    const results = await Actor.createDocuments([data]);
                                     actor = results[0];
                                 }
                             }
                         }
 
                         if (actor) {
-                            let tokenUpdate = { actorId: actor.id };
+                            const tokenUpdate = { actorId: actor.id };
                             if ((!token.texture?.src || token.texture?.src === "icons/svg/mystery-man.svg") && actor?.prototypeToken?.texture?.src)
                                 tokenUpdate.texture = { src: actor?.prototypeToken?.texture?.src };
                             await token.update(tokenUpdate);
                         }
                     }
                     // Go through notes and point them to the right Journal Entry
-                    for (let note of (document.notes || document.data.notes || [])) {
+                    for (const note of (document.notes || document.data.notes || [])) {
                         console.log("Note", note);
-                        //note.entryId
+                        // TODO: go through the notes on a scene to make sure they poin to the correct entry
                     }
                 } else {
-                    let prop = ImportBook.getDocumentProperty(document)
+                    const prop = ImportBook.getDocumentProperty(document)
                     let repvalue = getProperty(document, prop);
-                    let original = repvalue;
+                    const original = repvalue;
                     if (repvalue) {
-                        for (let [key, id] of Object.entries(ImportBook.translate)) {
-                            let value = (isV10 ? `@UUID[${id.uuid}]` : `@${id.type}[${id.id}]`);
+                        for (const [key, id] of Object.entries(ImportBook.translate)) {
+                            const value = (isV10 ? `@UUID[${id.uuid}]` : `@${id.type}[${id.id}]`);
                             repvalue = repvalue.replaceAll(`@Compendium[${key}]`, value); 
                         }
                         if (repvalue !== original) {
                             if (isV10)
                                 setProperty(document, prop, repvalue);
                             else {
-                                let update = { _id: document._id };
+                                const update = { _id: document._id };
                                 update[prop] = repvalue;
                                 updates.push(update);
                             }
@@ -260,18 +266,18 @@ export class ImportBook{
     }
 
     static async processChildren(parent, type, parentFolder, progress) {
-        let documentData = [];
+        const documentData = [];
         let folderSort = 100000;
-        let isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = isNewerVersion(game.version, "9.999999");
 
-        for (let child of parent.children) {
+        for (const child of parent.children) {
             if (child.type === "folder") {
                 let folder;
                 if (type === "Actor") {
                     folder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"]?.id === parentFolder.id && f.name === child.name);
                 }
                 if (!folder) {
-                    let folderData = {
+                    const folderData = {
                         name: child.name,
                         type: type,
                         sorting: type === "Actor" ? "a" : "m",
@@ -284,19 +290,19 @@ export class ImportBook{
                 }
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
             } else if (child.type === "document") {
-                let collection = game.packs.get(child.packId);
+                const collection = game.packs.get(child.packId);
                 if (!collection.contents.length) {
-                    let documents = await collection.getDocuments();
+                    await collection.getDocuments();
                 }
-                let document = collection.get(child.id);
+                const document = collection.get(child.id);
                 if (!document)
                     continue;
 
-                let key = `${child.packId}.${document.id}`;
+                const key = `${child.packId}.${document.id}`;
                 if (type === "Actor") {
                     const actor = game.actors.find(a => {
-                        let a_ddbid = getProperty(a, "flags.forge-compendium-browser.ddbid");
-                        let b_ddbid = getProperty(document, "flags.forge-compendium-browser.ddbid");
+                        const a_ddbid = getProperty(a, "flags.forge-compendium-browser.ddbid");
+                        const b_ddbid = getProperty(document, "flags.forge-compendium-browser.ddbid");
                         return a.folder?.id === parentFolder.id && ((a_ddbid && b_ddbid && a_ddbid === b_ddbid) || (a.name === document.name));
                     });
                     if (actor) {
@@ -304,12 +310,12 @@ export class ImportBook{
                         continue;
                     }
                 } else if (type === "Scene") {
-                    for (let note of (document.notes || document.data.notes || [])) {
+                    for (const note of (document.notes || document.data.notes || [])) {
                         console.log("Check Note", note);
-                        //note.entryId
+                        // TODO import the note properly
                     }
                 }
-                let data = document.toObject(false);
+                const data = document.toObject(false);
                 data.folder = parentFolder;
 
                 data._id = randomID();

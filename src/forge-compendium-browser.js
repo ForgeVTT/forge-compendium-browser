@@ -70,10 +70,10 @@ export class ForgeCompendiumBrowser {
 
         //Find all the DnDBeyond modules
         log("Parsing compendiums");
-        for (let module of game.modules.values()) {
+        for (const module of game.modules.values()) {
             const flags = module.flags ?? module.data.flags;
             if (flags["forge-compendium-browser"]?.active && module.active) {
-                let book = {
+                const book = {
                     id: module.id,
                     name: module.title ?? module.data.title,
                     description: module.description ?? module.data.description,
@@ -86,7 +86,7 @@ export class ForgeCompendiumBrowser {
                     permissions: permissions[module.id] || {},
                 };
 
-                let hierarchy = new Hierarchy(book);
+                const hierarchy = new Hierarchy(book);
                 await hierarchy.getHierarchy();
 
                 ForgeCompendiumBrowser.books.push(book);
@@ -130,7 +130,7 @@ export class ForgeCompendiumBrowser {
     static async indexBook(book) {
         const indexPacks = (parent) => {
             if (parent.children && parent.children.length) {
-                for (let child of parent.children) {
+                for (const child of parent.children) {
                     child.parent = parent;
                     child.section = parent.section || (parent.type === "section" && parent.id);
 
@@ -155,8 +155,8 @@ export class ForgeCompendiumBrowser {
     }
 
     static clearPacks() {
-        for (let book of ForgeCompendiumBrowser.books) {
-            for (let pack of book.packs) {
+        for (const book of ForgeCompendiumBrowser.books) {
+            for (const pack of book.packs) {
                 $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, ui.compendium.element).addClass('forge-compendium-pack');
             }
         }
@@ -192,7 +192,7 @@ export class ForgeCompendiumBrowser {
     
             const changes = isV10 ? fd.object : fd.toObject();
     
-            for (let [key, value] of Object.entries(changes)) {
+            for (const [key, value] of Object.entries(changes)) {
               permission[key] = value === "null" ? null : value === "true";
             }
     
@@ -233,7 +233,7 @@ Hooks.on("setupTileActions", (app) => {
                 name: "Compendium Book",
                 list: () => {
                     let list = {};
-                    for (let book of game.ForgeCompendiumBrowser.books) {
+                    for (const book of game.ForgeCompendiumBrowser.books) {
                         list[book.id] = book.name;
                     }
                     return list;
@@ -252,14 +252,14 @@ Hooks.on("setupTileActions", (app) => {
             }
         },
         content: async (trigger, action) => {
-            let book = game.ForgeCompendiumBrowser.books.find(b => b.id === action.data.bookid);
+            const book = game.ForgeCompendiumBrowser.books.find(b => b.id === action.data.bookid);
             return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${book.name || 'Unknown'}"</span>`;
         }
     });
 });
 
 Hooks.on('renderModuleManagement', (app, html, data) => {
-    for (let module of game.modules.values()) {
+    for (const module of game.modules.values()) {
         const flags = module.flags ?? module.data.flags;
         if (flags["forge-compendium-browser"]?.active) {
                $("<span>")
@@ -273,8 +273,8 @@ Hooks.on('renderModuleManagement', (app, html, data) => {
 // If the permissions change, make sure to update the book
 Hooks.on('updateSetting', (setting, data, options, userId) => {
     if (setting.key === "forge-compendium-browser.permissions") {
-        for (let [bookId, permission] of Object.entries(setting.value)) {
-            let book = ForgeCompendiumBrowser.books.find(b => b.id === bookId);
+        for (const [bookId, permission] of Object.entries(setting.value)) {
+            const book = ForgeCompendiumBrowser.books.find(b => b.id === bookId);
             if (book) {
                 book.permissions = permission;
             }

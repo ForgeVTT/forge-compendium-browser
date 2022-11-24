@@ -58,7 +58,7 @@ export default {
       if (!this.entity)
         return "";
 
-      let ids = [];
+      const ids = [];
       let item = this.selected;
       while (item.parent) {
         ids.push(item.id);

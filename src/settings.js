@@ -1,7 +1,7 @@
 import { i18n } from "./forge-compendium-browser.js";
 
 export const registerSettings = function () {
-    let modulename = "forge-compendium-browser";
+    const modulename = "forge-compendium-browser";
 
 	game.settings.register(modulename, "same-name", {
 		name: i18n("ForgeCompendiumBrowser.same-name.name"),

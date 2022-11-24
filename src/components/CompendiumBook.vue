@@ -321,7 +321,7 @@ export default {
           this.folder = entity;
       } else if (entity.type === "document") {
         if (!entity.document) {
-          let collection = game.packs.get(entity.packId);
+          const collection = game.packs.get(entity.packId);
           entity.document = await collection.getDocument(entity.id);
         }
         this.document = entity;
@@ -352,7 +352,7 @@ export default {
       if (!chapter) 
         return;
 
-      let checkedEntities = [];
+      const checkedEntities = [];
       // when changing the chapter, find the next available document in the chapter to display
       const entry = this.findDocument(0, chapter, 1, checkedEntities);
 
@@ -363,9 +363,9 @@ export default {
         return null;
 
       // Haven't found any children, so go up a parent and move to the next one
-      let pidx = parent.children.findIndex((c) => c.id === id);
+      const pidx = parent.children.findIndex((c) => c.id === id);
       if (!checkedEntities.includes(parent.id)) {
-        let entity = this.findDocument(pidx + dir, parent, dir, checkedEntities);
+        const entity = this.findDocument(pidx + dir, parent, dir, checkedEntities);
         if (entity) 
             return entity;
       }
@@ -373,11 +373,11 @@ export default {
     },
     findDocument(index, parent, dir, checkedEntities) {
       checkedEntities.push(parent.id);
-      for (let i = index; i >= 0 && i < parent.children.length; i += dir) {
+      for (const i = index; i >= 0 && i < parent.children.length; i += dir) {
         if (parent.children[i].children) {
-          let idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
+          const idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
           if (!checkedEntities.includes(parent.children[i].id)) {
-            let entity = this.findDocument(idx, parent.children[i], dir, checkedEntities);
+            const entity = this.findDocument(idx, parent.children[i], dir, checkedEntities);
             if (entity) 
                 return entity;
           }
@@ -388,7 +388,7 @@ export default {
       return null;
     },
     findClosestItem(dir, idx) {
-      let checkedEntities = [];
+      const checkedEntities = [];
 
       if (idx == undefined) {
         if (!this.document) 
@@ -404,7 +404,7 @@ export default {
       return newChild;
     },
     changeItem(dir) {
-      let entity = this.findClosestItem(dir);
+      const entity = this.findClosestItem(dir);
       if (entity && entity.type === "document") {
         this.selectEntity(entity);
       }
@@ -422,7 +422,7 @@ export default {
         let entity = parent.children.find((c) => c.id === id);
         if (entity) 
             return entity;
-        for (let child of parent.children) {
+        for (const child of parent.children) {
           entity = this.findEntity(child, id);
           if (entity) 
             return entity;
@@ -511,12 +511,12 @@ export default {
         }
       }
 
-      let startImport = function(html) {
+      const startImport = function(html) {
         $('.start-import', html).prop("disabled", true);
         game.ForgeCompendiumBrowser.importBook(this.book, { progress: progressFn });
       }
 
-      let closeDialog = function(event) {
+      const closeDialog = function(event) {
         $(event.currentTarget).closest('.dialog').find('header .close').click();
       }
 
@@ -559,7 +559,7 @@ export default {
       let query = this.searchTerm.toLowerCase();
 
       // added idx and text here for a future improvement to show highlighted text
-      let resultObject = (entity, idx, text) => {
+      const resultObject = (entity, idx, text) => {
         const section = entity.parent.type === "section" ? entity.parent : this.book.children.find((s) => s.id === entity.parent.section);
         let img = entity.img;
         if (isV10 && img && img.indexOf("systems/dnd5e/icons")) {
@@ -576,7 +576,7 @@ export default {
         };
       };
 
-      let traverseSearch = (parent, results) => {
+      const traverseSearch = (parent, results) => {
         let searchResult = null;
 
         if (parent.type === "document") {
@@ -590,8 +590,8 @@ export default {
             try {
               if (parent.document instanceof JournalEntry) {
                 if (isNewerVersion(game.version, "9.99999")) {
-                  for (let page of parent.pages) {
-                    let field = page.content;
+                  for (const page of parent.pages) {
+                    const field = page.content;
                     const idx = field.toLowerCase().indexOf(query);
                     if (idx >= 0) {
                       searchResult = resultObject(parent, idx, field);
@@ -599,20 +599,20 @@ export default {
                     }
                   }
                 } else {
-                  let field = parent.document.data.content;
+                  const field = parent.document.data.content;
                   const idx = field.toLowerCase().indexOf(query);
                   if (idx >= 0) {
                     searchResult = resultObject(parent, idx, field);
                   }
                 }
               } else if (parent.document instanceof Actor) {
-                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.details.biography.value : parent.document.data.data.details.biography.value;
+                const field = isNewerVersion(game.version, "9.99999") ? parent.document.system.details.biography.value : parent.document.data.data.details.biography.value;
                 const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
                   searchResult = resultObject(parent, idx, field);
                 }
               } else if (parent.document instanceof Item) {
-                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.description.value : parent.document.data.data.description.value
+                const field = isNewerVersion(game.version, "9.99999") ? parent.document.system.description.value : parent.document.data.data.description.value
                 const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
                   searchResult = resultObject(parent, idx, field);
@@ -627,7 +627,7 @@ export default {
           }
         }
         if (parent.children && parent.children.length) {
-          for (let child of parent.children) {
+          for (const child of parent.children) {
             if (parent.type === "book" && type != null && child.type !== type)
               continue;
             traverseSearch(child, results);
@@ -635,7 +635,7 @@ export default {
         }
       };
 
-      let results = {};
+      const results = {};
       traverseSearch(this.book, results);
       this.searchResults = Object.values(results);
     },
@@ -664,7 +664,7 @@ export default {
       return !this.findClosestItem(1) ? "disabled" : "";
     },
     path() {
-      let items = [];
+      const items = [];
       let item = this.document;
       items.push(item);
       while (item.parent) {

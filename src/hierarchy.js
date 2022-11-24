@@ -71,7 +71,7 @@ export class Hierarchy {
         this.hierarchy = { version: ForgeCompendiumBrowser.version, dynamic: true, children: [] };
 
         // check for a folders.json
-        let folders = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/folders.json`);
+        const folders = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/folders.json`);
         if (folders) {
             if (folders instanceof Array) {
                 this.parseFolders(folders);
@@ -96,10 +96,10 @@ export class Hierarchy {
     }
 
     parseFolders (folders, parent) {
-        for (let folder of folders) {
+        for (const folder of folders) {
             const type = folder.type || folder.entity;
-            let _parent = parent || this.getSection(type);
-            let child = this.createHierarchyFolder(folder);
+            const _parent = parent || this.getSection(type);
+            const child = this.createHierarchyFolder(folder);
             _parent.children.push(child);
             this.parseFolders(parent.children, child);
         }
@@ -107,9 +107,9 @@ export class Hierarchy {
 
     async parsePacks (packs, parent) {
         let sort = 10000;
-        for (let pack of packs) {
+        for (const pack of packs) {
             const type = pack.type || pack.entity;
-            let _parent = parent || this.getSection(type);  // Create the section if the parent doesn't exist
+            const _parent = parent || this.getSection(type);  // Create the section if the parent doesn't exist
             let folder = _parent;
             const olderPackStructure = Hierarchy.startsWithNumber(pack.name);
 
@@ -118,7 +118,7 @@ export class Hierarchy {
                 // If this is the older pack hierarchy, then add this pack as the folder structure
                 folder = _parent.children.find(f => f.id === pack.name);
                 if (!folder) {
-                    let data = { 
+                    const data = { 
                         id: pack.name, 
                         name: pack.label, 
                         sort: pack.sort || sort 
@@ -134,7 +134,7 @@ export class Hierarchy {
 
             if (olderPackStructure) {
                 // If this is an older pack hierarchy, then parse all the packs that are child packs
-                let children = this.bookpacks.filter((p) => {
+                const children = this.bookpacks.filter((p) => {
                     return p.parent === pack.id && p.parent != undefined;
                 });
                 if (children.length) {
@@ -196,7 +196,7 @@ export class Hierarchy {
                 }
                 if (path instanceof Array) {
                     // traverse the path to make sure all folders are present
-                    for (let i = 0; i < path.length; i++) {
+                    for (const i = 0; i < path.length; i++) {
                         let part = path[i];
                         if (typeof part === "string") {
                             part = { name: part };
@@ -206,7 +206,7 @@ export class Hierarchy {
                             break;
                         
                         // see if we can find the folder
-                        let parent = folder;
+                        const parent = folder;
                         const name = decodeURIComponent(part.name);
                         folder = parent.children.find(c => c.id === part.id || (part.id == undefined && c.name === name));
                         if (!folder) {
@@ -233,7 +233,7 @@ export class Hierarchy {
         const key = `${this.book.id}.${pack.name}`;
         try {
             const type = pack.type || pack.entity;
-            let collection = game.packs.get(key);
+            const collection = game.packs.get(key);
             
             // Make sure to keep checking in case the data store isn't ready yet.
             let count = 0;
@@ -247,8 +247,8 @@ export class Hierarchy {
                 }
             } while(!collection.indexed && count < 10)
             
-            for (let index of collection.index) {
-                let document = index;
+            for (const index of collection.index) {
+                const document = index;
                 let img = document.img;
                 if (pack.entity === "Scene") {
                     //document = await collection.contents.find(c => c.id);
@@ -262,7 +262,7 @@ export class Hierarchy {
                 }
 
                 // find the folder according to the entry
-                let _folder = this.getEntityFolder(document, type) || folder;
+                const _folder = this.getEntityFolder(document, type) || folder;
 
                 if (!_folder.children.find(c => c.id === document._id)) {
                     _folder.children.push({
@@ -276,7 +276,7 @@ export class Hierarchy {
                 }
             }
 
-            let section = this.hierarchy.children.find(c => c.packtype === type);
+            const section = this.hierarchy.children.find(c => c.packtype === type);
             if (section) {
                 section.count += (collection?.index?.size || 0);
             }

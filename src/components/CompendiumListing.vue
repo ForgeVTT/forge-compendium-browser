@@ -34,8 +34,8 @@ export default {
     },
     observeImages() {
       this.$nextTick(function () {
-        let lazyloadImages = document.querySelectorAll(".lazy");
-        let observer = this.observer;
+        const lazyloadImages = document.querySelectorAll(".lazy");
+        const observer = this.observer;
         lazyloadImages.forEach(function(image) {
           observer.observe(image);
         });
