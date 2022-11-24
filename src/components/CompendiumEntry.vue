@@ -22,16 +22,16 @@ export default {
       const packId = e.currentTarget.dataset.pack;
       const id = e.currentTarget.dataset.id;
 
-      console.log("Opening a link", id);
+      //console.log("Opening a link", id);
 
       this.$emit("link", packId, id);
       e.preventDefault();
       e.stopPropagation();
     },
     async loadDocument() {
-      console.log("entry", this.entry);
+      //console.log("Entry", this.entry);
       const document = this.entry.document;
-      const cls = document._getSheetClass ? document._getSheetClass() : null;
+      let cls = document._getSheetClass ? document._getSheetClass() : null;
 
       if (document instanceof Scene) {
         const templateData = {
@@ -112,14 +112,14 @@ export default {
         this.subsheet._disableFields(subdocument[0]);
 
         // Remove all the links that point back to this entry, just to clean up
-        $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link, text) => {
+        $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link) => {
           const linkHtml = $(link).html() || "";
           if (linkHtml.indexOf('<i class="fas fa-book-open"></i>') >= 0 && linkHtml.indexOf(this.entry.name) >= 0) {
             $(link).remove();
           }
         });
 
-        $('a[href^="ddb://"]', this.$refs.entry).each((idx, link, text) => {
+        $('a[href^="ddb://"]', this.$refs.entry).each((idx, link) => {
           const linkHtml = $(link).html() || "";
           let href = $(link).attr('href');
           if (href.startsWith("ddb://compendium")) {

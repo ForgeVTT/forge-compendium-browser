@@ -102,7 +102,7 @@ export class ForgeCompendiumBrowser {
         let err;
         let resp;
         try {
-            resp = await fetch(src, {cache: "no-cache"}).catch(e => {
+            resp = await fetch(src, {cache: "no-cache"}).catch((e) => {
                 err = e;
                 return null;
             });
@@ -111,7 +111,7 @@ export class ForgeCompendiumBrowser {
         }
         if (resp.status !== 200) {
             const msg = `Unable to load hierarchy data "${src}"`;
-            warn(msg);
+            warn(msg, err);
             return null;
         }
 
@@ -122,6 +122,7 @@ export class ForgeCompendiumBrowser {
             log(`Loaded hierarchy file ${src}`);
             json = foundry.utils.expandObject(json);
         } catch (err) {
+            warn(err);
             json = null;
         }
         return json;
@@ -208,7 +209,7 @@ Hooks.on('init', ForgeCompendiumBrowser.init);
 Hooks.on('setup', ForgeCompendiumBrowser.setup);
 Hooks.on('ready', ForgeCompendiumBrowser.ready);
 
-Hooks.on("renderCompendiumDirectory", (app, html, data) => {
+Hooks.on("renderCompendiumDirectory", (app, html) => {
     $('.directory-header', html).append(
         $('<div>')
             .addClass('forge-compendium-actions action-buttons flexrow')
@@ -248,7 +249,7 @@ Hooks.on("setupTileActions", (app) => {
             if(userid === game.user.id) {
                 game.ForgeCompendiumBrowser.openBrowser(action.data.bookid);
             } else {
-                game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, (resp) => { } );
+                game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, () => { } );
             }
         },
         content: async (trigger, action) => {
@@ -258,7 +259,7 @@ Hooks.on("setupTileActions", (app) => {
     });
 });
 
-Hooks.on('renderModuleManagement', (app, html, data) => {
+Hooks.on('renderModuleManagement', (app, html) => {
     for (const module of game.modules.values()) {
         const flags = module.flags ?? module.data.flags;
         if (flags["forge-compendium-browser"]?.active) {
@@ -271,7 +272,7 @@ Hooks.on('renderModuleManagement', (app, html, data) => {
 });
 
 // If the permissions change, make sure to update the book
-Hooks.on('updateSetting', (setting, data, options, userId) => {
+Hooks.on('updateSetting', (setting) => {
     if (setting.key === "forge-compendium-browser.permissions") {
         for (const [bookId, permission] of Object.entries(setting.value)) {
             const book = ForgeCompendiumBrowser.books.find(b => b.id === bookId);

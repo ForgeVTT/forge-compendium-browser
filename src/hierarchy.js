@@ -1,4 +1,4 @@
-import { ForgeCompendiumBrowser, log, warn, error, i18n, setting } from "./forge-compendium-browser.js";
+import { ForgeCompendiumBrowser, warn, log } from "./forge-compendium-browser.js";
 
 export class Hierarchy {
     book;
@@ -23,16 +23,16 @@ export class Hierarchy {
     async getHierarchy() {
         // Check for the compendium's hierarchy file
         this.book.hierarchy = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/hierarchy.json`);
-        console.log("finding hierarchy", this.book);
+        log("finding hierarchy", this.book);
 
         // If the Compendium Library version is greater than the current hierarchy, and it's allowed to update, then clear the hierarchy and reload
         if (this.book.hierarchy && (this.book.hierarchy.version || "-") !== ForgeCompendiumBrowser.version && this.book.hierarchy.dynamic !== false) {
-            console.log("reloading hierarchy", this.book);
+            log("reloading hierarchy", this.book);
             this.book.hierarchy = null; //The version has changed, so reload the hierarchy
         }
 
         if (this.book.hierarchy == undefined) {
-            console.log("building hierarchy", this.book);
+            log("building hierarchy", this.book);
 
             const moduleData = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/module.json`);
             if (!moduleData)
@@ -196,7 +196,7 @@ export class Hierarchy {
                 }
                 if (path instanceof Array) {
                     // traverse the path to make sure all folders are present
-                    for (const i = 0; i < path.length; i++) {
+                    for (let i = 0; i < path.length; i++) {
                         let part = path[i];
                         if (typeof part === "string") {
                             part = { name: part };

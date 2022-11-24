@@ -1,5 +1,3 @@
-import { ForgeCompendiumBrowser } from "./forge-compendium-browser.js";
-
 export class ImportBook{
     static async importBook(book, options) {
         let { progress } = options;
@@ -234,7 +232,7 @@ export class ImportBook{
                     }
                     // Go through notes and point them to the right Journal Entry
                     for (const note of (document.notes || document.data.notes || [])) {
-                        console.log("Note", note);
+                        //console.log("Check Note", note);
                         // TODO: go through the notes on a scene to make sure they poin to the correct entry
                     }
                 } else {
@@ -266,7 +264,7 @@ export class ImportBook{
     }
 
     static async processChildren(parent, type, parentFolder, progress) {
-        const documentData = [];
+        let documentData = [];
         let folderSort = 100000;
         const isV10 = isNewerVersion(game.version, "9.999999");
 
@@ -311,7 +309,7 @@ export class ImportBook{
                     }
                 } else if (type === "Scene") {
                     for (const note of (document.notes || document.data.notes || [])) {
-                        console.log("Check Note", note);
+                        //console.log("Check Note", note);
                         // TODO import the note properly
                     }
                 }

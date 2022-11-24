@@ -306,7 +306,7 @@ export default {
       this.selectEntity(entity);
     },
     async selectEntity(entity) {
-      console.log("Select an entity", entity);
+      //console.log("Select an entity", entity);
       if (!entity) return;
 
       if (entity.type === "search") {
@@ -373,7 +373,7 @@ export default {
     },
     findDocument(index, parent, dir, checkedEntities) {
       checkedEntities.push(parent.id);
-      for (const i = index; i >= 0 && i < parent.children.length; i += dir) {
+      for (let i = index; i >= 0 && i < parent.children.length; i += dir) {
         if (parent.children[i].children) {
           const idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
           if (!checkedEntities.includes(parent.children[i].id)) {
@@ -432,7 +432,7 @@ export default {
     },
     openLink(pack, id) {
       //find the other entry and open it.
-      console.log("Open Link", pack, id);
+      //console.log("Open Link", pack, id);
       const parts = pack.split(".");
       if (parts.length) {
         if (parts[0] === this.book.id) {
@@ -664,7 +664,7 @@ export default {
       return !this.findClosestItem(1) ? "disabled" : "";
     },
     path() {
-      const items = [];
+      let items = [];
       let item = this.document;
       items.push(item);
       while (item.parent) {
@@ -735,8 +735,6 @@ export default {
         const value = v ? "true" : "false";
         return `${user.name}: ${levels[value]}`;
       }).filter(p => !!p);
-
-      console.log("permission", permission);
 
       return [`${this.i18n("ForgeCompendiumBrowser.Everyone")}: ${levels[currentDefault]}`, ...playerPermissions];
     }
