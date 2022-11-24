@@ -74,16 +74,11 @@ export default {
     availableBooks() {
       if (!this.library)
         return null;
-
-      const permissions = game.ForgeCompendiumBrowser.setting("permissions");
-
+        
       return this.library.filter((book) => {
           if (game.user.isGM)
             return true;
-          const permission = permissions[book.id];
-          if (permission == undefined)
-            return true;
-          return permission[game.user.id] ?? permission["default"] ?? true;
+          return book.permissions[game.user.id] ?? book.permissions["default"] ?? true;
       });
     },
     LibraryMessage() {

@@ -187,14 +187,14 @@
             </div>
             <div v-else class="no-results"><div>{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div></div>
           </div>
-          <div v-else>
+          <div v-else class="flexcol">
             <div class="flexrow flexcontain">
               <div
                 class="forge-compendium-description"
                 v-html="book.description"
               ></div>
               <div class="forge-compendium-contains flexcol">
-                <b style="flex-grow: 0;">Contains:</b>
+                <b style="flex-grow: 0;">{{ this.i18n("ForgeCompendiumBrowser.Contains") }}:</b>
                 <ul class="forge-compendium-contains-list">
                   <li v-for="section in sections" :key="section.id">
                     <i class="fas" :class="section.icon"></i>
@@ -230,6 +230,23 @@
                   <i class="fas fa-search"></i>
                 </div>
                 <div class="forge-compendium-title">{{ this.i18n("ForgeCompendiumBrowser.Search") }}</div>
+              </div>
+            </div>
+            <div class="flexrow forge-compendium-permissions">
+              <button 
+                class="permission-button"
+                @click="updatePermissions" 
+                :title="i18n('ForgeCompendiumBrowser.ConfigurePermissions')"
+              >
+                <i class="fas fa-lock"></i>
+              </button>
+              <b style="flex-grow: 0; margin-left: 8px;">{{ this.i18n("ForgeCompendiumBrowser.Ownership") }}:</b>
+              <div class="permission-text">
+                <span 
+                  class="user-permission"
+                  v-for="(permission, i) in permissionText"
+                  :key="i"
+                >{{ permission }}<span>
               </div>
             </div>
           </div>
@@ -451,6 +468,9 @@ export default {
     canHistory(dir) {
       const position = this.historyPosition + dir;
       return position < 0 || position > this.history.length - 1 ? "disabled" : "";
+    },
+    updatePermissions() {
+      game.ForgeCompendiumBrowser.showPermissions(this.book);
     },
     async importModule() {
       let progress = {
@@ -692,6 +712,23 @@ export default {
     },
     bookName() {
       return this.book.name.toUpperCase();
+    },
+    permissionText() {
+      const permission = this.book.permissions || {};
+
+      const levels = { "true": this.i18n("ForgeCompendiumBrowser.Allowed"), "false": this.i18n("ForgeCompendiumBrowser.NotAllowed") };
+
+      const currentDefault = permission["default"] == undefined || permission["default"] ? "true" : "false";
+      const playerPermissions = Object.entries(permission).map(([k, v]) => {
+        if (k == "default" || v == currentDefault || v == undefined) return null;
+        const user = game.users.get(k);
+        const value = v ? "true" : "false";
+        return `${user.name}: ${levels[value]}`;
+      }).filter(p => !!p);
+
+      console.log("permission", permission);
+
+      return [`${this.i18n("ForgeCompendiumBrowser.Everyone")}: ${levels[currentDefault]}`, ...playerPermissions];
     }
   },
 };
@@ -868,6 +905,35 @@ export default {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.95);
   flex: 0 0 300px;
+}
+
+.forge-compendium-content .forge-compendium-permissions {
+  flex-grow: 0;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  line-height: 32px;
+}
+
+.forge-compendium-content .forge-compendium-permissions .user-permission {
+  border-radius: 4px;
+  border: 1px solid #808080;
+  padding: 4px 8px;
+  margin-right: 4px;
+}
+
+.forge-compendium-content .forge-compendium-permissions .permission-button {
+  flex: 0 0 30px;
+  width: 30px;
+  padding: 2px;
+  height: 30px;
+  line-height: 25px;
+  padding: 2px 2px 2px 6px;
+}
+
+.forge-compendium-content .forge-compendium-permissions .permission-text {
+  margin-left: 8px;
 }
 
 .forge-compendium-content .forge-compendium-contains .forge-compendium-contains-list {
