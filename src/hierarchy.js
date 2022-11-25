@@ -177,7 +177,7 @@ export class Hierarchy {
             name: data.name,
             type: "folder",
             children: [],
-            sort: data.sort instanceof Array ? sort[0] : (data.sort || sort)
+            sort: data.sort instanceof Array ? sort : (data.sort ?? sort)
         }
         this.folderCache[folder.id] = folder;
         return folder;
