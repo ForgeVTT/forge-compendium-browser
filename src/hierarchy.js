@@ -39,7 +39,6 @@ export class Hierarchy {
                 return;
 
             this.book.hierarchy = await this.build(moduleData.packs)
-            
 
             if (this.book.hierarchy) {
                 let src = "data";
@@ -87,7 +86,7 @@ export class Hierarchy {
         await this.parsePacks(packs, null);
 
         // destroy the global variables
-        const hierarchy = this.hierarchy;
+        const hierarchy = this.sortChildren(this.hierarchy);
         delete this.folderCache;
         delete this.folderSort;
         delete this.hierarchy;
@@ -283,5 +282,15 @@ export class Hierarchy {
         } catch(err) {
             warn("Error importing compendium", key, err);
         }
+    }
+
+    sortChildren(parent) {
+        if (parent.children) {
+            let children = parent.children.sort(ForgeCompendiumBrowser.compare);
+            for (let child of children) {
+                this.sortChildren(child);
+            }
+        }
+        return parent;
     }
 }

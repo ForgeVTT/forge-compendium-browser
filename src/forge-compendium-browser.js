@@ -170,39 +170,44 @@ export class ForgeCompendiumBrowser {
         const permission = permissions[book.id] || {};
     
         const data = {
-          defaultLevels: { "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
-          playerLevels: { "null": i18n("ForgeCompendiumBrowser.Default"), "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
-          currentDefault: permission["default"] == undefined || permission["default"] ? "true" : "false",
-          users: game.users.filter(u => !u.isGM).map(u => {
-            return {
-              id: u.id,
-              name: u.name,
-              allowed: permission[u.id] == undefined ? "null" : permission[u.id] ? "true" : "false",
-            }
-          })
+            defaultLevels: { "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
+            playerLevels: { "null": i18n("ForgeCompendiumBrowser.Default"), "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
+            currentDefault: permission["default"] == undefined || permission["default"] ? "true" : "false",
+            users: game.users.filter(u => !u.isGM).map(u => {
+                return {
+                    id: u.id,
+                    name: u.name,
+                    allowed: permission[u.id] == undefined ? "null" : permission[u.id] ? "true" : "false",
+                }
+            })
         };
     
         const html = await renderTemplate("./modules/forge-compendium-browser/templates/permissions.html", data);
         Dialog.prompt({
-          title: `${i18n("ForgeCompendiumBrowser.ConfigurePermissions")}: ${book.name}`,
-          content: html,
-          label: i18n("ForgeCompendiumBrowser.SaveChanges"),
-          callback: (html) => {
-            const form = $("#permission-control", html)[0];
-            const fd = new FormDataExtended(form);
-    
-            const changes = isV10 ? fd.object : fd.toObject();
-    
-            for (const [key, value] of Object.entries(changes)) {
-              permission[key] = value === "null" ? null : value === "true";
-            }
-    
-            permissions[book.id] = book.permissions = permission;
-            game.settings.set("forge-compendium-browser", "permissions", permissions);
-          },
-          rejectClose: false,
+            title: `${i18n("ForgeCompendiumBrowser.ConfigurePermissions")}: ${book.name}`,
+            content: html,
+            label: i18n("ForgeCompendiumBrowser.SaveChanges"),
+            callback: (html) => {
+                const form = $("#permission-control", html)[0];
+                const fd = new FormDataExtended(form);
+        
+                const changes = isV10 ? fd.object : fd.toObject();
+        
+                for (const [key, value] of Object.entries(changes)) {
+                    permission[key] = value === "null" ? null : value === "true";
+                }
+        
+                permissions[book.id] = book.permissions = permission;
+                game.settings.set("forge-compendium-browser", "permissions", permissions);
+            },
+            rejectClose: false,
         });
-      }
+    }
+
+    static compare(a, b) {
+        let result = (a.sort ?? 0) - (b.sort ?? 0);
+        return result == 0 ? (a.name || "").localeCompare(b.name || "") : result;
+    }
 }
 
 Hooks.on('init', ForgeCompendiumBrowser.init);

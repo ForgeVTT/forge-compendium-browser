@@ -70,7 +70,7 @@ export default {
     filterList() {
       if (!this.entity.children) return [];
 
-      return this.entity.children.filter((c) => c.name !== this.entity.name || c.type !== "document").sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });
+      return this.entity.children.filter((c) => c.name !== this.entity.name || c.type !== "document").sort(game.ForgeCompendiumBrowser.compare);
     },
     showChildren() {
       if (this.entity.children &&

@@ -69,7 +69,7 @@ export default {
       return this.depth === 0 ? "forge-compendium-item" : "";
     },
     sortedList() {
-      return [...this.listing].sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });
+      return [...this.listing].sort(game.ForgeCompendiumBrowser.compare);
     }
   },
 };
