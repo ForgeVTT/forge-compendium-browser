@@ -90,7 +90,7 @@ export class ForgeCompendiumBrowser {
                 await hierarchy.getHierarchy();
 
                 ForgeCompendiumBrowser.books.push(book);
-                log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length} associated compendiums`);
+                log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.size} associated compendiums`);
             }
         }
 
