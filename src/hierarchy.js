@@ -186,7 +186,7 @@ export class Hierarchy {
     getEntityFolder (document, type) {
         let folder = this.folderCache[document.folder];
         if (!folder) {
-            let path = getProperty(document, "flags.forge-compendium-browser.path");
+            let path = getProperty(document, "flags.forge-compendium-browser.path") || getProperty(document, "flags.ddb.path");
             if (path) {
                 const section = this.getSection(type);
                 folder = section;
@@ -210,11 +210,11 @@ export class Hierarchy {
                         folder = parent.children.find(c => c.id === part.id || (part.id == undefined && c.name === name));
                         if (!folder) {
                             // Get the key to find the sort information
-                            const key = path.slice(0, i + 1).map(p => p.name).join("/");
+                            const key = path.slice(0, i + 1).map(p => typeof p === "string" ? p : p.name).join("/");
                             const typeData = this.folderSort[type];
                             const folderData = typeData && typeData[key];
                             // create the folder
-                            folder = this.createHierarchyFolder({ id: part.id, name: folderData?.label || name }, folderData?.sort);
+                            folder = this.createHierarchyFolder({ id: part.id || randomID(), name: folderData?.label || name }, part.sort ?? folderData?.sort);
                             parent.children.push(folder);
                         }
                         // Once we've found the parent folder in the path list, then stop going any further
