@@ -84,13 +84,14 @@ export class ForgeCompendiumBrowser {
                     children: [],
                     type: "book",
                     permissions: permissions[module.id] || {},
+                    version: module.version ?? module.data.version
                 };
 
                 const hierarchy = new Hierarchy(book);
                 await hierarchy.getHierarchy();
 
                 ForgeCompendiumBrowser.books.push(book);
-                log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.size} associated compendiums`);
+                log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length ?? module.packs.size} associated compendiums`);
             }
         }
 
@@ -106,10 +107,11 @@ export class ForgeCompendiumBrowser {
                 err = e;
                 return null;
             });
-        } catch {
+        } catch (err) {
             // ignore this error, it should be caught in the next statement
+            error(err);
         }
-        if (resp.status !== 200) {
+        if (resp == undefined || resp.status !== 200) {
             const msg = `Unable to load hierarchy data "${src}"`;
             warn(msg, err);
             return null;

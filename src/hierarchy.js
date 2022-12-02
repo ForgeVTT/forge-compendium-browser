@@ -26,7 +26,9 @@ export class Hierarchy {
         log("finding hierarchy", this.book);
 
         // If the Compendium Library version is greater than the current hierarchy, and it's allowed to update, then clear the hierarchy and reload
-        if (this.book.hierarchy && (this.book.hierarchy.version || "-") !== ForgeCompendiumBrowser.version && this.book.hierarchy.dynamic !== false) {
+        if (this.book.hierarchy && 
+            ((this.book.hierarchy.version || "-") !== ForgeCompendiumBrowser.version || this.book.version != this.book.hierarchy.bookVersion || this.book.hierarchy.rebuild === true) && 
+            this.book.hierarchy.dynamic !== false) {
             log("reloading hierarchy", this.book);
             this.book.hierarchy = null; //The version has changed, so reload the hierarchy
         }
@@ -67,7 +69,12 @@ export class Hierarchy {
         this.bookpacks = bookpacks;
 
         // create the base hierarchy
-        this.hierarchy = { version: ForgeCompendiumBrowser.version, dynamic: true, children: [] };
+        this.hierarchy = { 
+            version: ForgeCompendiumBrowser.version, 
+            bookVersion: this.book.version,
+            dynamic: true, 
+            children: [] 
+        };
 
         // check for a folders.json
         const folders = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/folders.json`);
