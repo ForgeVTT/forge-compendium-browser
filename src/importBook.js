@@ -125,9 +125,8 @@ export class ImportBook{
             }
         }
 
-        // Store the Actor and Journal data in case we're importing a Scene
+        // Store the Actor data in case we're importing a Scene
         const actorUpdates = newDocs["Actor"];
-        const journalUpdates = newDocs["JournalEntry"];
 
         // Go through the documents and see if there are any inline links that need replacing
         const docUpdates = {};
@@ -173,6 +172,7 @@ export class ImportBook{
 
                     // Go through the tokens and point them to the right actors.
                     const tokens = (document.tokens || document.data.tokens || []);
+                    console.log("Scene Tokens", document, tokens);
                     for (const token of tokens) {
                         const tokenName = getProperty(token, "flags.ddbActorFlags.name") || getProperty(token.data, "flags.ddbActorFlags.name") || token.name;
                         console.log("Finding Scene Token", token, tokenName);
@@ -188,7 +188,8 @@ export class ImportBook{
                         // Check to see if it already exists in the Monsters folder
                         // Save the monsterFolder for later in case we need to pull from the monster compendium
                         const folderName = `Monsters | ${tokenName[0].toUpperCase()}`;
-                        let monsterFolder = game.folders.find(f => f.name === folderName && f.folder?.name === "Monsters");
+                        let monsterFolder = game.folders.find(f => f.name === folderName && f[isV10 ? "folder" : "parentFolder"]?.name === "Monsters");
+                        console.log("Finding Folder", monsterFolder, folderName, game.folders);
                         if (!actor && monsterFolder) {
                             actor = game.actors.find(a => {
                                 if (a.name !== tokenName)
@@ -208,7 +209,7 @@ export class ImportBook{
                                     const document = await monsterPack.getDocument(index._id);
                                     const data = document.toObject(false);
                                     if (!monsterFolder) {
-                                        let parentFolder = game.folders.find(f => f.name === "Monsters" && f.folder == undefined);
+                                        let parentFolder = game.folders.find(f => f.name === "Monsters" && f[isV10 ? "folder" : "parentFolder"] == undefined);
                                         if (!parentFolder) {
                                             const parentFolderData = {
                                                 name: "Monsters",
@@ -224,6 +225,7 @@ export class ImportBook{
                                             sorting: "a"
                                         };
                                         folderData[isV10 ? "folder" : "parent"] = parentFolder;
+                                        console.log("Creating a Folder2", folderData);
                                         monsterFolder = await Folder.create(folderData);
                                     }
                                     data.folder = monsterFolder;
@@ -237,13 +239,19 @@ export class ImportBook{
 
                         if (actor) {
                             const tokenUpdate = { actorId: actor.id };
-                            if ((!token.texture?.src || token.texture?.src === "icons/svg/mystery-man.svg") && actor?.prototypeToken?.texture?.src)
-                                tokenUpdate.texture = { src: actor?.prototypeToken?.texture?.src };
-
+                            
                             console.log("Found Actor", token, actor, tokenUpdate);
                             if (isV10) {
+                                if ((!token.texture?.src || token.texture?.src === "icons/svg/mystery-man.svg") && actor?.prototypeToken?.texture?.src)
+                                    tokenUpdate.texture = { src: actor?.prototypeToken?.texture?.src };
+
                                 mergeObject(token, tokenUpdate);
                             } else {
+                                if ((!token.data.img || token.data.img === "icons/svg/mystery-man.svg") && actor?.data?.token?.img)
+                                    tokenUpdate.img = actor?.data?.token?.img;
+
+                                console.log("Changing Token", token.data.img, actor?.data?.token?.img, tokenUpdate);
+
                                 await token.update(tokenUpdate);
                             }
                         }
@@ -309,6 +317,7 @@ export class ImportBook{
                     folderData[isV10 ? "folder" : "parent"] = parentFolder;
 
                     folderSort++;
+                    console.log("Creating a Folder1", folderData);
                     folder = await Folder.create(folderData);
                 }
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
