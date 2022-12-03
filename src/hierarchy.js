@@ -34,31 +34,35 @@ export class Hierarchy {
         }
 
         if (this.book.hierarchy == undefined) {
-            log("building hierarchy", this.book);
-
-            const moduleData = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/module.json`);
-            if (!moduleData)
-                return;
-
-            this.book.hierarchy = await this.build(moduleData.packs)
-
-            if (this.book.hierarchy) {
-                let src = "data";
-                if (typeof ForgeVTT !== "undefined" && ForgeVTT.usingTheForge) {
-                    src = "forgevtt";
-                }
-
-                await FilePicker.upload(src, `modules/${this.book.id}/`, new File([JSON.stringify(this.book.hierarchy)], "hierarchy.json"), {}, { notify: false });
-            }
-
-            this.book.children = duplicate(this.book.hierarchy.children);
-            ui.notifications.info(`${this.book.name}, hierarchy has finished building.`);
-
-            return this.book.hierarchy;
+            return await this.buildHierarchy();
         } else {
             this.book.children = duplicate(this.book.hierarchy.children);
             return this.book.hierarchy;
         }
+    }
+
+    async buildHierarchy() {
+        log("building hierarchy", this.book);
+
+        const moduleData = await ForgeCompendiumBrowser.getFileData(`modules/${this.book.id}/module.json`);
+        if (!moduleData)
+            return;
+
+        this.book.hierarchy = await this.build(moduleData.packs)
+
+        if (this.book.hierarchy) {
+            let src = "data";
+            if (typeof ForgeVTT !== "undefined" && ForgeVTT.usingTheForge) {
+                src = "forgevtt";
+            }
+
+            await FilePicker.upload(src, `modules/${this.book.id}/`, new File([JSON.stringify(this.book.hierarchy)], "hierarchy.json"), {}, { notify: false });
+        }
+
+        this.book.children = duplicate(this.book.hierarchy.children);
+        ui.notifications.info(`${this.book.name}, hierarchy has finished building.`);
+
+        return this.book.hierarchy;
     }
 
     async build(bookpacks) {

@@ -1,4 +1,5 @@
 import { ForgeCompendiumBrowser, i18n } from '../forge-compendium-browser.js';
+import { Hierarchy } from "../hierarchy.js";
 
 export class CompendiumBrowserApp extends Application {
     constructor(book, options = {}) {
@@ -70,13 +71,8 @@ export class CompendiumBrowserApp extends Application {
                     if (!book)
                         return;
 
-                    // Delete `modules/${book.id}/hierarchy.json`
-                    let src = "data";
-                    if (typeof ForgeVTT !== "undefined" && ForgeVTT.usingTheForge) {
-                        src = "forgevtt";
-                    }
-                    await FilePicker.upload(src, `modules/${book.id}/`, new File(['{"rebuild":true}'], "hierarchy.json"), {}, { notify: false });
-                    ui.notifications.info(`${book.name} will be rebuilt the next time Foundry is loaded.`)
+                    const hierarchy = new Hierarchy(book);
+                    await hierarchy.buildHierarchy();
                 }
             }
         ];
