@@ -142,27 +142,36 @@ export class ImportBook{
                 }
 
                 const type = document.folder?.type || document.parent?.folder?.type;
-                if (type === "JournalEntry" && isV10) {
-                    let isChanged = false;
-                    for (const page of document.pages) {
-                        let repvalue = getProperty(page, "text.content");
+                if (type === "JournalEntry") {
+                    if (isV10) {
+                        for (const page of document.pages) {
+                            let repvalue = getProperty(page, "text.content");
+                            const original = repvalue;
+                            if (repvalue) {
+                                for (const translate of ImportBook.translate) {
+                                    repvalue = repvalue.replaceAll(`@Compendium[${translate.key}]`, `@UUID[${translate.uuid}]`); 
+                                }
+                                if (repvalue !== original) {
+                                    setProperty(page, "text.content", repvalue);
+                                }
+                            }
+                        }
+                        /*
+                        if (isChanged) {
+                            updates.push({ _id: document._id, pages: pages });
+                        }
+                        */
+                    } else {
+                        let repvalue = getProperty(document, "text");
                         const original = repvalue;
                         if (repvalue) {
                             for (const translate of ImportBook.translate) {
-                                const value = `@UUID[${translate.uuid}]`;
-                                repvalue = repvalue.replaceAll(`@Compendium[${translate.key}]`, value); 
+                                repvalue = repvalue.replaceAll(`@Compendium[${translate.key}]`, `@JournalEntry[${translate.id}]`); 
                             }
                             if (repvalue !== original) {
-                                isChanged = true;
-                                if (isV10)
-                                    setProperty(page, "text.content", repvalue);
-                                else
-                                    updates.push({ object: page, "value": repvalue });
+                                updates.push({ _id: document._id, text: repvalue });
                             }
                         }
-                    }
-                    if (isChanged && !isV10) {
-                        updates.push({ _id: document._id, pages: pages });
                     }
                 } else if (type === "Scene") {
                     // Check the scene's journal entry
