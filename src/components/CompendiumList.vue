@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showListing" class="forge-compendium-list" :depth="depth">
+  <div v-if="showListing" class="forge-compendium-list" :depth="depth" :style="`margin-left:${(depth - 1) * 10}px`">
     <div v-for="item in sortedList" :key="item.id" :data-id="item.id">
       <div class="flexcol" :class="listClass">
         <div
