@@ -64,7 +64,7 @@ export default {
       return !this.isAvailable(book) ? "disabled" : "";
     },
     isAvailable(book) {
-      return book && book.children && book.children.length;
+      return book && book.children && book.children.length && book.error !== true;
     },
   },
   computed: {

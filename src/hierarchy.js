@@ -27,14 +27,19 @@ export class Hierarchy {
 
         // If the Compendium Library version is greater than the current hierarchy, and it's allowed to update, then clear the hierarchy and reload
         if (this.book.hierarchy && 
-            ((this.book.hierarchy.version || "-") !== ForgeCompendiumBrowser.version || this.book.version != this.book.hierarchy.bookVersion || this.book.hierarchy.rebuild === true) && 
-            this.book.hierarchy.dynamic !== false) {
+            ((this.book.hierarchy.version || "-") !== ForgeCompendiumBrowser.version || this.book.version != this.book.hierarchy.bookVersion || this.book.hierarchy.rebuild === true)) {
             log("reloading hierarchy", this.book);
             this.book.hierarchy = null; //The version has changed, so reload the hierarchy
         }
 
         if (this.book.hierarchy == undefined) {
-            return await this.buildHierarchy();
+            try {
+                return await this.buildHierarchy();
+            } catch (err) {
+                warn(err);
+                this.book.error = true;
+                return null;
+            }
         } else {
             this.book.children = duplicate(this.book.hierarchy.children);
             return this.book.hierarchy;

@@ -480,17 +480,17 @@ export default {
       let dialogHtml;
 
       const progressFn = (command, options) => {
-        const progressElem = $("li.progress", dialogHtml);
         // If there's a message included, then update the message text
         if (options?.message) {
-          $('.message', progressElem).html(options.message);
+          $('.message', dialogHtml).html(options.message);
         }
         // reset command to restart progress bar for an action
         if (command === "reset") {
           max = options?.max ?? 0;
           count = 0;
           lastPerc = 0;
-          $('.progress-bar .bar', progressElem).css({'width': '0%'});
+          $('.progress-bar .bar', dialogHtml).css({'width': '0%'});
+          $('.progress-bar .percent-msg', dialogHtml).html("0%");
 
         // increase command to increase the progress bar by one
         } else if (command === "increase") {
@@ -499,7 +499,8 @@ export default {
           const currentPerc = (Math.round((count / max) * 100));
           if (currentPerc !== lastPerc) {
             lastPerc = currentPerc;
-            $('.progress-bar .bar', progressElem).css({'width': `${lastPerc}%`});
+            $('.progress-bar .bar', dialogHtml).css({'width': `${lastPerc}%`});
+            $('.progress-bar .percent-msg', dialogHtml).html(`${lastPerc}%`);
           }
 
         // finish command when the process is done and the dialog needs to be cleaned up
@@ -508,6 +509,7 @@ export default {
           $('.finish-import', dialogHtml).show();
           $('.message', dialogHtml).html('');
           $('.progress-bar .bar', dialogHtml).css({'width': "100%"});
+          $('.progress-bar .percent-msg', dialogHtml).html("100%");
         }
       }
 

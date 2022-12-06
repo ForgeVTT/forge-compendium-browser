@@ -44,7 +44,11 @@ export default {
         const book = this.library.find((b) => b.id === bookId);
         if (book) {
           if (!this.isAvailable(book)) {
-            ui.notifications.warn("Please wait, book is still building its index, this may take some time");
+            if (book.error) {
+              ui.notifications.warn("Erorr loading the book hierarchy file, please make sure you are using the latest version.");
+            } else {
+              ui.notifications.warn("Please wait, book is still building its index, this may take some time");
+            }
           } else {
             this.indexing = true;
             await game.ForgeCompendiumBrowser.indexBook(book, (progress) => { this.progress = progress; });
@@ -67,7 +71,7 @@ export default {
       }
     },
     isAvailable(book) {
-      return book && book.children && book.children.length;
+      return book && book.children && book.children.length && book.error !== true;
     },
   },
   computed: {

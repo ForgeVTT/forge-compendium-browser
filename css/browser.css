@@ -1,3 +1,8 @@
+#forge-compendium-browser {
+    min-width: 900px;
+    min-height: 580px;
+}
+
 #forge-compendium-browser .window-content {
     padding: 0px;
 }
@@ -72,6 +77,20 @@
     background-color: royalblue;
     border-right: 1px solid darkblue;
     border-radius: 4px;
+    overflow: hidden;
+}
+
+#forge-compendium-browser-import .percent-msg {
+    width: 193px;
+    position: absolute;
+    float: left;
+    top: 0px;
+    left: 0px;
+    text-align: center;
+}
+
+#forge-compendium-browser-import .bar .percent-msg {
+    color: #FFF;
 }
 
 #forge-compendium-browser-import .start-import {

@@ -88,7 +88,10 @@ export class ForgeCompendiumBrowser {
                 };
 
                 const hierarchy = new Hierarchy(book);
-                await hierarchy.getHierarchy();
+                const data = await hierarchy.getHierarchy();
+                if (data == null) {
+                    book.error = true;
+                }
 
                 ForgeCompendiumBrowser.books.push(book);
                 log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length ?? module.packs.size} associated compendiums`);
