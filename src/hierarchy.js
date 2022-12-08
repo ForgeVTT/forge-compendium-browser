@@ -280,13 +280,15 @@ export class Hierarchy {
                 const _folder = this.getEntityFolder(document, type) || folder;
 
                 if (!_folder.children.find(c => c.id === document._id)) {
+                    const visible = getProperty(document, "flags.forge-compendium-browser.visible") !== false;
                     _folder.children.push({
                         id: document._id,
                         name: document.name,
                         type: "document",
                         img: img,
                         sort: (isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort),
-                        packId: key
+                        packId: key,
+                        visible: visible
                     });
                 }
             }

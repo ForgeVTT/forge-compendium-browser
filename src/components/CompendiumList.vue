@@ -55,7 +55,7 @@ export default {
         return [];
       }
 
-      return item.children.filter((c) => c.name !== item.name || !useSameName);
+      return item.children.filter((c) => (c.name !== item.name || !useSameName) && c.visible !== false);
     },
     hasImage(item) {
         return item.img ? 'has-image' : '';
