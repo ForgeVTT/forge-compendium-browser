@@ -5,90 +5,94 @@ export class ImportBook{
 
         const isV10 = isNewerVersion(game.version, "9.999999");
 
-        const documentData = {};
-        for (const c of book.hierarchy.children) {
-            let mainfolder;
-            if (c.packtype === "Actor") {
-                mainfolder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"] == undefined && f.name === "Monsters");
-            }
-            if (!mainfolder) {
-                const folderData = {
-                    name: c.packtype === "Actor" ? "Monsters" : book.name,
-                    type: c.packtype,
-                    sorting: c.packtype === "Actor" ? "a" : "m"
-                };
-                folderData[isV10 ? "folder" : "parent"] = null;
-                mainfolder = await Folder.create(folderData);
-            }
-            console.log("Processing", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
-            if (progress) {
-                progress("reset", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
-            }
-            const data = await ImportBook.processChildren(c, c.packtype, mainfolder, progress);
+        try {
+            const documentData = {};
+            for (const c of book.hierarchy.children) {
+                let mainfolder;
+                if (c.packtype === "Actor") {
+                    mainfolder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"] == undefined && f.name === "Monsters");
+                }
+                if (!mainfolder) {
+                    const folderData = {
+                        name: c.packtype === "Actor" ? "Monsters" : book.name,
+                        type: c.packtype,
+                        sorting: c.packtype === "Actor" ? "a" : "m"
+                    };
+                    folderData[isV10 ? "folder" : "parent"] = null;
+                    mainfolder = await Folder.create(folderData);
+                }
+                console.log("Processing", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
+                if (progress) {
+                    progress("reset", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
+                }
+                const data = await ImportBook.processChildren(c, c.packtype, mainfolder, progress);
 
-            documentData[c.packtype] = data;
-        }
-
-        if (isV10) { 
-            // v10 lets us set the document id when creating, so we can update all the related ids before saving.
-            await ImportBook.updateDocumentKeys(documentData, progress);
-        }
-
-        const newDocs = {};
-        for (const [type, documents] of Object.entries(documentData)){
-            if (progress) {
-                progress("reset", { max: 1, type, message: `Creating ${type}` });
+                documentData[c.packtype] = data;
             }
 
-            const cls = getDocumentClass(type);
-            const docs = await cls.createDocuments(documents, { render: false, keepId: true });
-
-            if (progress) {
-                progress("increase", { type: type });
+            if (isV10) { 
+                // v10 lets us set the document id when creating, so we can update all the related ids before saving.
+                await ImportBook.updateDocumentKeys(documentData, progress);
             }
 
-            newDocs[type] = docs;
-        }
+            const newDocs = {};
+            for (const [type, documents] of Object.entries(documentData)){
+                if (progress) {
+                    progress("reset", { max: 1, type, message: `Creating ${type}` });
+                }
 
-        if (!isV10) {
-            // v9 doesn't allow us to create documents with specific IDs, therefore we have to go through after creation to collect the new IDs and replace the IDs witht he old ones.
-            const docUpdates = await ImportBook.updateDocumentKeys(newDocs, progress);
+                const cls = getDocumentClass(type);
+                const docs = await cls.createDocuments(documents, { render: false, keepId: true });
 
-            //  Update the document changes with the inline link keys
-            for (const [type, data] of Object.entries(docUpdates)) {
-                if (data && data.length) {
-                    if (type === "JournalEntry" && isV10) {
-                        if (progress)
-                            progress("reset", { max: data.length, type, message: `Updating ${type}` });
+                if (progress) {
+                    progress("increase", { type: type });
+                }
 
-                        for (const page of data) {
-                            await page.object.update({"text.content": page.value});
+                newDocs[type] = docs;
+            }
 
+            if (!isV10) {
+                // v9 doesn't allow us to create documents with specific IDs, therefore we have to go through after creation to collect the new IDs and replace the IDs witht he old ones.
+                const docUpdates = await ImportBook.updateDocumentKeys(newDocs, progress);
+
+                //  Update the document changes with the inline link keys
+                for (const [type, data] of Object.entries(docUpdates)) {
+                    if (data && data.length) {
+                        if (type === "JournalEntry" && isV10) {
                             if (progress)
+                                progress("reset", { max: data.length, type, message: `Updating ${type}` });
+
+                            for (const page of data) {
+                                await page.object.update({"text.content": page.value});
+
+                                if (progress)
+                                    progress("increase", { type });
+                            }
+                        } else {
+                            if (progress) {
+                                progress("reset", { max: 1, type, message: `Updating ${type}` });
+                            }
+
+                            const cls = getDocumentClass(type);
+                            await cls.updateDocuments(data, { render: false });
+
+                            if (progress) {
                                 progress("increase", { type });
-                        }
-                    } else {
-                        if (progress) {
-                            progress("reset", { max: 1, type, message: `Updating ${type}` });
-                        }
-
-                        const cls = getDocumentClass(type);
-                        await cls.updateDocuments(data, { render: false });
-
-                        if (progress) {
-                            progress("increase", { type });
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (progress) {
-            progress("finish");
-        }
-        // refresh the directory listing, for some reason they're not being refreshed.
-        for (const dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
-            ui[dir].render();
+            if (progress) {
+                progress("finish");
+            }
+            // refresh the directory listing, for some reason they're not being refreshed.
+            for (const dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
+                ui[dir].render();
+            }
+        } catch {
+            progress("finish", { message: "Unknown Error Encountered" });
         }
     }
 
@@ -109,21 +113,15 @@ export class ImportBook{
             for (const [type, documents] of Object.entries(newDocs)) {
                 for (const document of documents) {
                     const docType = document.folder?.type || document.parent?.folder?.type || type;
-                    let originalData = getProperty(document, "flags.forge-compendium-browser.originalData");
+                    let originalData = getProperty(document, "data.flags.forge-compendium-browser.originalData");
                     if (originalData) {
-                        ImportBook.translate.push({ original: originalData.id, key: originalData.key, id: document._id, uuid: document.uuid });
-                    }
-                    if (document.pages) {
-                        for (const page of document.pages) {
-                            originalData = getProperty(page, "flags.forge-compendium-browser.originalData");
-                            if (originalData) {
-                                ImportBook.translate.push({ original: originalData.id, key: originalData.key,  id: page._id, uuid: page.uuid, type: docType });
-                            }
-                        }
+                        ImportBook.translate.push({ original: originalData.id, key: originalData.key, id: document.id, uuid: document.uuid, type: docType });
                     }
                 }
             }
         }
+
+        console.log("Translations", ImportBook.translate);
 
         // Store the Actor data in case we're importing a Scene
         const actorUpdates = newDocs["Actor"];
@@ -151,25 +149,33 @@ export class ImportBook{
                                 for (const translate of ImportBook.translate) {
                                     repvalue = repvalue.replaceAll(`@Compendium[${translate.key}]`, `@UUID[${translate.uuid}]`); 
                                 }
+
+                                // Remove the links to the same document
+                                repvalue = repvalue.replaceAll(`@UUID[JournalEntry.${document._id}]{${document.name}}`, ''); 
+
+                                // Clean any ddbeyond links
+                                repvalue = ImportBook.cleanText(document._id, document.name, repvalue);
+
                                 if (repvalue !== original) {
                                     setProperty(page, "text.content", repvalue);
                                 }
                             }
                         }
-                        /*
-                        if (isChanged) {
-                            updates.push({ _id: document._id, pages: pages });
-                        }
-                        */
                     } else {
-                        let repvalue = getProperty(document, "text");
+                        let repvalue = getProperty(document, "data.content");
                         const original = repvalue;
                         if (repvalue) {
                             for (const translate of ImportBook.translate) {
                                 repvalue = repvalue.replaceAll(`@Compendium[${translate.key}]`, `@JournalEntry[${translate.id}]`); 
                             }
+                            // Remove the links to the same document
+                            repvalue = repvalue.replaceAll(`@JournalEntry[${document.id}]{${document.name}}`, ''); 
+
+                            // Clean any ddbeyond links
+                            repvalue = ImportBook.cleanText(document.id, document.name, repvalue);
+
                             if (repvalue !== original) {
-                                updates.push({ _id: document._id, text: repvalue });
+                                updates.push({ _id: document.id, content: repvalue });
                             }
                         }
                     }
@@ -267,7 +273,8 @@ export class ImportBook{
                     }
                     // Go through notes and point them to the right Journal Entry
                     for (const note of (document.notes || document.data.notes || [])) {
-                        let translate = ImportBook.translate.find(t => t.original == note.entryId);
+                        let entryId = isV10 ? note.entryId : note.data.entryId;
+                        let translate = ImportBook.translate.find(t => t.original == entryId);
 
                         if (translate) {
                             if (isV10) {
@@ -347,7 +354,7 @@ export class ImportBook{
                         return a.folder?.id === parentFolder.id && ((a_ddbid && b_ddbid && a_ddbid === b_ddbid) || (a.name === document.name));
                     });
                     if (actor) {
-                        ImportBook.translate.push({ original: document.id, key: key, id: actor.id, uuid: actor.uuid });
+                        ImportBook.translate.push({ original: document.id, key: key, id: actor.id, uuid: actor.uuid, type });
                         continue;
                     }
                 } else if (type === "Scene") {
@@ -363,7 +370,7 @@ export class ImportBook{
                 if (!isV10) {
                     setProperty(data, "flags.forge-compendium-browser.originalData", { id: document.id, key });
                 } else {
-                    ImportBook.translate.push({ original: document.id, key: key, id: data._id, uuid: `${document.documentName}.${data._id}` });
+                    ImportBook.translate.push({ original: document.id, key: key, id: data._id, uuid: `${document.documentName}.${data._id}`, type });
                 }
 
                 if (progress) {
@@ -374,5 +381,34 @@ export class ImportBook{
             }
         }
         return documentData;
+    }
+
+    static cleanText(id, name, text) {
+        let html = $(`<div>${text}</div>`);
+
+        // Try and fix any ddb links
+        $('a[href^="ddb://"]', html).each((idx, link) => {
+            const linkHtml = $(link).html() || "";
+            let href = $(link).attr('href');
+            if (href.startsWith("ddb://compendium")) {
+                try {
+                    const bookid = href.replace("ddb://compendium/", "").split("/")[0];
+
+                    $(link).addClass("content-link").removeAttr("href").attr("data-pack", `dndbeyond-${bookid}`);
+                } catch { 
+                // don't bother with the catch
+                }
+            } else {
+                if (href.startsWith("ddb://spells"))
+                    href = "https://www.dndbeyond.com/spells/"+ linkHtml.replaceAll(" ", "-");
+                else {
+                    href = href
+                        .replace("ddb://", "https://www.dndbeyond.com/")
+                        .replace("magicitems", "magic-items") + "-" + linkHtml.replaceAll(" ", "-");
+                }
+                $(link).attr('href', href).attr("target", "_blank");
+            }
+        });
+        return html.html();
     }
 }

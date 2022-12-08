@@ -507,7 +507,8 @@ export default {
         } else if (command === "finish") {
           $('.start-import', dialogHtml).hide();
           $('.finish-import', dialogHtml).show();
-          $('.message', dialogHtml).html('');
+          if (!options?.message)
+            $('.message', dialogHtml).html('');
           $('.progress-bar .bar', dialogHtml).css({'width': "100%"});
           $('.progress-bar .percent-msg', dialogHtml).html("100%");
         }
