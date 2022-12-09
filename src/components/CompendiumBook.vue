@@ -648,9 +648,15 @@ export default {
     importEntry() {
         const collection = this.document.document.collection;
         const pack = game.packs.get(this.document.packId);
-        if (collection && collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true })) {
-            ui.notifications.info("Document has been imported");
+        if (collection) {
+            let document = collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true });
+            if (document.type == "Scene") {
+                // Need to link the tokens and notes?
+            }
+            if (document)
+                return ui.notifications.info("Document has been imported");
         }
+        ui.notifications.error("Error importing document");
     }
   },
   computed: {

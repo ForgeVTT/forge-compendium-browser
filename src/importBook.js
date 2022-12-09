@@ -1,3 +1,5 @@
+import { error } from "./forge-compendium-browser.js";
+
 export class ImportBook{
     static async importBook(book, options) {
         let { progress } = options;
@@ -91,7 +93,8 @@ export class ImportBook{
             for (const dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
                 ui[dir].render();
             }
-        } catch {
+        } catch (err) {
+            error(err);
             progress("finish", { message: "Unknown Error Encountered" });
         }
     }
@@ -253,19 +256,17 @@ export class ImportBook{
                         }
 
                         if (actor) {
-                            const tokenUpdate = { actorId: actor.id };
-                            
-                            console.log("Found Actor", token, actor, tokenUpdate);
                             if (isV10) {
+                                token.actorId = actor._id;
                                 if ((!token.texture?.src || token.texture?.src === "icons/svg/mystery-man.svg") && actor?.prototypeToken?.texture?.src)
-                                    tokenUpdate.texture = { src: actor?.prototypeToken?.texture?.src };
-
-                                mergeObject(token, tokenUpdate);
+                                    token.texture.src = actor?.prototypeToken?.texture?.src;
+                                console.log("Found Actor", token, actor);
                             } else {
+                                const tokenUpdate = { actorId: actor.id };
                                 if ((!token.data.img || token.data.img === "icons/svg/mystery-man.svg") && actor?.data?.token?.img)
                                     tokenUpdate.img = actor?.data?.token?.img;
 
-                                console.log("Changing Token", token.data.img, actor?.data?.token?.img, tokenUpdate);
+                                console.log("Found Actor", token, actor, tokenUpdate);
 
                                 await token.update(tokenUpdate);
                             }
