@@ -21,5 +21,12 @@
     "ForgeCompendiumBrowser.NotAllowed": "Not Allowed",
     "ForgeCompendiumBrowser.Default": "Default",
     "ForgeCompendiumBrowser.SaveChanges": "Save Changes",
-    "ForgeCompendiumBrowser.Everyone": "Everyone"
+    "ForgeCompendiumBrowser.Everyone": "Everyone",
+    "ForgeCompendiumBrowser.Drawing": "Drawings", 
+    "ForgeCompendiumBrowser.AmbientLight": "Lights", 
+    "ForgeCompendiumBrowser.Note": "Notes", 
+    "ForgeCompendiumBrowser.AmbientSound": "Sounds", 
+    "ForgeCompendiumBrowser.Tile": "Tiles", 
+    "ForgeCompendiumBrowser.Token": "Tokens", 
+    "ForgeCompendiumBrowser.Wall": "Walls"
 }

@@ -40,6 +40,7 @@ export default {
         };
 
         // Collect the stats on the scene
+        const statIcon = { Drawing: "fa-solid fa-pencil-alt", AmbientLight: "fa-regular fa-lightbulb", Note: "fas fa-bookmark", AmbientSound: "fa-solid fa-music", Tile: "fa-solid fa-cubes", Token: "fas fa-user-alt", Wall: "fa-solid fa-university" };
         const stats = {};
         for (const collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls",]) {
           const collectionData = isNewerVersion(game.version, "9.99999") ? document[collection] : document.data[collection];
@@ -49,7 +50,10 @@ export default {
           }
         }
 
-        templateData.stats = Object.keys(stats).map((key) => ({ name: key, value: stats[key]}));
+        templateData.stats = Object.keys(stats).map((key) => {
+            return { name: `${stats[key]} ${game.i18n.localize(`ForgeCompendiumBrowser.${key}`)}`, icon: statIcon[key], value: stats[key]};
+        });
+        console.log("Stats", templateData.stats);
 
         const html = await renderTemplate("modules/forge-compendium-browser/templates/scene-entry.html", templateData);
 
@@ -156,6 +160,9 @@ export default {
       if (game.version.startsWith("10.")) 
         classes.push("v10");
       return classes.join(" ");
+    },
+    i18n(key) {
+        return game.i18n.localize(key);
     },
   },
   watch: {

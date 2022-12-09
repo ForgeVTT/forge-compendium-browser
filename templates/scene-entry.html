@@ -1,11 +1,11 @@
 <div class="forge-compendium-scene">
-    <div class="background" style="background-image:url('{{img}}')"></div>
-    <img src="{{img}}" />
+    <div class="background compendium-scene" style="background-image:url('{{img}}')"></div>
+    <div class= "foreground compendium-scene" style="background-image:url('{{img}}')"></div>
     {{#if stats}}
     <div class="forge-compendium-scene-stat">
-        <ul style="list-style: none;">
+        <ul class="flexrow">
             {{#each stats}}
-            <li class="flexrow"><span style="flex: 0 0 50px">{{this.value}}</span> {{this.name}}</li>
+            <li class="flexrow" title="{{this.name}}"><i style="flex: 0 0 25px" class="{{this.icon}}"></i><span>{{this.value}}</span></li>
             {{/each}}
         </ul>
     </div>
