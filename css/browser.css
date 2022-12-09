@@ -122,3 +122,7 @@
 #forge-compendium-browser-import .message {
     font-style: italic;
 }
+
+#forge-compendium-browser .window-resizable-handle {
+    z-index: 300;
+}
