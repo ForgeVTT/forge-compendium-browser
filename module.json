@@ -2,7 +2,7 @@
   "name": "forge-compendium-browser",
   "title": "The Forge: Compendium Library",
   "description": "Browse your compendium books like they were meant to be viewed. The Forge's Compendium Library lets you navigate your D&amp;D Beyond imported books in a beautiful and easy to use interface!",
-  "version": "2.0",
+  "version": "1.3.2",
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "10",
   "compatibility": {
