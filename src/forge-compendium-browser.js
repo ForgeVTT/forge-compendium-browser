@@ -21,6 +21,7 @@ export let setting = key => {
 export class ForgeCompendiumBrowser {
     static books = [];
     static debugEnabled = 1;
+    static iconMap = null;
 
     static init() {
         registerSettings();
@@ -39,6 +40,12 @@ export class ForgeCompendiumBrowser {
 
     static setup() {
         //compile the DnDBeyond compendiums
+        const isV10 = isNewerVersion(game.version, "9.999999");
+        if (isV10) {
+            ForgeCompendiumBrowser.getIconMap().then(data => {
+                ForgeCompendiumBrowser.iconMap = data;
+            });
+        }
         ForgeCompendiumBrowser.parseCompendiums();
     }
 
@@ -64,6 +71,18 @@ export class ForgeCompendiumBrowser {
         const module = game.modules.get("forge-compendium-browser");
         return module.version ?? module.data.version;
     }
+
+    static getIconMap = async function() {
+        let iconMap = {};
+        try {
+          const icons = await ForgeCompendiumBrowser.getFileData("systems/dnd5e/json/icon-migration.json", { expand: false });
+          const spellIcons = await ForgeCompendiumBrowser.getFileData("systems/dnd5e/json/spell-icon-migration.json", { expand: false });
+          iconMap = {...icons, ...spellIcons};
+        } catch(err) {
+          console.warn(`Failed to retrieve icon migration data: ${err.message}`);
+        }
+        return iconMap;
+      };
 
     static async parseCompendiums() {
         const permissions = game.ForgeCompendiumBrowser.setting("permissions") || {};
@@ -103,7 +122,7 @@ export class ForgeCompendiumBrowser {
         ForgeCompendiumBrowser.clearPacks();
     }
 
-    static async getFileData(src) {
+    static async getFileData(src, options = {}) {
         // Load the referenced translation file
         let err;
         let resp;
@@ -117,7 +136,7 @@ export class ForgeCompendiumBrowser {
             error(err);
         }
         if (resp == undefined || resp.status !== 200) {
-            const msg = `Unable to load hierarchy data "${src}"`;
+            const msg = `Unable to load data "${src}"`;
             warn(msg, err);
             return null;
         }
@@ -126,8 +145,9 @@ export class ForgeCompendiumBrowser {
         let json;
         try {
             json = await resp.json();
-            log(`Loaded hierarchy file ${src}`);
-            json = foundry.utils.expandObject(json);
+            log(`Loaded file ${src}`);
+            if (options.expand !== false)
+                json = foundry.utils.expandObject(json);
         } catch (err) {
             warn(err);
             json = null;
@@ -163,9 +183,11 @@ export class ForgeCompendiumBrowser {
     }
 
     static clearPacks() {
-        for (const book of ForgeCompendiumBrowser.books) {
-            for (const pack of book.packs) {
-                $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, ui.compendium.element).addClass('forge-compendium-pack');
+        if (ui?.compendium?.element) {
+            for (const book of ForgeCompendiumBrowser.books) {
+                for (const pack of book.packs) {
+                    $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, ui.compendium.element).addClass('forge-compendium-pack');
+                }
             }
         }
     }

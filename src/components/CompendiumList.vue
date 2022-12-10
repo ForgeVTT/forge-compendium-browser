@@ -9,7 +9,7 @@
           draggable
           @dragstart="startDrag($event, item)"
         >
-          <img v-if="item.img" :data-src="item.img" class="lazy forge-compendium-image" />
+          <img v-if="item.img" :data-src="mapIcon(item.img)" class="lazy forge-compendium-image" @error="errorLoadingImage" />
           <span>{{ item.name }}</span>
         </div>
         <compendium-list
@@ -60,6 +60,20 @@ export default {
     hasImage(item) {
         return item.img ? 'has-image' : '';
     },
+    mapIcon(path) {
+        if ( path && game.ForgeCompendiumBrowser.iconMap ) {
+            if ( path.startsWith("/") || path.startsWith("\\") ) path = path.substring(1);
+            return game.ForgeCompendiumBrowser.iconMap[path] || path;
+        }
+        return path;
+    },
+    errorLoadingImage(ev) {
+        // If image fails to load, then fallback to default image
+        const defaultImage = "icons/svg/mystery-man.svg";
+        const img = ev.target;
+        if (img && img.attributes.src.value !== defaultImage)
+            img.src = defaultImage;
+    },
   },
   computed: {
     showListing() {
@@ -70,7 +84,7 @@ export default {
     },
     sortedList() {
       return [...this.listing].sort(game.ForgeCompendiumBrowser.compare);
-    }
+    },
   },
 };
 </script>
