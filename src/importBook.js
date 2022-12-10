@@ -325,17 +325,23 @@ export class ImportBook{
                     folder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"]?.id === parentFolder.id && f.name === child.name);
                 }
                 if (!folder) {
-                    const folderData = {
-                        name: child.name,
-                        type: type,
-                        sorting: type === "Actor" ? "a" : "m",
-                        sort: child.sort ?? folderSort
-                    };
-                    folderData[isV10 ? "folder" : "parent"] = parentFolder;
+                    console.log("Checkign depth", CONST.FOLDER_MAX_DEPTH, parentFolder.depth);
+                    if (parentFolder.depth === (CONST.FOLDER_MAX_DEPTH || 3)) {
+                        folder = parentFolder;
+                        console.log("Depth exceeded", CONST.FOLDER_MAX_DEPTH, parent, parentFolder);
+                    } else {
+                        const folderData = {
+                            name: child.name,
+                            type: type,
+                            sorting: type === "Actor" ? "a" : "m",
+                            sort: child.sort ?? folderSort
+                        };
+                        folderData[isV10 ? "folder" : "parent"] = parentFolder;
 
-                    folderSort++;
-                    console.log("Creating a Folder1", folderData);
-                    folder = await Folder.create(folderData);
+                        folderSort++;
+                        console.log("Creating a Folder1", folderData);
+                        folder = await Folder.create(folderData);
+                    }
                 }
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
             } else if (child.type === "document") {
