@@ -21,6 +21,7 @@ export let setting = key => {
 export class ForgeCompendiumBrowser {
     static books = [];
     static debugEnabled = 1;
+    static iconMap = null;
 
     static init() {
         registerSettings();
@@ -39,6 +40,12 @@ export class ForgeCompendiumBrowser {
 
     static setup() {
         //compile the DnDBeyond compendiums
+        const isV10 = isNewerVersion(game.version, "9.999999");
+        if (isV10) {
+            ForgeCompendiumBrowser.getIconMap().then(data => {
+                ForgeCompendiumBrowser.iconMap = data;
+            });
+        }
         ForgeCompendiumBrowser.parseCompendiums();
     }
 
@@ -53,7 +60,7 @@ export class ForgeCompendiumBrowser {
     static async onMessage(data) {
         switch (data.action) {
             case 'open': {
-                if (data.userid == game.user.id || data.userid == undefined) {
+                if (data.userid === game.user.id || data.userid == undefined) {
                     ForgeCompendiumBrowser.openBrowser(data.book);
                 }
             }
@@ -65,13 +72,27 @@ export class ForgeCompendiumBrowser {
         return module.version ?? module.data.version;
     }
 
-    static parseCompendiums() {
+    static getIconMap = async function() {
+        let iconMap = {};
+        try {
+          const icons = await ForgeCompendiumBrowser.getFileData("systems/dnd5e/json/icon-migration.json", { expand: false });
+          const spellIcons = await ForgeCompendiumBrowser.getFileData("systems/dnd5e/json/spell-icon-migration.json", { expand: false });
+          iconMap = {...icons, ...spellIcons};
+        } catch(err) {
+          console.warn(`Failed to retrieve icon migration data: ${err.message}`);
+        }
+        return iconMap;
+      };
+
+    static async parseCompendiums() {
+        const permissions = game.ForgeCompendiumBrowser.setting("permissions") || {};
+
         //Find all the DnDBeyond modules
         log("Parsing compendiums");
-        for (let module of game.modules.values()) {
+        for (const module of game.modules.values()) {
             const flags = module.flags ?? module.data.flags;
             if (flags["forge-compendium-browser"]?.active && module.active) {
-                let book = {
+                const book = {
                     id: module.id,
                     name: module.title ?? module.data.title,
                     description: module.description ?? module.data.description,
@@ -81,31 +102,42 @@ export class ForgeCompendiumBrowser {
                     packs: module.packs ?? module.data.packs,
                     children: [],
                     type: "book",
+                    permissions: permissions[module.id] || {},
+                    version: module.version ?? module.data.version
                 };
 
-                new Hierarchy(book);
-
                 ForgeCompendiumBrowser.books.push(book);
-                log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length} associated compendiums`);
+
+                const hierarchy = new Hierarchy(book);
+                hierarchy.getHierarchy().then((data) => {
+                    if (data == null) {
+                        book.error = true;
+                    }
+                });
+
+                log(`Found package:${module.title ?? module.data.title}, hiding ${module.packs.length ?? module.packs.size} associated compendiums`);
             }
         }
+
+        ForgeCompendiumBrowser.clearPacks();
     }
 
-    static async getFileData(src) {
+    static async getFileData(src, options = {}) {
         // Load the referenced translation file
         let err;
         let resp;
         try {
-            resp = await fetch(src).catch(e => {
+            resp = await fetch(src, {cache: "no-cache"}).catch((e) => {
                 err = e;
                 return null;
             });
-        } catch {
+        } catch (err) {
             // ignore this error, it should be caught in the next statement
+            error(err);
         }
-        if (resp.status !== 200) {
-            const msg = `Unable to load hierarchy data "${src}"`;
-            warn(msg);
+        if (resp == undefined || resp.status !== 200) {
+            const msg = `Unable to load data "${src}"`;
+            warn(msg, err);
             return null;
         }
 
@@ -113,9 +145,11 @@ export class ForgeCompendiumBrowser {
         let json;
         try {
             json = await resp.json();
-            log(`Loaded hierarchy file ${src}`);
-            json = foundry.utils.expandObject(json);
+            log(`Loaded file ${src}`);
+            if (options.expand !== false)
+                json = foundry.utils.expandObject(json);
         } catch (err) {
+            warn(err);
             json = null;
         }
         return json;
@@ -124,9 +158,9 @@ export class ForgeCompendiumBrowser {
     static async indexBook(book) {
         const indexPacks = (parent) => {
             if (parent.children && parent.children.length) {
-                for (let child of parent.children) {
+                for (const child of parent.children) {
                     child.parent = parent;
-                    child.section = parent.section || (parent.type == "section" && parent.id);
+                    child.section = parent.section || (parent.type === "section" && parent.id);
 
                     if (child.children)
                         indexPacks(child);
@@ -147,13 +181,69 @@ export class ForgeCompendiumBrowser {
     static openBrowser(book) {
         ForgeCompendiumBrowser.browser = new CompendiumBrowserApp(book).render(true);
     }
+
+    static clearPacks() {
+        if (ui?.compendium?.element) {
+            for (const book of ForgeCompendiumBrowser.books) {
+                for (const pack of book.packs) {
+                    $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, ui.compendium.element).addClass('forge-compendium-pack');
+                }
+            }
+        }
+    }
+
+    static async showPermissions(book) {
+        const isV10 = isNewerVersion(game.version, "9.999999");
+
+        const permissions = duplicate(game.ForgeCompendiumBrowser.setting("permissions") || {});
+        const permission = permissions[book.id] || {};
+    
+        const data = {
+            defaultLevels: { "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
+            playerLevels: { "null": i18n("ForgeCompendiumBrowser.Default"), "true": i18n("ForgeCompendiumBrowser.Allowed"), "false": i18n("ForgeCompendiumBrowser.NotAllowed") },
+            currentDefault: permission["default"] == undefined || permission["default"] ? "true" : "false",
+            users: game.users.filter(u => !u.isGM).map(u => {
+                return {
+                    id: u.id,
+                    name: u.name,
+                    allowed: permission[u.id] == undefined ? "null" : permission[u.id] ? "true" : "false",
+                }
+            })
+        };
+    
+        const html = await renderTemplate("./modules/forge-compendium-browser/templates/permissions.html", data);
+        Dialog.prompt({
+            title: `${i18n("ForgeCompendiumBrowser.ConfigurePermissions")}: ${book.name}`,
+            content: html,
+            label: i18n("ForgeCompendiumBrowser.SaveChanges"),
+            callback: (html) => {
+                const form = $("#permission-control", html)[0];
+                const fd = new FormDataExtended(form);
+        
+                const changes = isV10 ? fd.object : fd.toObject();
+        
+                for (const [key, value] of Object.entries(changes)) {
+                    permission[key] = value === "null" ? null : value === "true";
+                }
+        
+                permissions[book.id] = book.permissions = permission;
+                game.settings.set("forge-compendium-browser", "permissions", permissions);
+            },
+            rejectClose: false,
+        });
+    }
+
+    static compare(a, b) {
+        let result = (a.sort ?? 0) - (b.sort ?? 0);
+        return result == 0 ? (a.name || "").localeCompare(b.name || "") : result;
+    }
 }
 
 Hooks.on('init', ForgeCompendiumBrowser.init);
 Hooks.on('setup', ForgeCompendiumBrowser.setup);
 Hooks.on('ready', ForgeCompendiumBrowser.ready);
 
-Hooks.on("renderCompendiumDirectory", (app, html, data) => {
+Hooks.on("renderCompendiumDirectory", (app, html) => {
     $('.directory-header', html).append(
         $('<div>')
             .addClass('forge-compendium-actions action-buttons flexrow')
@@ -165,11 +255,7 @@ Hooks.on("renderCompendiumDirectory", (app, html, data) => {
             )
     );
 
-    for (let book of ForgeCompendiumBrowser.books) {
-        for (let pack of book.packs) {
-            $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, html).addClass('forge-compendium-pack');
-        }
-    }
+    ForgeCompendiumBrowser.clearPacks();
 });
 
 Hooks.on("setupTileActions", (app) => {
@@ -182,7 +268,7 @@ Hooks.on("setupTileActions", (app) => {
                 name: "Compendium Book",
                 list: () => {
                     let list = {};
-                    for (let book of game.ForgeCompendiumBrowser.books) {
+                    for (const book of game.ForgeCompendiumBrowser.books) {
                         list[book.id] = book.name;
                     }
                     return list;
@@ -194,27 +280,39 @@ Hooks.on("setupTileActions", (app) => {
         fn: async (args = {}) => {
             const { action, userid } = args;
 
-            if(userid == game.user.id) {
+            if(userid === game.user.id) {
                 game.ForgeCompendiumBrowser.openBrowser(action.data.bookid);
             } else {
-                game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, (resp) => { } );
+                game.socket.emit( game.ForgeCompendiumBrowser.SOCKET, { action: "open", userid: userid, bookid: action.data.bookid}, () => { } );
             }
         },
         content: async (trigger, action) => {
-            let book = game.ForgeCompendiumBrowser.books.find(b => b.id == action.data.bookid);
+            const book = game.ForgeCompendiumBrowser.books.find(b => b.id === action.data.bookid);
             return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${book.name || 'Unknown'}"</span>`;
         }
     });
 });
 
-Hooks.on('renderModuleManagement', (app, html, data) => {
-    for (let module of game.modules.values()) {
+Hooks.on('renderModuleManagement', (app, html) => {
+    for (const module of game.modules.values()) {
         const flags = module.flags ?? module.data.flags;
         if (flags["forge-compendium-browser"]?.active) {
                $("<span>")
                 .addClass("tag compendium-library")
-                .html('<img title="Forge Compendium Browser" src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">')
+                .html(`<img title="${i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary")}" src="/modules/forge-compendium-browser/img/the-forge-logo-32x32.png" width="16" height="16" style="border: 0px;margin-bottom: -3px;">`)
                 .insertAfter($(`.package[data-module-name="${module.id || module.name}"] .package-title,.package[data-module-id="${module.id || module.name}"] .package-title`, html));
+        }
+    }
+});
+
+// If the permissions change, make sure to update the book
+Hooks.on('updateSetting', (setting) => {
+    if (setting.key === "forge-compendium-browser.permissions") {
+        for (const [bookId, permission] of Object.entries(setting.value)) {
+            const book = ForgeCompendiumBrowser.books.find(b => b.id === bookId);
+            if (book) {
+                book.permissions = permission;
+            }
         }
     }
 });

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showListing" class="forge-compendium-list" :depth="depth">
+  <div v-if="showListing" class="forge-compendium-list" :depth="depth" :style="`margin-left:${Math.max(depth - 1, 0) * 10}px`">
     <div v-for="item in sortedList" :key="item.id" :data-id="item.id">
       <div class="flexcol" :class="listClass">
         <div
@@ -9,7 +9,7 @@
           draggable
           @dragstart="startDrag($event, item)"
         >
-          <img v-if="item.img" :data-src="item.img" class="lazy forge-compendium-image" />
+          <img v-if="item.img" :data-src="mapIcon(item.img)" class="lazy forge-compendium-image" @error="errorLoadingImage" />
           <span>{{ item.name }}</span>
         </div>
         <compendium-list
@@ -33,9 +33,9 @@ export default {
   },
   methods: {
     openItem(item) {
-      if (item.type == "document") {
+      if (item.type === "document") {
         this.$emit("open", item);
-      } else if (item.children && item.children.length && item.children[0].name == item.name) {
+      } else if (item.children && item.children.length && item.children[0].name === item.name) {
         this.$emit("open", item.children[0]);
       }
     },
@@ -51,14 +51,28 @@ export default {
     },
     filteredList(item) {
       const useSameName = game.ForgeCompendiumBrowser.setting("same-name");
-      if (!item.children || (item.children.length == 1 && item.children[0].name == item.name)) {
+      if (!item.children || (item.children.length === 1 && item.children[0].name === item.name)) {
         return [];
       }
 
-      return item.children.filter((c) => c.name != item.name || !useSameName);
+      return item.children.filter((c) => (c.name !== item.name || !useSameName) && c.visible !== false);
     },
     hasImage(item) {
         return item.img ? 'has-image' : '';
+    },
+    mapIcon(path) {
+        if ( path && game.ForgeCompendiumBrowser.iconMap ) {
+            if ( path.startsWith("/") || path.startsWith("\\") ) path = path.substring(1);
+            return game.ForgeCompendiumBrowser.iconMap[path] || path;
+        }
+        return path;
+    },
+    errorLoadingImage(ev) {
+        // If image fails to load, then fallback to default image
+        const defaultImage = "icons/svg/mystery-man.svg";
+        const img = ev.target;
+        if (img && img.attributes.src.value !== defaultImage)
+            img.src = defaultImage;
     },
   },
   computed: {
@@ -66,11 +80,11 @@ export default {
       return this.listing && this.listing.length;
     },
     listClass() {
-      return this.depth == 0 ? "forge-compendium-item" : "";
+      return this.depth === 0 ? "forge-compendium-item" : "";
     },
     sortedList() {
-      return [...this.listing].sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });
-    }
+      return [...this.listing].sort(game.ForgeCompendiumBrowser.compare);
+    },
   },
 };
 </script>

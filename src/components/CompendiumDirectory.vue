@@ -34,14 +34,14 @@ export default {
   },
   methods: {
     selectEntity() {
-      if (this.entity.type == "document") {
+      if (this.entity.type === "document") {
         this.$emit("open", this.entity);
       } else {
         if (
           this.entity.children &&
           this.entity.children.length &&
-          this.entity.children[0].name == this.entity.name &&
-          this.entity.children[0].type == "document"
+          this.entity.children[0].name === this.entity.name &&
+          this.entity.children[0].type === "document"
         ) {
           this.$emit("open", this.entity.children[0]);
         } else {
@@ -58,7 +58,7 @@ export default {
       if (!this.entity)
         return "";
 
-      let ids = [];
+      const ids = [];
       let item = this.selected;
       while (item.parent) {
         ids.push(item.id);
@@ -70,13 +70,13 @@ export default {
     filterList() {
       if (!this.entity.children) return [];
 
-      return this.entity.children.filter((c) => c.name != this.entity.name || c.type != "document").sort((a, b) => { return (a.sort ?? 0) - (b.sort ?? 0) });
+      return this.entity.children.filter((c) => (c.name !== this.entity.name || c.type !== "document") && c.visible !== false).sort(game.ForgeCompendiumBrowser.compare);
     },
     showChildren() {
       if (this.entity.children &&
-          this.entity.children.length == 1 &&
-          this.entity.children[0].name == this.entity.name &&
-          this.entity.type == "document") {
+          this.entity.children.length === 1 &&
+          this.entity.children[0].name === this.entity.name &&
+          this.entity.type === "document") {
         return false;
       }
 
@@ -88,9 +88,9 @@ export default {
     showMarker() {
       if (
         (this.entity.children &&
-          this.entity.children.length == 1 &&
-          this.entity.children[0].name == this.entity.name) ||
-        this.entity.type == "document"
+          this.entity.children.length === 1 &&
+          this.entity.children[0].name === this.entity.name) ||
+        this.entity.type === "document"
       )
         return false;
 

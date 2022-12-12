@@ -23,7 +23,7 @@ globalThis.game = {
             return "";
         },
         async indexBook(book) {
-            let indexPacks = async (parent) => {
+            const indexPacks = async (parent) => {
                 for (let child of parent.children) {
                     child.parent = parent;
     

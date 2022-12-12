@@ -1,3 +1,8 @@
+#forge-compendium-browser {
+    min-width: 900px;
+    min-height: 580px;
+}
+
 #forge-compendium-browser .window-content {
     padding: 0px;
 }
@@ -12,26 +17,28 @@
     height: 100%;
 }
 
-.forge-compendium-scene .background {
+.forge-compendium-scene .compendium-scene {
     background-position: center;
-    background-size: cover;
     background-repeat: no-repeat;
     width: 100%;
     height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+.forge-compendium-scene .background {
+    background-size: cover;
     filter: blur(5px);
     opacity: 0.5;
     z-index: 100;
 }
 
-.forge-compendium-scene img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.forge-compendium-scene .foreground {
+    background-size: contain;
+    height: calc(100% - 40px);
     border: 0px;
     z-index: 200;
-    position: absolute;
-    top: 0px;
-    left: 0px;
 }
 
 .forge-compendium-scene .forge-compendium-scene-stat {
@@ -41,12 +48,24 @@
     background-color: rgba(0, 0, 0, 0.8);
     border: 2px solid #000;
     border-radius: 8px;
-    max-width: 300px;
-    width: 300px;
+    width: 100%;
     color: #ffffff;
-    padding: 12px 0px;
+    padding: 6px 0px;
     font-size: 18px;
     z-index: 300;
+}
+
+.forge-compendium-scene .forge-compendium-scene-stat ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+}
+
+.forge-compendium-scene .forge-compendium-scene-stat ul li {
+    flex: 0 0 75px;
+    margin: 0px 8px;
+    text-align: left;
 }
 
 .package-list .package .tag.compendium-library {
@@ -72,6 +91,20 @@
     background-color: royalblue;
     border-right: 1px solid darkblue;
     border-radius: 4px;
+    overflow: hidden;
+}
+
+#forge-compendium-browser-import .percent-msg {
+    width: 193px;
+    position: absolute;
+    float: left;
+    top: 0px;
+    left: 0px;
+    text-align: center;
+}
+
+#forge-compendium-browser-import .bar .percent-msg {
+    color: #FFF;
 }
 
 #forge-compendium-browser-import .start-import {
@@ -88,4 +121,8 @@
 
 #forge-compendium-browser-import .message {
     font-style: italic;
+}
+
+#forge-compendium-browser .window-resizable-handle {
+    z-index: 300;
 }

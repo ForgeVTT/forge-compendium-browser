@@ -99,8 +99,8 @@
         <!-- breadcrumbs -->
         <ul class="flexrow forge-compendium-breadcrumbs">
           <li v-for="(item, index) in path" :key="item.id">
-            <span v-if="index != 0">/</span>
-            <div class="breadcrumb-link" v-on="item.id != document.id ? { click: () => selectEntity(item) } : {}">{{ item.name }}</div>
+            <span v-if="index !== 0">/</span>
+            <div class="breadcrumb-link" v-on="item.id !== document.id ? { click: () => selectEntity(item) } : {}">{{ item.name }}</div>
           </li>
         </ul>
         <div class="forge-entry-import" @click="importEntry">
@@ -187,21 +187,21 @@
             </div>
             <div v-else class="no-results"><div>{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div></div>
           </div>
-          <div v-else>
+          <div v-else class="flexcol">
             <div class="flexrow flexcontain">
               <div
                 class="forge-compendium-description"
                 v-html="book.description"
               ></div>
               <div class="forge-compendium-contains flexcol">
-                <b style="flex-grow: 0;">Contains:</b>
+                <b style="flex-grow: 0;">{{ this.i18n("ForgeCompendiumBrowser.Contains") }}:</b>
                 <ul class="forge-compendium-contains-list">
                   <li v-for="section in sections" :key="section.id">
                     <i class="fas" :class="section.icon"></i>
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
-                <div style="text-align: center;flex-grow: 0;display: none;">
+                <div style="text-align: center;flex-grow: 0;">
                   <button @click="importModule">
                     <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
@@ -230,6 +230,23 @@
                   <i class="fas fa-search"></i>
                 </div>
                 <div class="forge-compendium-title">{{ this.i18n("ForgeCompendiumBrowser.Search") }}</div>
+              </div>
+            </div>
+            <div class="flexrow forge-compendium-permissions">
+              <button 
+                class="permission-button"
+                @click="updatePermissions" 
+                :title="i18n('ForgeCompendiumBrowser.ConfigurePermissions')"
+              >
+                <i class="fas fa-lock"></i>
+              </button>
+              <b style="flex-grow: 0; margin-left: 8px;">{{ this.i18n("ForgeCompendiumBrowser.Ownership") }}:</b>
+              <div class="permission-text">
+                <span 
+                  class="user-permission"
+                  v-for="(permission, i) in permissionText"
+                  :key="i"
+                >{{ permission }}<span>
               </div>
             </div>
           </div>
@@ -289,22 +306,22 @@ export default {
       this.selectEntity(entity);
     },
     async selectEntity(entity) {
-      console.log("Select an entity", entity);
+      //console.log("Select an entity", entity);
       if (!entity) return;
 
-      if (entity.type == "search") {
+      if (entity.type === "search") {
         this.openSearch(entity.query);
-      } else if (entity.type == "book") {
+      } else if (entity.type === "book") {
         this.clearPath();
-      } else if (entity.type == "folder") {
-        const child = entity.children.find(c => c.name == entity.name && c.type == "document");
+      } else if (entity.type === "folder") {
+        const child = entity.children.find(c => c.name === entity.name && c.type === "document");
         if (child) 
           this.selectEntity(child);
         else 
           this.folder = entity;
-      } else if (entity.type == "document") {
+      } else if (entity.type === "document") {
         if (!entity.document) {
-          let collection = game.packs.get(entity.packId);
+          const collection = game.packs.get(entity.packId);
           entity.document = await collection.getDocument(entity.id);
         }
         this.document = entity;
@@ -312,7 +329,7 @@ export default {
         this.folder = entity;
       } else if (entity) {
         this.folder = entity;
-        if (entity.type == "section") this.document = null;
+        if (entity.type === "section") this.document = null;
       }
     },
     findClosestChapter(dir) {
@@ -324,7 +341,7 @@ export default {
       )
         return false;
 
-      let idx = this.currentSection.children.findIndex((c) => c.id == currentChapter.id);
+      let idx = this.currentSection.children.findIndex((c) => c.id === currentChapter.id);
       idx += dir;
       // If there is an entry with the same name as the current chapter, then use that to display as the entity.
       const chapter = this.currentSection.children[idx];
@@ -335,20 +352,20 @@ export default {
       if (!chapter) 
         return;
 
-      let checkedEntities = [];
+      const checkedEntities = [];
       // when changing the chapter, find the next available document in the chapter to display
       const entry = this.findDocument(0, chapter, 1, checkedEntities);
 
       this.selectEntity(entry || chapter);
     },
     moveUpParent(id, parent, dir, checkedEntities) {
-      if (!parent || parent.type == "book") 
+      if (!parent || parent.type === "book") 
         return null;
 
       // Haven't found any children, so go up a parent and move to the next one
-      let pidx = parent.children.findIndex((c) => c.id == id);
+      const pidx = parent.children.findIndex((c) => c.id === id);
       if (!checkedEntities.includes(parent.id)) {
-        let entity = this.findDocument(pidx + dir, parent, dir, checkedEntities);
+        const entity = this.findDocument(pidx + dir, parent, dir, checkedEntities);
         if (entity) 
             return entity;
       }
@@ -358,25 +375,25 @@ export default {
       checkedEntities.push(parent.id);
       for (let i = index; i >= 0 && i < parent.children.length; i += dir) {
         if (parent.children[i].children) {
-          let idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
+          const idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
           if (!checkedEntities.includes(parent.children[i].id)) {
-            let entity = this.findDocument(idx, parent.children[i], dir, checkedEntities);
+            const entity = this.findDocument(idx, parent.children[i], dir, checkedEntities);
             if (entity) 
                 return entity;
           }
-        } else if (parent.children[i].type == "document") {
+        } else if (parent.children[i].type === "document") {
           return parent.children[i];
         }
       }
       return null;
     },
     findClosestItem(dir, idx) {
-      let checkedEntities = [];
+      const checkedEntities = [];
 
       if (idx == undefined) {
         if (!this.document) 
             return null;
-        idx = this.document.parent.children.findIndex((i) => i.id == this.document.id);
+        idx = this.document.parent.children.findIndex((i) => i.id === this.document.id);
       }
 
       let newChild = this.findDocument(idx + dir, this.document.parent, dir, checkedEntities);
@@ -387,25 +404,25 @@ export default {
       return newChild;
     },
     changeItem(dir) {
-      let entity = this.findClosestItem(dir);
-      if (entity && entity.type == "document") {
+      const entity = this.findClosestItem(dir);
+      if (entity && entity.type === "document") {
         this.selectEntity(entity);
       }
     },
     sectionActive(section) {
-      return this.currentSection?.id == section.id ||
-        (this.searchTerm !== null &&
-          section.id == "search" &&
-          this.currentSection?.id == null)
+      return this.currentSection?.id === section.id ||
+        (this.searchTerm != null &&
+          section.id === "search" &&
+          this.currentSection?.id === null)
         ? "active"
         : "";
     },
     findEntity(parent, id) {
       if (parent.children) {
-        let entity = parent.children.find((c) => c.id == id);
+        let entity = parent.children.find((c) => c.id === id);
         if (entity) 
             return entity;
-        for (let child of parent.children) {
+        for (const child of parent.children) {
           entity = this.findEntity(child, id);
           if (entity) 
             return entity;
@@ -415,10 +432,10 @@ export default {
     },
     openLink(pack, id) {
       //find the other entry and open it.
-      console.log("Open Link", pack, id);
+      //console.log("Open Link", pack, id);
       const parts = pack.split(".");
       if (parts.length) {
-        if (parts[0] == this.book.id) {
+        if (parts[0] === this.book.id) {
           // This is document is from this book, so find it and open it
           const entity = this.findEntity(this.book, id);
           if (entity) {
@@ -441,7 +458,7 @@ export default {
       this.historyPosition += dir;
       this.historyPosition = Math.min(Math.max(0, this.historyPosition), this.history.length - 1);
       const entity = this.history[this.historyPosition];
-      if (entity.type == "search") {
+      if (entity.type === "search") {
         this.openSearch(entity.query);
       } else {
         this.document = entity;
@@ -452,67 +469,68 @@ export default {
       const position = this.historyPosition + dir;
       return position < 0 || position > this.history.length - 1 ? "disabled" : "";
     },
+    updatePermissions() {
+      game.ForgeCompendiumBrowser.showPermissions(this.book);
+    },
     async importModule() {
-      let sections = this.book.hierarchy.children.map((c) => {
-        return {
-          type: c.packtype,
-          name: c.name,
-          max: 0,
-          count: 0,
-          perc: 0
-        }
-      });
+      let max = 0;
+      let count = 0;
+      let lastPerc = 0;
 
-      let globalHtml;
+      let dialogHtml;
 
-      let progressFn = (command, options) => {
-        let typeElem = options?.type ? $(`li[data-id="${options.type}"]`, globalHtml) : null;
-        if (options?.message)
-          $('.message', typeElem).html(options?.message);
-        if (command == "reset" && options?.type) {
-          let section = sections.find(s => s.type == options.type);
-          if (section) {
-            section.max = options?.max ?? 0;
-            section.count = 0;
-            section.perc = 0;
-            $('.progress-bar .bar', typeElem).css({'width': `0%`});
-          }
+      const progressFn = (command, options) => {
+        // If there's a message included, then update the message text
+        if (options?.message) {
+          $('.message', dialogHtml).html(options.message);
         }
-        if (command == "increase" && options?.type) {
-          let section = sections.find(s => s.type == options.type);
-          if (section) {
-            section.count++;
-            if ((Math.round((section.count / section.max) * 100)) != section.perc) {
-              section.perc = (Math.round((section.count / section.max) * 100));
-              $('.progress-bar .bar', typeElem).css({'width': `${section.perc}%`});
-            }
+        // reset command to restart progress bar for an action
+        if (command === "reset") {
+          max = options?.max ?? 0;
+          count = 0;
+          lastPerc = 0;
+          $('.progress-bar .bar', dialogHtml).css({'width': '0%'});
+          $('.progress-bar .percent-msg', dialogHtml).html("0%");
+
+        // increase command to increase the progress bar by one
+        } else if (command === "increase") {
+          count++;
+          // only update the interface if this addition has changed the percent
+          const currentPerc = (Math.round((count / max) * 100));
+          if (currentPerc !== lastPerc) {
+            lastPerc = currentPerc;
+            $('.progress-bar .bar', dialogHtml).css({'width': `${lastPerc}%`});
+            $('.progress-bar .percent-msg', dialogHtml).html(`${lastPerc}%`);
           }
-        }
-        if (command == "finish") {
-          $('.start-import', globalHtml).hide();
-          $('.finish-import', globalHtml).show();
-          $('.message', globalHtml).html('');
-          $('.progress-bar .bar', globalHtml).css({'width': `100%`});
+
+        // finish command when the process is done and the dialog needs to be cleaned up
+        } else if (command === "finish") {
+          $('.start-import', dialogHtml).hide();
+          $('.finish-import', dialogHtml).show();
+          if (!options?.message)
+            $('.message', dialogHtml).html('');
+          $('.progress-bar .bar', dialogHtml).css({'width': "100%"});
+          $('.progress-bar .percent-msg', dialogHtml).html("100%");
         }
       }
 
-      let startImport = function(html) {
+      const startImport = function(html) {
         $('.start-import', html).prop("disabled", true);
         game.ForgeCompendiumBrowser.importBook(this.book, { progress: progressFn });
       }
 
-      let closeDialog = function(event) {
+      const closeDialog = function(event) {
         $(event.currentTarget).closest('.dialog').find('header .close').click();
       }
 
-      const template = await renderTemplate("modules/forge-compendium-browser/templates/import-documents.html", { sections: sections });
+      const template = await renderTemplate("modules/forge-compendium-browser/templates/import-documents.html");
       new Dialog({
         title: game.i18n.localize("ForgeCompendiumBrowser.ImportCompendiumDocuments"),
         content: template,
         label: game.i18n.localize("ForgeCompendiumBrowser.Import"),
         buttons: {},
         render: (html) => {
-          globalHtml = html;
+          dialogHtml = html;
           $('.start-import', html).on("click", startImport.bind(this, html));
           $('.finish-import', html).on("click", closeDialog.bind(this));
         },
@@ -534,6 +552,7 @@ export default {
       }
     },
     searchBook() {
+      const isV10 = isNewerVersion(game.version, "9.999999");
       if (this.searchTerm.length < 3) {
         this.searchResults = [];
       }
@@ -543,12 +562,16 @@ export default {
       let query = this.searchTerm.toLowerCase();
 
       // added idx and text here for a future improvement to show highlighted text
-      let resultObject = (entity, idx, text) => {
-        let section = entity.parent.type == "section" ? entity.parent : this.book.children.find((s) => s.id == entity.parent.section);
+      const resultObject = (entity, idx, text) => {
+        const section = entity.parent.type === "section" ? entity.parent : this.book.children.find((s) => s.id === entity.parent.section);
+        let img = entity.img;
+        if (isV10 && img && img.indexOf("systems/dnd5e/icons")) {
+          img = img.replace("systems/dnd5e/icons", "images/icons");
+        }
         return {
           id: entity.id,
           name: entity.name,
-          img: entity.img,
+          img: img,
           parent: entity.parent.name,
           section: section.name,
           icon: section.icon,
@@ -556,10 +579,10 @@ export default {
         };
       };
 
-      let traverseSearch = (parent, results) => {
+      const traverseSearch = (parent, results) => {
         let searchResult = null;
 
-        if (parent.type == "document") {
+        if (parent.type === "document") {
           if (title != null) {
             const idx = parent.name.toLowerCase().indexOf(title);
             if (idx >= 0) {
@@ -570,8 +593,8 @@ export default {
             try {
               if (parent.document instanceof JournalEntry) {
                 if (isNewerVersion(game.version, "9.99999")) {
-                  for (let page of parent.pages) {
-                    let field = page.content;
+                  for (const page of parent.pages) {
+                    const field = page.content;
                     const idx = field.toLowerCase().indexOf(query);
                     if (idx >= 0) {
                       searchResult = resultObject(parent, idx, field);
@@ -579,20 +602,20 @@ export default {
                     }
                   }
                 } else {
-                  let field = parent.document.data.content;
+                  const field = parent.document.data.content;
                   const idx = field.toLowerCase().indexOf(query);
                   if (idx >= 0) {
                     searchResult = resultObject(parent, idx, field);
                   }
                 }
               } else if (parent.document instanceof Actor) {
-                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.details.biography.value : parent.document.data.data.details.biography.value;
+                const field = isNewerVersion(game.version, "9.99999") ? parent.document.system.details.biography.value : parent.document.data.data.details.biography.value;
                 const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
                   searchResult = resultObject(parent, idx, field);
                 }
               } else if (parent.document instanceof Item) {
-                let field = isNewerVersion(game.version, "9.99999") ? parent.document.system.description.value : parent.document.data.data.description.value
+                const field = isNewerVersion(game.version, "9.99999") ? parent.document.system.description.value : parent.document.data.data.description.value
                 const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
                   searchResult = resultObject(parent, idx, field);
@@ -607,15 +630,15 @@ export default {
           }
         }
         if (parent.children && parent.children.length) {
-          for (let child of parent.children) {
-            if (parent.type == "book" && type != null && child.type != type)
+          for (const child of parent.children) {
+            if (parent.type === "book" && type != null && child.type !== type)
               continue;
             traverseSearch(child, results);
           }
         }
       };
 
-      let results = {};
+      const results = {};
       traverseSearch(this.book, results);
       this.searchResults = Object.values(results);
     },
@@ -625,9 +648,15 @@ export default {
     importEntry() {
         const collection = this.document.document.collection;
         const pack = game.packs.get(this.document.packId);
-        if (collection && collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true })) {
-            ui.notifications.info("Document has been imported");
+        if (collection) {
+            let document = collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true });
+            if (document.type == "Scene") {
+                // Need to link the tokens and notes?
+            }
+            if (document)
+                return ui.notifications.info("Document has been imported");
         }
+        ui.notifications.error("Error importing document");
     }
   },
   computed: {
@@ -649,9 +678,9 @@ export default {
       items.push(item);
       while (item.parent) {
         item = item.parent;
-        if (item.type != "book") {
+        if (item.type !== "book") {
           let canAdd = true;
-          if (game.ForgeCompendiumBrowser.setting("same-name") && item.name == items[items.length - 1].name) {
+          if (game.ForgeCompendiumBrowser.setting("same-name") && item.name === items[items.length - 1].name) {
             //Don't double up on the names if the user doesn't want to see them
             canAdd = false;
           }
@@ -677,18 +706,18 @@ export default {
         return null;
       } else {
         let section = this.document || this.folder;
-        while (section.type != "section" && section.parent) {
+        while (section.type !== "section" && section.parent) {
           section = section.parent;
         }
         return section;
       }
     },
     currentChapter() {
-      if (!this.folder || this.folder.type == "section") {
+      if (!this.folder || this.folder.type === "section") {
         return null;
       } else {
         let chapter = this.folder;
-        while (chapter.parent && chapter.parent.type != "section") {
+        while (chapter.parent && chapter.parent.type !== "section") {
           chapter = chapter.parent;
         }
         return chapter;
@@ -702,6 +731,21 @@ export default {
     },
     bookName() {
       return this.book.name.toUpperCase();
+    },
+    permissionText() {
+      const permission = this.book.permissions || {};
+
+      const levels = { "true": this.i18n("ForgeCompendiumBrowser.Allowed"), "false": this.i18n("ForgeCompendiumBrowser.NotAllowed") };
+
+      const currentDefault = permission["default"] == undefined || permission["default"] ? "true" : "false";
+      const playerPermissions = Object.entries(permission).map(([k, v]) => {
+        if (k === "default" || v === currentDefault || v == undefined) return null;
+        const user = game.users.get(k);
+        const value = v ? "true" : "false";
+        return `${user.name}: ${levels[value]}`;
+      }).filter(p => !!p);
+
+      return [`${this.i18n("ForgeCompendiumBrowser.Everyone")}: ${levels[currentDefault]}`, ...playerPermissions];
     }
   },
 };
@@ -880,9 +924,42 @@ export default {
   flex: 0 0 300px;
 }
 
+.forge-compendium-content .forge-compendium-permissions {
+  flex-grow: 0;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  line-height: 32px;
+}
+
+.forge-compendium-content .forge-compendium-permissions .user-permission {
+  border-radius: 4px;
+  border: 1px solid #808080;
+  padding: 4px 8px;
+  margin-right: 4px;
+}
+
+.forge-compendium-content .forge-compendium-permissions .permission-button {
+  flex: 0 0 30px;
+  width: 30px;
+  padding: 2px;
+  height: 30px;
+  line-height: 25px;
+  padding: 2px 2px 2px 6px;
+}
+
+.forge-compendium-content .forge-compendium-permissions .permission-text {
+  margin-left: 8px;
+}
+
 .forge-compendium-content .forge-compendium-contains .forge-compendium-contains-list {
   list-style: none;
   padding-left: 10px;
+}
+
+.forge-compendium-content .forge-compendium-contains .forge-compendium-contains-list li {
+  margin-bottom: 5px;
 }
 
 .forge-compendium-content .forge-compendium-contains i {

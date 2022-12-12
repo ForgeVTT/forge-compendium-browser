@@ -22,15 +22,15 @@ export default {
       const packId = e.currentTarget.dataset.pack;
       const id = e.currentTarget.dataset.id;
 
-      console.log("Opening a link", id);
+      //console.log("Opening a link", id);
 
       this.$emit("link", packId, id);
       e.preventDefault();
       e.stopPropagation();
     },
     async loadDocument() {
-      console.log("entry", this.entry);
-      let document = this.entry.document;
+      //console.log("Entry", this.entry);
+      const document = this.entry.document;
       let cls = document._getSheetClass ? document._getSheetClass() : null;
 
       if (document instanceof Scene) {
@@ -40,16 +40,19 @@ export default {
         };
 
         // Collect the stats on the scene
-        let stats = {};
-        for (let collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls",]) {
-          let collectionData = isNewerVersion(game.version, "9.99999") ? document[collection] : document.data[collection];
+        const statIcon = { Drawing: "fa-solid fa-pencil-alt", AmbientLight: "fa-regular fa-lightbulb", Note: "fas fa-bookmark", AmbientSound: "fa-solid fa-music", Tile: "fa-solid fa-cubes", Token: "fas fa-user-alt", Wall: "fa-solid fa-university" };
+        const stats = {};
+        for (const collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls",]) {
+          const collectionData = isNewerVersion(game.version, "9.99999") ? document[collection] : document.data[collection];
           if (collectionData.size) {
             const name = collectionData.documentClass.documentName;
             stats[name] = collectionData.size;
           }
         }
 
-        templateData.stats = Object.keys(stats).map((key) => ({ name: key, value: stats[key]}));
+        templateData.stats = Object.keys(stats).map((key) => {
+            return { name: `${stats[key]} ${game.i18n.localize(`ForgeCompendiumBrowser.${key}`)}`, icon: statIcon[key], value: stats[key]};
+        });
 
         const html = await renderTemplate("modules/forge-compendium-browser/templates/scene-entry.html", templateData);
 
@@ -58,11 +61,11 @@ export default {
         this.subsheet = { options: { classes: ["scene-entry"] } };
       } else {
         let html = "";
-        let pages = [];
+        const pages = [];
         if (document instanceof JournalEntry) {
           if (document instanceof JournalEntry && isNewerVersion(game.version, "9.99999")) {
             const cfg = CONFIG["JournalEntryPage"];
-            for (let page of this.entry.document.pages) {
+            for (const page of this.entry.document.pages) {
               const sheets = cfg.sheetClasses[page.type] || {};
               switch (page.type) {
                 case 'image': pages.push({document: page, cls: sheets["core.JournalImagePageSheet"].cls}); break;
@@ -82,7 +85,7 @@ export default {
           pages.push({document, cls});
         }
 
-        for (let page of pages){
+        for (const page of pages){
           this.subsheet = new page.cls(page.document, { editable: false });
           this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
           const templateData = await this.subsheet.getData();
@@ -112,19 +115,19 @@ export default {
         this.subsheet._disableFields(subdocument[0]);
 
         // Remove all the links that point back to this entry, just to clean up
-        $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link, text) => {
-          let linkHtml = $(link).html() || "";
+        $(`a.content-link[data-id="${this.entry.id}"]`, this.$refs.entry).each((idx, link) => {
+          const linkHtml = $(link).html() || "";
           if (linkHtml.indexOf('<i class="fas fa-book-open"></i>') >= 0 && linkHtml.indexOf(this.entry.name) >= 0) {
             $(link).remove();
           }
         });
 
-        $(`a[href^="ddb://"]`, this.$refs.entry).each((idx, link, text) => {
-          let linkHtml = $(link).html() || "";
+        $('a[href^="ddb://"]', this.$refs.entry).each((idx, link) => {
+          const linkHtml = $(link).html() || "";
           let href = $(link).attr('href');
           if (href.startsWith("ddb://compendium")) {
             try {
-              let bookid = href.replace("ddb://compendium/", "").split("/")[0];
+              const bookid = href.replace("ddb://compendium/", "").split("/")[0];
 
               $(link).addClass("content-link").removeAttr("href").attr("data-pack", `dndbeyond-${bookid}`);
             } catch { 
@@ -142,8 +145,8 @@ export default {
           }
         });
 
-        $(`a.entity-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
-        $(`a.content-link[data-pack]`, this.$refs.entry).on("click", this.openLink.bind(this));
+        $('a.entity-link[data-pack]', this.$refs.entry).on("click", this.openLink.bind(this));
+        $('a.content-link[data-pack]', this.$refs.entry).on("click", this.openLink.bind(this));
 
         document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
@@ -152,10 +155,13 @@ export default {
   },
   computed: {
     documentClasses() {
-      let classes = this.subsheet?.options?.classes || [];
+      const classes = this.subsheet?.options?.classes || [];
       if (game.version.startsWith("10.")) 
         classes.push("v10");
       return classes.join(" ");
+    },
+    i18n(key) {
+        return game.i18n.localize(key);
     },
   },
   watch: {
