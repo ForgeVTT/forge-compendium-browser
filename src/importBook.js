@@ -23,7 +23,6 @@ export class ImportBook{
                     folderData[isV10 ? "folder" : "parent"] = null;
                     mainfolder = await Folder.create(folderData);
                 }
-                console.log("Processing", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
                 if (progress) {
                     progress("reset", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
                 }
@@ -124,8 +123,6 @@ export class ImportBook{
             }
         }
 
-        console.log("Translations", ImportBook.translate);
-
         // Store the Actor data in case we're importing a Scene
         const actorUpdates = newDocs["Actor"];
 
@@ -190,10 +187,8 @@ export class ImportBook{
 
                     // Go through the tokens and point them to the right actors.
                     const tokens = (document.tokens || document.data.tokens || []);
-                    console.log("Scene Tokens", document, tokens);
                     for (const token of tokens) {
                         const tokenName = getProperty(token, "flags.ddbActorFlags.name") || getProperty(token.data, "flags.ddbActorFlags.name") || token.name;
-                        console.log("Finding Scene Token", token, tokenName);
                         if (!tokenName)
                             continue;
                         // Check to see if it's being imported with this adventure.
@@ -201,20 +196,17 @@ export class ImportBook{
                         if (actorUpdates) {
                             actor = actorUpdates.find(a => a.name === tokenName);
                         }
-                        console.log("Finding Actor from updates", actor, actorUpdates);
 
                         // Check to see if it already exists in the Monsters folder
                         // Save the monsterFolder for later in case we need to pull from the monster compendium
                         const folderName = `Monsters | ${tokenName[0].toUpperCase()}`;
                         let monsterFolder = game.folders.find(f => f.name === folderName && f[isV10 ? "folder" : "parentFolder"]?.name === "Monsters");
-                        console.log("Finding Folder", monsterFolder, folderName, game.folders);
                         if (!actor && monsterFolder) {
                             actor = game.actors.find(a => {
                                 if (a.name !== tokenName)
                                     return false;
                                 return a.folder?.id === monsterFolder.id;
                             });
-                            console.log("Looking for Monster folder", actor, monsterFolder, folderName);
                         }
                         // Check to see if it's in the Monsters SRD Compendium
                         if (!actor) {
@@ -243,15 +235,12 @@ export class ImportBook{
                                             sorting: "a"
                                         };
                                         folderData[isV10 ? "folder" : "parent"] = parentFolder;
-                                        console.log("Creating a Folder2", folderData);
                                         monsterFolder = await Folder.create(folderData);
                                     }
                                     data.folder = monsterFolder;
                                     const results = await Actor.createDocuments([data]);
                                     actor = results[0];
                                 }
-
-                                console.log("Looking in Compendium", actor, index);
                             }
                         }
 
@@ -260,13 +249,10 @@ export class ImportBook{
                                 token.actorId = actor._id;
                                 if ((!token.texture?.src || token.texture?.src === "icons/svg/mystery-man.svg") && actor?.prototypeToken?.texture?.src)
                                     token.texture.src = actor?.prototypeToken?.texture?.src;
-                                console.log("Found Actor", token, actor);
                             } else {
                                 const tokenUpdate = { actorId: actor.id };
                                 if ((!token.data.img || token.data.img === "icons/svg/mystery-man.svg") && actor?.data?.token?.img)
                                     tokenUpdate.img = actor?.data?.token?.img;
-
-                                console.log("Found Actor", token, actor, tokenUpdate);
 
                                 await token.update(tokenUpdate);
                             }
@@ -326,7 +312,6 @@ export class ImportBook{
                     folder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"]?.id === parentFolder.id && f.name === child.name);
                 }
                 if (!folder) {
-                    console.log("Checking depth", CONST.FOLDER_MAX_DEPTH, parentFolder.depth);
                     const folderData = {
                         name: child.name,
                         type: type,
@@ -339,12 +324,10 @@ export class ImportBook{
                         folderData.name = `${parentFolder.name}, ${child.name}`;
                         folderData.sort = getProperty(parentFolder, isV10 ? "sort" : "data.sort") + maxDepthSort;
                         folderData[isV10 ? "folder" : "parent"] = parentFolder[isV10 ? "folder" : "parentFolder"];
-                        console.log("Depth exceeded", folderData, parentFolder);
                         maxDepthSort++;
                     }
 
                     folderSort += 1000;
-                    console.log("Creating a Folder1", folderData);
                     folder = await Folder.create(folderData);
                 }
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
@@ -370,7 +353,6 @@ export class ImportBook{
                     }
                 } else if (type === "Scene") {
                     for (const note of (document.notes || document.data.notes || [])) {
-                        //console.log("Check Note", note);
                         // TODO import the note properly
                     }
                 }

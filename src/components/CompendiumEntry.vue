@@ -53,7 +53,6 @@ export default {
         templateData.stats = Object.keys(stats).map((key) => {
             return { name: `${stats[key]} ${game.i18n.localize(`ForgeCompendiumBrowser.${key}`)}`, icon: statIcon[key], value: stats[key]};
         });
-        console.log("Stats", templateData.stats);
 
         const html = await renderTemplate("modules/forge-compendium-browser/templates/scene-entry.html", templateData);
 
