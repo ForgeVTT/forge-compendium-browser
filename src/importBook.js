@@ -316,6 +316,7 @@ export class ImportBook{
     static async processChildren(parent, type, parentFolder, progress) {
         let documentData = [];
         let folderSort = 100000;
+        let maxDepthSort = 1;
         const isV10 = isNewerVersion(game.version, "9.999999");
 
         for (const child of parent.children) {
@@ -325,23 +326,26 @@ export class ImportBook{
                     folder = game.folders.find(f => f[isV10 ? "folder" : "parentFolder"]?.id === parentFolder.id && f.name === child.name);
                 }
                 if (!folder) {
-                    console.log("Checkign depth", CONST.FOLDER_MAX_DEPTH, parentFolder.depth);
-                    if (parentFolder.depth === (CONST.FOLDER_MAX_DEPTH || 3)) {
-                        folder = parentFolder;
-                        console.log("Depth exceeded", CONST.FOLDER_MAX_DEPTH, parent, parentFolder);
-                    } else {
-                        const folderData = {
-                            name: child.name,
-                            type: type,
-                            sorting: type === "Actor" ? "a" : "m",
-                            sort: child.sort ?? folderSort
-                        };
-                        folderData[isV10 ? "folder" : "parent"] = parentFolder;
+                    console.log("Checking depth", CONST.FOLDER_MAX_DEPTH, parentFolder.depth);
+                    const folderData = {
+                        name: child.name,
+                        type: type,
+                        sorting: type === "Actor" ? "a" : "m",
+                        sort: child.sort ?? folderSort
+                    };
+                    folderData[isV10 ? "folder" : "parent"] = parentFolder;
 
-                        folderSort++;
-                        console.log("Creating a Folder1", folderData);
-                        folder = await Folder.create(folderData);
+                    if (parentFolder.depth >= (CONST.FOLDER_MAX_DEPTH || 3)) {
+                        folderData.name = `${parentFolder.name}, ${child.name}`;
+                        folderData.sort = getProperty(parentFolder, isV10 ? "sort" : "data.sort") + maxDepthSort;
+                        folderData[isV10 ? "folder" : "parent"] = parentFolder[isV10 ? "folder" : "parentFolder"];
+                        console.log("Depth exceeded", folderData, parentFolder);
+                        maxDepthSort++;
                     }
+
+                    folderSort += 1000;
+                    console.log("Creating a Folder1", folderData);
+                    folder = await Folder.create(folderData);
                 }
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
             } else if (child.type === "document") {
