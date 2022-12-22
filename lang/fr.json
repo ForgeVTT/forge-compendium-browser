@@ -13,5 +13,20 @@
   "ForgeCompendiumBrowser.Import": "Importer",
   "ForgeCompendiumBrowser.Search": "Recherche",
   "ForgeCompendiumBrowser.NoSearchResults": "Aucun résultat de recherche",
-  "ForgeCompendiumBrowser.AllPlayers": "Tous les joueurs"
+  "ForgeCompendiumBrowser.AllPlayers": "Tous les joueurs",
+  "ForgeCompendiumBrowser.Ownership": "Propriété",
+  "ForgeCompendiumBrowser.Contains": "Contient",
+  "ForgeCompendiumBrowser.Allowed": "Autorisé",
+  "ForgeCompendiumBrowser.NotAllowed": "Non autorisé",
+  "ForgeCompendiumBrowser.Default": "Défaut",
+  "ForgeCompendiumBrowser.SaveChanges": "Sauvegarder les modifications",
+  "ForgeCompendiumBrowser.Everyone": "Tout le monde",
+  "ForgeCompendiumBrowser.Drawing": "Dessins",
+  "ForgeCompendiumBrowser.AmbientLight": "Lumières",
+  "ForgeCompendiumBrowser.Note": "Notes",
+  "ForgeCompendiumBrowser.AmbientSound": "Sons",
+  "ForgeCompendiumBrowser.Tile": "Tuiles",
+  "ForgeCompendiumBrowser.Token": "Jetons",
+  "ForgeCompendiumBrowser.Wall": "Murs",
+  "ForgeCompendiumBrowser.ConfigurePermissions": "Configurer les droits"
 }
