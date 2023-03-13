@@ -217,7 +217,7 @@ export class ImportBook{
 
                                 if (index) {
                                     const document = await monsterPack.getDocument(index._id);
-                                    const data = document.toObject(false);
+                                    const data = document.toObject();
                                     if (!monsterFolder) {
                                         let parentFolder = game.folders.find(f => f.name === "Monsters" && f[isV10 ? "folder" : "parentFolder"] == undefined);
                                         if (!parentFolder) {
@@ -351,12 +351,12 @@ export class ImportBook{
                         ImportBook.translate.push({ original: document.id, key: key, id: actor.id, uuid: actor.uuid, type });
                         continue;
                     }
-                } else if (type === "Scene") {
+                } /*else if (type === "Scene") {
                     for (const note of (document.notes || document.data.notes || [])) {
                         // TODO import the note properly
                     }
-                }
-                const data = document.toObject(false);
+                }*/
+                const data = document.toObject();
                 data.folder = parentFolder;
 
                 data._id = randomID();
