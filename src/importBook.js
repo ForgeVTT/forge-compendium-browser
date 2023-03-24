@@ -182,7 +182,10 @@ export class ImportBook{
                 } else if (type === "Scene") {
                     // Check the scene's journal entry
                     if (document.journal) {
-                        document.journal = ImportBook.translate.find(t => t.original == document.journal);
+                        const translateData = ImportBook.translate.find(t => t.original == document.journal);
+                        if (translateData) {
+                            document.journal = translateData.id;
+                        }
                     }
 
                     // Go through the tokens and point them to the right actors.
