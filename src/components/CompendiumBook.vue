@@ -483,6 +483,7 @@ export default {
         // If there's a message included, then update the message text
         if (options?.message) {
           $('.message', dialogHtml).html(options.message);
+          console.log("Progress Message", options.message);
         }
         // reset command to restart progress bar for an action
         if (command === "reset") {
@@ -507,8 +508,9 @@ export default {
         } else if (command === "finish") {
           $('.start-import', dialogHtml).hide();
           $('.finish-import', dialogHtml).show();
-          if (!options?.message)
+          if (!options?.message) {
             $('.message', dialogHtml).html('');
+          }
           $('.progress-bar .bar', dialogHtml).css({'width': "100%"});
           $('.progress-bar .percent-msg', dialogHtml).html("100%");
         }
