@@ -2,7 +2,7 @@
   "ForgeCompendiumBrowser.same-name.name": "Ouverture automatique avec le même nom",
   "ForgeCompendiumBrowser.same-name.hint": "Ouvrir automatiquement les documents portant le même nom que le nom de la liste",
   "ForgeCompendiumBrowser.ForgeCompendiumLibrary": "Bibliothèque de Compendiums de The Forge",
-  "ForgeCompendiumBrowser.LibraryMessage": "Ceci est votre bibliothèque de livres de compendium. Si vous n'avez pas de livres listés, veuillez utiliser le {link} du Bazaar pour importer vos livres.",
+  "ForgeCompendiumBrowser.LibraryMessage": "Ceci est votre bibliothèque de livres sur le compendium. Si vous n'avez pas de livres listés, veuillez utiliser le {link} du Bazar pour importer vos livres et activer le module dans votre monde.",
   "ForgeCompendiumBrowser.NoBooksLoaded": "Aucun livre chargé",
   "ForgeCompendiumBrowser.CompendiumLibrary": "Bibliothèque de Compendium",
   "ForgeCompendiumBrowser.Prev": "Prec",
