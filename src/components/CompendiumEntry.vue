@@ -1,10 +1,5 @@
 <template>
-  <div
-    ref="entry"
-    class="forge-compendium-entry"
-    :class="documentClasses"
-    v-html="html"
-  ></div>
+  <div ref="entry" class="forge-compendium-entry" :class="documentClasses" v-html="html"></div>
 </template>
 
 <script>
@@ -40,10 +35,20 @@ export default {
         };
 
         // Collect the stats on the scene
-        const statIcon = { Drawing: "fa-solid fa-pencil-alt", AmbientLight: "fa-regular fa-lightbulb", Note: "fas fa-bookmark", AmbientSound: "fa-solid fa-music", Tile: "fa-solid fa-cubes", Token: "fas fa-user-alt", Wall: "fa-solid fa-university" };
+        const statIcon = {
+          Drawing: "fa-solid fa-pencil-alt",
+          AmbientLight: "fa-regular fa-lightbulb",
+          Note: "fas fa-bookmark",
+          AmbientSound: "fa-solid fa-music",
+          Tile: "fa-solid fa-cubes",
+          Token: "fas fa-user-alt",
+          Wall: "fa-solid fa-university",
+        };
         const stats = {};
-        for (const collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls",]) {
-          const collectionData = isNewerVersion(game.version, "9.99999") ? document[collection] : document.data[collection];
+        for (const collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls"]) {
+          const collectionData = isNewerVersion(game.version, "9.99999")
+            ? document[collection]
+            : document.data[collection];
           if (collectionData.size) {
             const name = collectionData.documentClass.documentName;
             stats[name] = collectionData.size;
@@ -51,7 +56,11 @@ export default {
         }
 
         templateData.stats = Object.keys(stats).map((key) => {
-            return { name: `${stats[key]} ${game.i18n.localize(`ForgeCompendiumBrowser.${key}`)}`, icon: statIcon[key], value: stats[key]};
+          return {
+            name: `${stats[key]} ${game.i18n.localize(`ForgeCompendiumBrowser.${key}`)}`,
+            icon: statIcon[key],
+            value: stats[key],
+          };
         });
 
         const html = await renderTemplate("modules/forge-compendium-browser/templates/scene-entry.html", templateData);
@@ -68,30 +77,42 @@ export default {
             for (const page of this.entry.document.pages) {
               const sheets = cfg.sheetClasses[page.type] || {};
               switch (page.type) {
-                case 'image': pages.push({document: page, cls: sheets["core.JournalImagePageSheet"].cls}); break;
-                case 'pdf': pages.push({document: page, cls: sheets["core.JournalPDFPageSheet"].cls}); break;
-                case 'text': pages.push({document: page, cls: sheets["core.JournalTextPageSheet"].cls}); break;
-                case 'video': pages.push({document: page, cls: sheets["core.JournalVideoPageSheet"].cls}); break;
-                default: pages.push({document: page, cls: Object.values(sheets[document.type])[0].cls});
+                case "image":
+                  pages.push({ document: page, cls: sheets["core.JournalImagePageSheet"].cls });
+                  break;
+                case "pdf":
+                  pages.push({ document: page, cls: sheets["core.JournalPDFPageSheet"].cls });
+                  break;
+                case "text":
+                  pages.push({ document: page, cls: sheets["core.JournalTextPageSheet"].cls });
+                  break;
+                case "video":
+                  pages.push({ document: page, cls: sheets["core.JournalVideoPageSheet"].cls });
+                  break;
+                default:
+                  pages.push({ document: page, cls: Object.values(sheets[document.type])[0].cls });
               }
             }
           } else {
             const cfg = CONFIG["JournalEntry"];
             const sheets = cfg.sheetClasses[CONST.BASE_DOCUMENT_TYPE] || {};
             cls = sheets["core.JournalSheet"].cls;
-            pages.push({document, cls});
+            pages.push({ document, cls });
           }
         } else {
-          pages.push({document, cls});
+          pages.push({ document, cls });
         }
 
-        for (const page of pages){
+        for (const page of pages) {
           this.subsheet = new page.cls(page.document, { editable: false });
           this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
           const templateData = await this.subsheet.getData();
 
-          if (templateData.enrichedText instanceof Promise)
-            templateData.enrichedText = await templateData.enrichedText;
+          if (templateData.enrichedText instanceof Promise) templateData.enrichedText = await templateData.enrichedText;
+          if (templateData.data?.img)
+            templateData.data.img = game.ForgeCompendiumBrowser.mapIcon(templateData.data.img);
+          if (templateData.item?.img)
+            templateData.item.img = game.ForgeCompendiumBrowser.mapIcon(templateData.item.img);
           const template = await renderTemplate(this.subsheet.template, templateData);
           html += `<article>${template}</article>`;
         }
@@ -124,29 +145,30 @@ export default {
 
         $('a[href^="ddb://"]', this.$refs.entry).each((idx, link) => {
           const linkHtml = $(link).html() || "";
-          let href = $(link).attr('href');
+          let href = $(link).attr("href");
           if (href.startsWith("ddb://compendium")) {
             try {
               const bookid = href.replace("ddb://compendium/", "").split("/")[0];
 
               $(link).addClass("content-link").removeAttr("href").attr("data-pack", `dndbeyond-${bookid}`);
-            } catch { 
+            } catch {
               // don't bother with the catch
             }
           } else {
             if (href.startsWith("ddb://spells"))
-              href = "https://www.dndbeyond.com/spells/"+ linkHtml.replaceAll(" ", "-");
+              href = "https://www.dndbeyond.com/spells/" + linkHtml.replaceAll(" ", "-");
             else {
-              href = href
-                .replace("ddb://", "https://www.dndbeyond.com/")
-                .replace("magicitems", "magic-items") + "-" + linkHtml.replaceAll(" ", "-");
+              href =
+                href.replace("ddb://", "https://www.dndbeyond.com/").replace("magicitems", "magic-items") +
+                "-" +
+                linkHtml.replaceAll(" ", "-");
             }
-            $(link).attr('href', href).attr("target", "_blank");
+            $(link).attr("href", href).attr("target", "_blank");
           }
         });
 
-        $('a.entity-link[data-pack]', this.$refs.entry).on("click", this.openLink.bind(this));
-        $('a.content-link[data-pack]', this.$refs.entry).on("click", this.openLink.bind(this));
+        $("a.entity-link[data-pack]", this.$refs.entry).on("click", this.openLink.bind(this));
+        $("a.content-link[data-pack]", this.$refs.entry).on("click", this.openLink.bind(this));
 
         document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
@@ -156,12 +178,11 @@ export default {
   computed: {
     documentClasses() {
       const classes = this.subsheet?.options?.classes || [];
-      if (game.version.startsWith("10.")) 
-        classes.push("v10");
+      if (game.version.startsWith("10.")) classes.push("v10");
       return classes.join(" ");
     },
     i18n(key) {
-        return game.i18n.localize(key);
+      return game.i18n.localize(key);
     },
   },
   watch: {

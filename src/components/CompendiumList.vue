@@ -1,5 +1,10 @@
 <template>
-  <div v-if="showListing" class="forge-compendium-list" :depth="depth" :style="`margin-left:${Math.max(depth - 1, 0) * 10}px`">
+  <div
+    v-if="showListing"
+    class="forge-compendium-list"
+    :depth="depth"
+    :style="`margin-left:${Math.max(depth - 1, 0) * 10}px`"
+  >
     <div v-for="item in sortedList" :key="item.id" :data-id="item.id">
       <div class="flexcol" :class="listClass">
         <div
@@ -9,7 +14,12 @@
           draggable
           @dragstart="startDrag($event, item)"
         >
-          <img v-if="item.img" :data-src="mapIcon(item.img)" class="lazy forge-compendium-image" @error="errorLoadingImage" />
+          <img
+            v-if="item.img"
+            :data-src="mapIcon(item.img)"
+            class="lazy forge-compendium-image"
+            @error="errorLoadingImage"
+          />
           <span>{{ item.name }}</span>
         </div>
         <compendium-list
@@ -58,21 +68,16 @@ export default {
       return item.children.filter((c) => (c.name !== item.name || !useSameName) && c.visible !== false);
     },
     hasImage(item) {
-        return item.img ? 'has-image' : '';
+      return item.img ? "has-image" : "";
     },
     mapIcon(path) {
-        if ( path && game.ForgeCompendiumBrowser.iconMap ) {
-            if ( path.startsWith("/") || path.startsWith("\\") ) path = path.substring(1);
-            return game.ForgeCompendiumBrowser.iconMap[path] || path;
-        }
-        return path;
+      return game.ForgeCompendiumBrowser.mapIcon(path);
     },
     errorLoadingImage(ev) {
-        // If image fails to load, then fallback to default image
-        const defaultImage = "icons/svg/mystery-man.svg";
-        const img = ev.target;
-        if (img && img.attributes.src.value !== defaultImage)
-            img.src = defaultImage;
+      // If image fails to load, then fallback to default image
+      const defaultImage = "icons/svg/mystery-man.svg";
+      const img = ev.target;
+      if (img && img.attributes.src.value !== defaultImage) img.src = defaultImage;
     },
   },
   computed: {
@@ -119,7 +124,11 @@ export default {
   margin: 0px;
 }
 
-.forge-compendium-list .forge-compendium-item .forge-compendium-list > div:last-child .forge-compendium-title.has-image {
+.forge-compendium-list
+  .forge-compendium-item
+  .forge-compendium-list
+  > div:last-child
+  .forge-compendium-title.has-image {
   margin-bottom: 8px;
 }
 

@@ -7,40 +7,20 @@
             <i class="fas fa-atlas"></i> {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
           </div>
         </div>
-        <img
-          class="forge-compendium-book-image"
-          :src="book.img"
-          @click="clearPath"
-        />
+        <img class="forge-compendium-book-image" :src="book.img" @click="clearPath" />
         <hr />
         <!-- navigation row -->
         <div class="flexrow navigation-row">
-          <div
-            class="navigation-button first"
-            :class="canPrevChapter"
-            @click="changeChapter(-1)"
-          >
+          <div class="navigation-button first" :class="canPrevChapter" @click="changeChapter(-1)">
             <i class="fas fa-angle-double-left"></i>
           </div>
-          <div
-            class="navigation-button prev"
-            :class="canPrevItem"
-            @click="changeItem(-1)"
-          >
+          <div class="navigation-button prev" :class="canPrevItem" @click="changeItem(-1)">
             <i class="fas fa-chevron-left"></i> {{ this.i18n("ForgeCompendiumBrowser.Prev") }}
           </div>
-          <div
-            class="navigation-button next"
-            :class="canNextItem"
-            @click="changeItem(1)"
-          >
+          <div class="navigation-button next" :class="canNextItem" @click="changeItem(1)">
             {{ this.i18n("ForgeCompendiumBrowser.Next") }} <i class="fas fa-chevron-right"></i>
           </div>
-          <div
-            class="navigation-button last"
-            :class="canNextChapter"
-            @click="changeChapter(1)"
-          >
+          <div class="navigation-button last" :class="canNextChapter" @click="changeChapter(1)">
             <i class="fas fa-angle-double-right"></i>
           </div>
         </div>
@@ -57,11 +37,7 @@
             <i class="fas" :class="section.icon"></i>
             <span>{{ section.name }}</span>
           </div>
-          <div
-            class="navigation-section-link"
-            :class="sectionActive({ id: 'search' })"
-            @click="openSearch()"
-          >
+          <div class="navigation-section-link" :class="sectionActive({ id: 'search' })" @click="openSearch()">
             <i class="fas fa-search"></i>
             <span>{{ this.i18n("ForgeCompendiumBrowser.Search") }}</span>
           </div>
@@ -78,51 +54,34 @@
       </ol>
     </div>
     <div class="forge-compendium-content flexcol">
-      <h2
-        v-if="document"
-        class="flexrow flexcontain forge-compendium-listing-header"
-      >
-        <div
-          class="back-button"
-          :class="canHistory(-1)"
-          @click="viewHistory(-1)"
-        >
+      <h2 v-if="document" class="flexrow flexcontain forge-compendium-listing-header">
+        <div class="back-button" :class="canHistory(-1)" @click="viewHistory(-1)">
           <i class="fas fa-chevron-left"></i>
         </div>
-        <div
-          class="forward-button"
-          :class="canHistory(1)"
-          @click="viewHistory(1)"
-        >
+        <div class="forward-button" :class="canHistory(1)" @click="viewHistory(1)">
           <i class="fas fa-chevron-right"></i>
         </div>
         <!-- breadcrumbs -->
         <ul class="flexrow forge-compendium-breadcrumbs">
           <li v-for="(item, index) in path" :key="item.id">
             <span v-if="index !== 0">/</span>
-            <div class="breadcrumb-link" v-on="item.id !== document.id ? { click: () => selectEntity(item) } : {}">{{ item.name }}</div>
+            <div class="breadcrumb-link" v-on="item.id !== document.id ? { click: () => selectEntity(item) } : {}">
+              {{ item.name }}
+            </div>
           </li>
         </ul>
         <div class="forge-entry-import" @click="importEntry">
-            <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.Import") }}
+          <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.Import") }}
         </div>
       </h2>
-      <compendium-entry
-        v-if="document"
-        :entry="document"
-        @link="openLink"
-      ></compendium-entry>
+      <compendium-entry v-if="document" :entry="document" @link="openLink"></compendium-entry>
       <compendium-listing
         v-else-if="currentSection"
         :listing="currentSection"
         @select="selectEntity"
         @open="selectEntity"
       ></compendium-listing>
-      <div
-        v-else
-        class="forge-compendium-background flexcol"
-        :style="backgroundStyle"
-      >
+      <div v-else class="forge-compendium-background flexcol" :style="backgroundStyle">
         <!-- Book Title -->
         <div class="forge-compendium-book-title">
           <svg class="forge-compendium-svg">
@@ -141,28 +100,18 @@
         </div>
         <div class="forge-compendium-info flexcol">
           <!-- Search -->
-          <div
-            v-if="searchTerm != null"
-            class="forge-compendium-search-area flexcol"
-          >
+          <div v-if="searchTerm != null" class="forge-compendium-search-area flexcol">
             <div class="forge-compendium-search-bar flexrow">
-              <input type="text" v-model="searchTerm" @keypress="checkEnter" />
+              <input type="text" v-model="searchTerm" @keypress="checkEnter" style="margin-right: 0px" />
               <button type="button" @click="searchBook()" title="Search">
                 <i class="fas fa-search"></i>
               </button>
-              <button
-                type="button"
-                @click="clearSearch()"
-                title="Clear search term"
-              >
-                <i class="fas fa-trash"></i>
+              <button type="button" @click="clearSearch()" title="Clear search term" style="margin-left: 0px">
+                <i class="fas fa-times-circle"></i>
               </button>
             </div>
             <!-- Search Results -->
-            <div
-              v-if="searchResults.length"
-              class="forge-compendium-search-list"
-            >
+            <div v-if="searchResults.length" class="forge-compendium-search-list">
               <table class="forge-compendium-search-table">
                 <tr
                   v-for="item in searchResults"
@@ -185,23 +134,22 @@
                 </tr>
               </table>
             </div>
-            <div v-else class="no-results"><div>{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div></div>
+            <div v-else class="no-results">
+              <div>{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div>
+            </div>
           </div>
           <div v-else class="flexcol">
             <div class="flexrow flexcontain">
-              <div
-                class="forge-compendium-description"
-                v-html="book.description"
-              ></div>
+              <div class="forge-compendium-description" v-html="book.description"></div>
               <div class="forge-compendium-contains flexcol">
-                <b style="flex-grow: 0;">{{ this.i18n("ForgeCompendiumBrowser.Contains") }}:</b>
+                <b style="flex-grow: 0">{{ this.i18n("ForgeCompendiumBrowser.Contains") }}:</b>
                 <ul class="forge-compendium-contains-list">
                   <li v-for="section in sections" :key="section.id">
                     <i class="fas" :class="section.icon"></i>
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
-                <div style="text-align: center;flex-grow: 0;">
+                <div style="text-align: center; flex-grow: 0">
                   <button @click="importModule">
                     <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
@@ -222,10 +170,7 @@
                 </div>
                 <div class="forge-compendium-title">{{ item.name }}</div>
               </div>
-              <div
-                class="forge-compendium-section flexcol"
-                @click="openSearch()"
-              >
+              <div class="forge-compendium-section flexcol" @click="openSearch()">
                 <div class="forge-compendium-icon">
                   <i class="fas fa-search"></i>
                 </div>
@@ -233,20 +178,16 @@
               </div>
             </div>
             <div class="flexrow forge-compendium-permissions">
-              <button 
+              <button
                 class="permission-button"
-                @click="updatePermissions" 
+                @click="updatePermissions"
                 :title="i18n('ForgeCompendiumBrowser.ConfigurePermissions')"
               >
                 <i class="fas fa-lock"></i>
               </button>
-              <b style="flex-grow: 0; margin-left: 8px;">{{ this.i18n("ForgeCompendiumBrowser.Ownership") }}:</b>
+              <b style="flex-grow: 0; margin-left: 8px">{{ this.i18n("ForgeCompendiumBrowser.Ownership") }}:</b>
               <div class="permission-text">
-                <span 
-                  class="user-permission"
-                  v-for="(permission, i) in permissionText"
-                  :key="i"
-                >{{ permission }}<span>
+                <span class="user-permission" v-for="(permission, i) in permissionText" :key="i">{{ permission }}</span>
               </div>
             </div>
           </div>
@@ -260,6 +201,7 @@
 import CompendiumEntry from "./CompendiumEntry.vue";
 import CompendiumDirectory from "./CompendiumDirectory.vue";
 import CompendiumListing from "./CompendiumListing.vue";
+import { ImportBook } from "@/importBook";
 
 export default {
   name: "CompendiumBook",
@@ -272,7 +214,7 @@ export default {
     book: Object,
   },
   data: () => ({
-    folder: null,   // This is used to determine the selected path on the left side
+    folder: null, // This is used to determine the selected path on the left side
     document: null,
     history: [],
     historyPosition: 0,
@@ -282,7 +224,7 @@ export default {
   watch: {
     book() {
       this.reset();
-    }
+    },
   },
   methods: {
     reset() {
@@ -314,11 +256,9 @@ export default {
       } else if (entity.type === "book") {
         this.clearPath();
       } else if (entity.type === "folder") {
-        const child = entity.children.find(c => c.name === entity.name && c.type === "document");
-        if (child) 
-          this.selectEntity(child);
-        else 
-          this.folder = entity;
+        const child = entity.children.find((c) => c.name === entity.name && c.type === "document");
+        if (child) this.selectEntity(child);
+        else this.folder = entity;
       } else if (entity.type === "document") {
         if (!entity.document) {
           const collection = game.packs.get(entity.packId);
@@ -334,12 +274,7 @@ export default {
     },
     findClosestChapter(dir) {
       const currentChapter = this.currentChapter;
-      if (
-        !currentChapter ||
-        !this.currentSection ||
-        !this.currentSection.children
-      )
-        return false;
+      if (!currentChapter || !this.currentSection || !this.currentSection.children) return false;
 
       let idx = this.currentSection.children.findIndex((c) => c.id === currentChapter.id);
       idx += dir;
@@ -349,8 +284,7 @@ export default {
     },
     changeChapter(dir) {
       const chapter = this.findClosestChapter(dir);
-      if (!chapter) 
-        return;
+      if (!chapter) return;
 
       const checkedEntities = [];
       // when changing the chapter, find the next available document in the chapter to display
@@ -359,15 +293,13 @@ export default {
       this.selectEntity(entry || chapter);
     },
     moveUpParent(id, parent, dir, checkedEntities) {
-      if (!parent || parent.type === "book") 
-        return null;
+      if (!parent || parent.type === "book") return null;
 
       // Haven't found any children, so go up a parent and move to the next one
       const pidx = parent.children.findIndex((c) => c.id === id);
       if (!checkedEntities.includes(parent.id)) {
         const entity = this.findDocument(pidx + dir, parent, dir, checkedEntities);
-        if (entity) 
-            return entity;
+        if (entity) return entity;
       }
       return this.moveUpParent(parent.id, parent.parent, dir, checkedEntities);
     },
@@ -378,8 +310,7 @@ export default {
           const idx = dir < 0 ? parent.children[i].children.length - 1 : 0;
           if (!checkedEntities.includes(parent.children[i].id)) {
             const entity = this.findDocument(idx, parent.children[i], dir, checkedEntities);
-            if (entity) 
-                return entity;
+            if (entity) return entity;
           }
         } else if (parent.children[i].type === "document") {
           return parent.children[i];
@@ -391,8 +322,7 @@ export default {
       const checkedEntities = [];
 
       if (idx == undefined) {
-        if (!this.document) 
-            return null;
+        if (!this.document) return null;
         idx = this.document.parent.children.findIndex((i) => i.id === this.document.id);
       }
 
@@ -410,22 +340,19 @@ export default {
       }
     },
     sectionActive(section) {
+      console.log("Section Active", section, this.currentSection, this.searchTerm);
       return this.currentSection?.id === section.id ||
-        (this.searchTerm != null &&
-          section.id === "search" &&
-          this.currentSection?.id === null)
+        (this.searchTerm !== null && section.id === "search" && !this.currentSection?.id)
         ? "active"
         : "";
     },
     findEntity(parent, id) {
       if (parent.children) {
         let entity = parent.children.find((c) => c.id === id);
-        if (entity) 
-            return entity;
+        if (entity) return entity;
         for (const child of parent.children) {
           entity = this.findEntity(child, id);
-          if (entity) 
-            return entity;
+          if (entity) return entity;
         }
       }
       return null;
@@ -482,7 +409,7 @@ export default {
       const progressFn = (command, options) => {
         // If there's a message included, then update the message text
         if (options?.message) {
-          $('.message', dialogHtml).html(options.message);
+          $(".message", dialogHtml).html(options.message);
           console.log("Progress Message", options.message);
         }
         // reset command to restart progress bar for an action
@@ -490,40 +417,40 @@ export default {
           max = options?.max ?? 0;
           count = 0;
           lastPerc = 0;
-          $('.progress-bar .bar', dialogHtml).css({'width': '0%'});
-          $('.progress-bar .percent-msg', dialogHtml).html("0%");
+          $(".progress-bar .bar", dialogHtml).css({ width: "0%" });
+          $(".progress-bar .percent-msg", dialogHtml).html("0%");
 
-        // increase command to increase the progress bar by one
+          // increase command to increase the progress bar by one
         } else if (command === "increase") {
           count++;
           // only update the interface if this addition has changed the percent
-          const currentPerc = (Math.round((count / max) * 100));
+          const currentPerc = Math.round((count / max) * 100);
           if (currentPerc !== lastPerc) {
             lastPerc = currentPerc;
-            $('.progress-bar .bar', dialogHtml).css({'width': `${lastPerc}%`});
-            $('.progress-bar .percent-msg', dialogHtml).html(`${lastPerc}%`);
+            $(".progress-bar .bar", dialogHtml).css({ width: `${lastPerc}%` });
+            $(".progress-bar .percent-msg", dialogHtml).html(`${lastPerc}%`);
           }
 
-        // finish command when the process is done and the dialog needs to be cleaned up
+          // finish command when the process is done and the dialog needs to be cleaned up
         } else if (command === "finish") {
-          $('.start-import', dialogHtml).hide();
-          $('.finish-import', dialogHtml).show();
+          $(".start-import", dialogHtml).hide();
+          $(".finish-import", dialogHtml).show();
           if (!options?.message) {
-            $('.message', dialogHtml).html('');
+            $(".message", dialogHtml).html("");
           }
-          $('.progress-bar .bar', dialogHtml).css({'width': "100%"});
-          $('.progress-bar .percent-msg', dialogHtml).html("100%");
+          $(".progress-bar .bar", dialogHtml).css({ width: "100%" });
+          $(".progress-bar .percent-msg", dialogHtml).html("100%");
         }
-      }
+      };
 
-      const startImport = function(html) {
-        $('.start-import', html).prop("disabled", true);
+      const startImport = function (html) {
+        $(".start-import", html).prop("disabled", true);
         game.ForgeCompendiumBrowser.importBook(this.book, { progress: progressFn });
-      }
+      };
 
-      const closeDialog = function(event) {
-        $(event.currentTarget).closest('.dialog').find('header .close').click();
-      }
+      const closeDialog = function (event) {
+        $(event.currentTarget).closest(".dialog").find("header .close").click();
+      };
 
       const template = await renderTemplate("modules/forge-compendium-browser/templates/import-documents.html");
       new Dialog({
@@ -533,8 +460,8 @@ export default {
         buttons: {},
         render: (html) => {
           dialogHtml = html;
-          $('.start-import', html).on("click", startImport.bind(this, html));
-          $('.finish-import', html).on("click", closeDialog.bind(this));
+          $(".start-import", html).on("click", startImport.bind(this, html));
+          $(".finish-import", html).on("click", closeDialog.bind(this));
         },
         rejectClose: false,
       }).render(true);
@@ -565,7 +492,10 @@ export default {
 
       // added idx and text here for a future improvement to show highlighted text
       const resultObject = (entity, idx, text) => {
-        const section = entity.parent.type === "section" ? entity.parent : this.book.children.find((s) => s.id === entity.parent.section);
+        const section =
+          entity.parent.type === "section"
+            ? entity.parent
+            : this.book.children.find((s) => s.id === entity.parent.section);
         let img = entity.img;
         if (isV10 && img && img.indexOf("systems/dnd5e/icons")) {
           img = img.replace("systems/dnd5e/icons", "images/icons");
@@ -611,13 +541,17 @@ export default {
                   }
                 }
               } else if (parent.document instanceof Actor) {
-                const field = isNewerVersion(game.version, "9.99999") ? parent.document.system.details.biography.value : parent.document.data.data.details.biography.value;
+                const field = isNewerVersion(game.version, "9.99999")
+                  ? parent.document.system.details.biography.value
+                  : parent.document.data.data.details.biography.value;
                 const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
                   searchResult = resultObject(parent, idx, field);
                 }
               } else if (parent.document instanceof Item) {
-                const field = isNewerVersion(game.version, "9.99999") ? parent.document.system.description.value : parent.document.data.data.description.value
+                const field = isNewerVersion(game.version, "9.99999")
+                  ? parent.document.system.description.value
+                  : parent.document.data.data.description.value;
                 const idx = field.toLowerCase().indexOf(query);
                 if (idx >= 0) {
                   searchResult = resultObject(parent, idx, field);
@@ -633,8 +567,7 @@ export default {
         }
         if (parent.children && parent.children.length) {
           for (const child of parent.children) {
-            if (parent.type === "book" && type != null && child.type !== type)
-              continue;
+            if (parent.type === "book" && type != null && child.type !== type) continue;
             traverseSearch(child, results);
           }
         }
@@ -645,21 +578,115 @@ export default {
       this.searchResults = Object.values(results);
     },
     i18n(key) {
-        return game.i18n.localize(key);
+      return game.i18n.localize(key);
     },
-    importEntry() {
-        const collection = this.document.document.collection;
-        const pack = game.packs.get(this.document.packId);
-        if (collection) {
-            let document = collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true });
-            if (document.type == "Scene") {
-                // Need to link the tokens and notes?
+    async importEntry() {
+      const collection = this.document.document.collection;
+      const pack = game.packs.get(this.document.packId);
+      if (collection) {
+        if (this.document.section === "Scene") {
+          ui.notifications.info(`Beginning the import of scene ${this.document.name}`);
+          let sceneBook = {
+            name: this.document.name,
+            hierarchy: {
+              children: [
+                {
+                  children: [this.document],
+                  packtype: "Scene",
+                  type: "section",
+                },
+              ],
+            },
+          };
+          let tokens = this.document.document.tokens || this.document.document.data.tokens;
+          if (tokens?.size) {
+            let monsterFolders = [];
+            const packId = `${this.book.id}.actors`;
+            const collection = game.packs.get(packId);
+            if (!collection.contents.length) {
+              await collection.getDocuments();
             }
-            if (document)
-                return ui.notifications.info("Document has been imported");
+            console.log("Getting Actor Collection", collection);
+            for (const token of tokens) {
+              const tokenName =
+                getProperty(token, "flags.ddbActorFlags.name") ||
+                getProperty(token.data, "flags.ddbActorFlags.name") ||
+                token.name;
+              if (!tokenName) continue;
+
+              console.log("Finding Actor Name", tokenName);
+
+              let actor = collection.find((a) => a.name === tokenName);
+              if (!actor) continue;
+
+              const folderName = `Monsters | ${actor.name[0].toUpperCase()}`;
+              let actorFolder = monsterFolders.find((a) => a.name === folderName);
+              if (!actorFolder) {
+                actorFolder = {
+                  children: [],
+                  packtype: "Actor",
+                  name: folderName,
+                  type: "folder",
+                };
+                monsterFolders.push(actorFolder);
+              }
+
+              console.log("Finding Actor", actor);
+              if (!actorFolder.children.find((a) => a.id === actor.id)) {
+                actorFolder.children.push({
+                  id: actor.id,
+                  name: actor.name,
+                  packId,
+                  type: "document",
+                });
+              }
+            }
+            console.log("Including Actors", monsterFolders);
+            if (monsterFolders.length) {
+              sceneBook.hierarchy.children.push({
+                children: monsterFolders,
+                packtype: "Actor",
+                type: "section",
+              });
+            }
+          }
+
+          let notes = this.document.document.notes || this.document.document.data.notes;
+          if (notes?.size) {
+            let journalChild = {
+              children: [],
+              packtype: "JournalEntry",
+              type: "section",
+            };
+
+            for (const note of notes) {
+              let entryId = isV10 ? note.entryId : note.data.entryId;
+
+              if (!journalChild.children.find((je) => je.id === entryId)) {
+                journalChild.children.push({
+                  id: entryId,
+                  packId: `${this.book.id}.journal`,
+                  type: "document",
+                });
+              }
+            }
+            if (journalChild.children.length) {
+              sceneBook.hierarchy.children.push(journalChild);
+            }
+          }
+          let result = await game.ForgeCompendiumBrowser.importBook(sceneBook, { actorFolderName: this.document.name });
+          console.log("Import Result", sceneBook, result);
+          if (result !== false) return ui.notifications.info("Document has been imported");
+        } else {
+          let document = await collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true });
+          if (this.document.section === "Item" && document?.img) {
+            await document.update({ img: game.ForgeCompendiumBrowser.mapIcon(document.img) });
+          }
+          if (document) return ui.notifications.info("Document has been imported");
         }
-        ui.notifications.error("Error importing document");
-    }
+      }
+      ui.notifications.error("Error importing document");
+    },
   },
   computed: {
     canPrevChapter() {
@@ -726,8 +753,7 @@ export default {
       }
     },
     backgroundStyle() {
-      if (!this.book || !this.book.background) 
-        return "";
+      if (!this.book || !this.book.background) return "";
 
       return `background-image:url(${this.book.background})`;
     },
@@ -737,18 +763,23 @@ export default {
     permissionText() {
       const permission = this.book.permissions || {};
 
-      const levels = { "true": this.i18n("ForgeCompendiumBrowser.Allowed"), "false": this.i18n("ForgeCompendiumBrowser.NotAllowed") };
+      const levels = {
+        true: this.i18n("ForgeCompendiumBrowser.Allowed"),
+        false: this.i18n("ForgeCompendiumBrowser.NotAllowed"),
+      };
 
       const currentDefault = permission["default"] == undefined || permission["default"] ? "true" : "false";
-      const playerPermissions = Object.entries(permission).map(([k, v]) => {
-        if (k === "default" || v === currentDefault || v == undefined) return null;
-        const user = game.users.get(k);
-        const value = v ? "true" : "false";
-        return `${user.name}: ${levels[value]}`;
-      }).filter(p => !!p);
+      const playerPermissions = Object.entries(permission)
+        .map(([k, v]) => {
+          if (k === "default" || v === currentDefault || v == undefined) return null;
+          const user = game.users.get(k);
+          const value = v ? "true" : "false";
+          return `${user.name}: ${levels[value]}`;
+        })
+        .filter((p) => !!p);
 
       return [`${this.i18n("ForgeCompendiumBrowser.Everyone")}: ${levels[currentDefault]}`, ...playerPermissions];
-    }
+    },
   },
 };
 </script>
@@ -767,16 +798,8 @@ export default {
   overflow: hidden;
   /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#45484d+0,000000+100;Black+3D+%231 */
   background: rgb(69, 72, 77); /* Old browsers */
-  background: -moz-linear-gradient(
-    top,
-    rgba(69, 72, 77, 1) 0%,
-    rgba(0, 0, 0, 1) 100%
-  ); /* FF3.6-15 */
-  background: -webkit-linear-gradient(
-    top,
-    rgba(69, 72, 77, 1) 0%,
-    rgba(0, 0, 0, 1) 100%
-  ); /* Chrome10-25,Safari5.1-6 */
+  background: -moz-linear-gradient(top, rgba(69, 72, 77, 1) 0%, rgba(0, 0, 0, 1) 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, rgba(69, 72, 77, 1) 0%, rgba(0, 0, 0, 1) 100%); /* Chrome10-25,Safari5.1-6 */
   background: linear-gradient(
     to bottom,
     rgba(69, 72, 77, 1) 0%,
@@ -1118,8 +1141,8 @@ export default {
   width: 100%;
   text-align: center;
   margin-top: 100px;
-} 
-.forge-compendium-search-area .no-results > div{
+}
+.forge-compendium-search-area .no-results > div {
   padding: 20px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
