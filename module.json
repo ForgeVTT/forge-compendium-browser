@@ -2,12 +2,12 @@
   "name": "forge-compendium-browser",
   "title": "The Forge: Compendium Library",
   "description": "Browse your compendium books like they were meant to be viewed. The Forge's Compendium Library lets you navigate your D&amp;D Beyond imported books in a beautiful and easy to use interface!",
-  "version": "1.3.4",
+  "version": "1.4.1",
   "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "10",
+  "compatibleCoreVersion": "11",
   "compatibility": {
     "minimum": "9",
-    "verified": "10"
+    "verified": "11"
   },
   "author": "The Forge",
   "authors": [
@@ -21,34 +21,30 @@
       "name": "KaKaRoTo"
     }
   ],
-  "scripts": [
-    "dist/ForgeCompendiumBrowserModule.umd.min.js"
-  ],
+  "scripts": ["dist/ForgeCompendiumBrowserModule.umd.min.js"],
   "packs": [],
-  "styles": [
-    "css/browser.css"
-  ],
+  "styles": ["css/browser.css"],
   "socket": true,
   "languages": [
     {
-		"lang": "en",
-		"name": "English",
-		"path": "lang/en.json"
-    },
-	{
-		"lang": "fr",
-		"name": "Français",
-		"path": "lang/fr.json"
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
     },
     {
-		"lang": "fi",
-		"name": "Suomi",
-		"path": "lang/fi.json"
+      "lang": "fr",
+      "name": "Français",
+      "path": "lang/fr.json"
     },
     {
-		"lang": "pt-BR",
-		"name": "Português",
-		"path": "lang/pt-BR.json"
+      "lang": "fi",
+      "name": "Suomi",
+      "path": "lang/fi.json"
+    },
+    {
+      "lang": "pt-BR",
+      "name": "Português",
+      "path": "lang/pt-BR.json"
     }
   ],
   "relationships": {
