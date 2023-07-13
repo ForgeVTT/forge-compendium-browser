@@ -206,7 +206,7 @@ export class ImportBook {
                             for (const translate of ImportBook.translate) {
                                 repvalue = repvalue.replaceAll(
                                     `@Compendium[${translate.key}]`,
-                                    `@JournalEntry[${translate.id}]`
+                                    `@${translate.type}[${translate.id}]`
                                 );
                             }
                             // Remove the links to the same document
