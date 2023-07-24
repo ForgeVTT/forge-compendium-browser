@@ -7,7 +7,10 @@
             <i class="fas fa-atlas"></i> {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
           </div>
         </div>
-        <img class="forge-compendium-book-image" :src="book.img" @click="clearPath" />
+        <div class="forge-compendium-book-image-container">
+          <div class="forge-compendium-book-image-background" :style="backgroundStyle"></div>
+          <img class="forge-compendium-book-image" :src="book.img" @click="clearPath" />
+        </div>
         <hr />
         <!-- navigation row -->
         <div class="flexrow navigation-row">
@@ -102,7 +105,7 @@
           <!-- Search -->
           <div v-if="searchTerm != null" class="forge-compendium-search-area flexcol">
             <div class="forge-compendium-search-bar flexrow">
-              <input type="text" v-model="searchTerm" @keypress="checkEnter" style="margin-right: 0px" />
+              <input type="text" v-model="searchTerm" style="margin-right: 0px" />
               <button type="button" @click="searchBook()" title="Search">
                 <i class="fas fa-search"></i>
               </button>
@@ -225,6 +228,10 @@ export default {
     book() {
       this.reset();
     },
+    searchTerm() {
+      this.searchBook();
+      console.log("Search Results", this.searchResults, this.searchTerm);
+    },
   },
   methods: {
     reset() {
@@ -248,7 +255,6 @@ export default {
       this.selectEntity(entity);
     },
     async selectEntity(entity) {
-      //console.log("Select an entity", entity);
       if (!entity) return;
 
       if (entity.type === "search") {
@@ -340,7 +346,6 @@ export default {
       }
     },
     sectionActive(section) {
-      console.log("Section Active", section, this.currentSection, this.searchTerm);
       return this.currentSection?.id === section.id ||
         (this.searchTerm !== null && section.id === "search" && !this.currentSection?.id)
         ? "active"
@@ -359,7 +364,6 @@ export default {
     },
     openLink(pack, id) {
       //find the other entry and open it.
-      //console.log("Open Link", pack, id);
       const parts = pack.split(".");
       if (parts.length) {
         if (parts[0] === this.book.id) {
@@ -475,15 +479,11 @@ export default {
       this.searchTerm = "";
       this.searchResults = [];
     },
-    checkEnter(e) {
-      if (e.keyCode === 13) {
-        this.searchBook();
-      }
-    },
     searchBook() {
       const isV10 = isNewerVersion(game.version, "9.999999");
-      if (this.searchTerm.length < 3) {
+      if (this.searchTerm.length < 2) {
         this.searchResults = [];
+        return;
       }
       // adding title and type here for a future improvement to allow for a more specific searching
       let title = this.searchTerm.toLowerCase();
@@ -606,15 +606,12 @@ export default {
             if (!collection.contents.length) {
               await collection.getDocuments();
             }
-            console.log("Getting Actor Collection", collection);
             for (const token of tokens) {
               const tokenName =
                 getProperty(token, "flags.ddbActorFlags.name") ||
                 getProperty(token.data, "flags.ddbActorFlags.name") ||
                 token.name;
               if (!tokenName) continue;
-
-              console.log("Finding Actor Name", tokenName);
 
               let actor = collection.find((a) => a.name === tokenName);
               if (!actor) continue;
@@ -630,8 +627,6 @@ export default {
                 };
                 monsterFolders.push(actorFolder);
               }
-
-              console.log("Finding Actor", actor);
               if (!actorFolder.children.find((a) => a.id === actor.id)) {
                 actorFolder.children.push({
                   id: actor.id,
@@ -641,7 +636,6 @@ export default {
                 });
               }
             }
-            console.log("Including Actors", monsterFolders);
             if (monsterFolders.length) {
               sceneBook.hierarchy.children.push({
                 children: monsterFolders,
@@ -675,7 +669,6 @@ export default {
             }
           }
           let result = await game.ForgeCompendiumBrowser.importBook(sceneBook, { actorFolderName: this.document.name });
-          console.log("Import Result", sceneBook, result);
           if (result !== false) return ui.notifications.info("Document has been imported");
         } else {
           let document = await collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true });
@@ -828,14 +821,38 @@ export default {
   cursor: pointer;
 }
 
-.forge-compendium-sidebar header img {
+.forge-compendium-sidebar header .forge-compendium-book-image-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
   height: 300px;
   flex: 0 0 300px;
+}
+
+.forge-compendium-sidebar header .forge-compendium-book-image-background {
+  float: left;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(10px);
+  opacity: 0.6;
+}
+
+.forge-compendium-sidebar header .forge-compendium-book-image {
+  height: 100%;
   width: 100%;
   object-fit: contain;
   object-position: top center;
   cursor: pointer;
   border: 0px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
 }
 
 .forge-compendium-sidebar header hr {
