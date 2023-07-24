@@ -18,6 +18,7 @@
             v-if="item.img"
             :data-src="mapIcon(item.img)"
             class="lazy forge-compendium-image"
+            :class="item.section === 'Scene' ? 'noborder' : ''"
             @error="errorLoadingImage"
           />
           <span>{{ item.name }}</span>
@@ -150,6 +151,10 @@ export default {
   object-fit: contain;
   border-radius: 4px;
   margin-right: 10px;
+}
+
+.forge-compendium-list .forge-compendium-item .forge-compendium-image.noborder {
+  border: 0px;
 }
 
 .forge-compendium-list .forge-compendium-list[depth="1"] .forge-compendium-title {
