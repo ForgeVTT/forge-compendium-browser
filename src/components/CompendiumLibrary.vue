@@ -24,19 +24,18 @@
           data-type="book"
           @click="selectBook(book.id)"
         >
-          <div
-            v-if="book.img"
-            class="forge-compendium-img"
-            :style="bookImage(book)"
-          />
+          <div v-if="book.img" class="forge-compendium-img" :style="bookImage(book)" />
+          <div v-if="book.permissions.default === false" class="forge-compendium-locked">
+            <i class="fas fa-lock"></i>
+          </div>
           <div class="forge-compendium-title">{{ book.name }}</div>
         </div>
       </div>
       <div v-else class="compendium-information flexrow">
         <h3 class="compendium-muted">
-            {{ this.i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
+          {{ this.i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
         </h3>
-    </div>
+      </div>
     </div>
   </div>
 </template>
@@ -58,7 +57,7 @@ export default {
       window.open("https://forge-vtt.com/", "_blank");
     },
     i18n(key) {
-        return game.i18n.localize(key);
+      return game.i18n.localize(key);
     },
     bookClass(book) {
       return !this.isAvailable(book) ? "disabled" : "";
@@ -72,18 +71,18 @@ export default {
       return this.availableBooks && this.availableBooks.length > 0;
     },
     availableBooks() {
-      if (!this.library)
-        return null;
-        
+      if (!this.library) return null;
+
       return this.library.filter((book) => {
-          if (game.user.isGM)
-            return true;
-          return book.permissions[game.user.id] ?? book.permissions["default"] ?? true;
+        if (game.user.isGM) return true;
+        return book.permissions[game.user.id] ?? book.permissions["default"] ?? true;
       });
     },
     LibraryMessage() {
-        return game.i18n.format("ForgeCompendiumBrowser.LibraryMessage", { link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>' })
-    }
+      return game.i18n.format("ForgeCompendiumBrowser.LibraryMessage", {
+        link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>',
+      });
+    },
   },
 };
 </script>
@@ -134,7 +133,7 @@ export default {
   margin: 10px;
   position: relative;
   cursor: pointer;
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .forge-compendium-library .forge-compendium-book.disabled {
@@ -180,13 +179,25 @@ export default {
   border: 1px solid #000;
 }
 
+.forge-compendium-library .forge-compendium-book .forge-compendium-locked {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  font-size: 14px;
+  color: #fff;
+}
+
+.forge-compendium-library .forge-compendium-book .forge-compendium-locked i {
+  text-shadow: 2px 2px #000000;
+}
+
 .forge-compendium-library-list {
-    overflow-y: auto;
-    align-content: flex-start;
+  overflow-y: auto;
+  align-content: flex-start;
 }
 .compendium-information {
-    text-align: center;
-    margin: auto;
-    margin-top: 10%;
+  text-align: center;
+  margin: auto;
+  margin-top: 10%;
 }
 </style>
