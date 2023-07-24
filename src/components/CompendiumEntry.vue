@@ -17,14 +17,11 @@ export default {
       const packId = e.currentTarget.dataset.pack;
       const id = e.currentTarget.dataset.id;
 
-      //console.log("Opening a link", id);
-
       this.$emit("link", packId, id);
       e.preventDefault();
       e.stopPropagation();
     },
     async loadDocument() {
-      //console.log("Entry", this.entry);
       const document = this.entry.document;
       let cls = document._getSheetClass ? document._getSheetClass() : null;
 
@@ -68,6 +65,16 @@ export default {
         this.$refs.entry.innerHTML = html;
 
         this.subsheet = { options: { classes: ["scene-entry"] } };
+
+        $(".forge-compendium-scene", this.$refs.entry).on("click", () => {
+          console.log("Poppout image", this.entry);
+          const ip = new ImagePopout(templateData.img, {
+            title: this.entry.name,
+            uuid: `Compendium.${this.entry.packId}.Scene.${this.entry.id}`,
+            showTitle: true,
+          });
+          ip.render(true);
+        });
       } else {
         let html = "";
         const pages = [];
