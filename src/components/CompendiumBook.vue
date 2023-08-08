@@ -234,6 +234,9 @@ export default {
     },
   },
   methods: {
+    isV10() {
+      return isNewerVersion(game.version, "9.999999");
+    },
     reset() {
       this.folder = null;
       this.document = null;
@@ -480,7 +483,6 @@ export default {
       this.searchResults = [];
     },
     searchBook() {
-      const isV10 = isNewerVersion(game.version, "9.999999");
       if (this.searchTerm.length < 2) {
         this.searchResults = [];
         return;
@@ -497,7 +499,7 @@ export default {
             ? entity.parent
             : this.book.children.find((s) => s.id === entity.parent.section);
         let img = entity.img;
-        if (isV10 && img && img.indexOf("systems/dnd5e/icons")) {
+        if (this.isV10 && img && img.indexOf("systems/dnd5e/icons")) {
           img = img.replace("systems/dnd5e/icons", "images/icons");
         }
         return {
@@ -654,7 +656,7 @@ export default {
             };
 
             for (const note of notes) {
-              let entryId = isV10 ? note.entryId : note.data.entryId;
+              let entryId = this.isV10 ? note.entryId : note.data.entryId;
 
               if (!journalChild.children.find((je) => je.id === entryId)) {
                 journalChild.children.push({
