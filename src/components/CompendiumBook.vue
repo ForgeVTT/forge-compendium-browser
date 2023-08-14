@@ -588,6 +588,7 @@ export default {
       if (collection) {
         if (this.document.section === "Scene") {
           ui.notifications.info(`Beginning the import of scene ${this.document.name}`);
+          const monsterPack = game.packs.get("dnd5e.monsters");
           let sceneBook = {
             name: this.document.name,
             hierarchy: {

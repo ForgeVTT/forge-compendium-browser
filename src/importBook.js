@@ -151,6 +151,8 @@ export class ImportBook {
             }
         }
 
+        const monsterPack = game.packs.get("dnd5e.monsters");
+
         // Store the Actor data in case we're importing a Scene
         const actorUpdates = newDocs["Actor"];
 
@@ -257,14 +259,13 @@ export class ImportBook {
                         }
                         // Check to see if it's in the Monsters SRD Compendium
                         if (!actor) {
-                            const monsterPack = game.packs.get("dnd5e.monsters");
                             if (monsterPack) {
                                 await monsterPack.getIndex();
                                 const index = monsterPack.index.find((i) => i.name === tokenName);
 
                                 if (index) {
-                                    const document = await monsterPack.getDocument(index._id);
-                                    const data = document.toObject();
+                                    const packDocument = await monsterPack.getDocument(index._id);
+                                    const data = packDocument.toObject();
                                     if (!monsterFolder) {
                                         let parentFolder = game.folders.find(
                                             (f) =>
@@ -299,7 +300,10 @@ export class ImportBook {
                             if (isV10) {
                                 token.actorId = actor._id;
                                 if (
-                                    (!token.texture?.src || token.texture?.src === "icons/svg/mystery-man.svg") &&
+                                    (!token.texture?.src ||
+                                        token.texture?.src === "icons/svg/mystery-man.svg" ||
+                                        token.texture?.src?.includes("placeholder") ||
+                                        token.texture?.src?.includes("-token")) &&
                                     actor?.prototypeToken?.texture?.src
                                 ) {
                                     token.texture.src = actor?.prototypeToken?.texture?.src;
@@ -307,7 +311,10 @@ export class ImportBook {
                             } else {
                                 const tokenUpdate = { actorId: actor.id };
                                 if (
-                                    (!token.data.img || token.data.img === "icons/svg/mystery-man.svg") &&
+                                    (!token.data.img ||
+                                        token.data.img === "icons/svg/mystery-man.svg" ||
+                                        token.data?.img?.includes("placeholder") ||
+                                        token.data?.img?.includes("-token")) &&
                                     actor?.data?.token?.img
                                 )
                                     tokenUpdate.img = actor?.data?.token?.img;
@@ -361,6 +368,8 @@ export class ImportBook {
         let folderSort = 100000;
         let maxDepthSort = 1;
         const isV10 = isNewerVersion(game.version, "9.999999");
+
+        const monsterPack = game.packs.get("dnd5e.monsters");
 
         for (const child of parent.children) {
             if (child.type === "folder") {
@@ -428,6 +437,41 @@ export class ImportBook {
 
                 if (type === "Item" && data.img) {
                     data.img = game.ForgeCompendiumBrowser.mapIcon(data.img);
+                } else if (type === "Actor") {
+                    const img = data.img || data.data?.img;
+                    if (img && (img.includes("placeholders") || img.includes("-token"))) {
+                        // Replace the placeholder images if we can from the monsters compendium
+                        if (monsterPack) {
+                            await monsterPack.getIndex();
+                            const index = monsterPack.index.find((i) => i.name === data.name);
+
+                            if (index) {
+                                const packDocument = await monsterPack.getDocument(index._id);
+                                const packData = packDocument.toObject();
+
+                                if (isV10) {
+                                    if (packData.img) {
+                                        setProperty(data, "img", packData.img || data.img);
+                                        setProperty(
+                                            data,
+                                            "prototypeToken.texture.src",
+                                            packData?.prototypeToken?.texture?.src || data.prototypeToken.texture.src
+                                        );
+                                    }
+                                } else {
+                                    if (packData.data.img) {
+                                        setProperty(data, "data.img", packData.data.img || data.data.img);
+                                        setProperty(
+                                            data,
+                                            "data.prototypeToken.texture.src",
+                                            packData?.data?.prototypeToken?.texture?.src ||
+                                                data?.data.prototypeToken.texture.src
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 data._id = randomID();
