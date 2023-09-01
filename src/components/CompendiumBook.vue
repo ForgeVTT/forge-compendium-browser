@@ -204,7 +204,6 @@
 import CompendiumEntry from "./CompendiumEntry.vue";
 import CompendiumDirectory from "./CompendiumDirectory.vue";
 import CompendiumListing from "./CompendiumListing.vue";
-import { ImportBook } from "@/importBook";
 
 export default {
   name: "CompendiumBook",
@@ -492,8 +491,7 @@ export default {
       let type = null;
       let query = this.searchTerm.toLowerCase();
 
-      // added idx and text here for a future improvement to show highlighted text
-      const resultObject = (entity, idx, text) => {
+      const resultObject = (entity) => {
         const section =
           entity.parent.type === "section"
             ? entity.parent
@@ -588,7 +586,6 @@ export default {
       if (collection) {
         if (this.document.section === "Scene") {
           ui.notifications.info(`Beginning the import of scene ${this.document.name}`);
-          const monsterPack = game.packs.get("dnd5e.monsters");
           let sceneBook = {
             name: this.document.name,
             hierarchy: {

@@ -6,7 +6,6 @@ export class ImportBook {
         ImportBook.translate = [];
 
         const isV10 = isNewerVersion(game.version, "9.999999");
-        const isV11 = isNewerVersion(game.version, "10.999999");
 
         try {
             const documentData = {};
