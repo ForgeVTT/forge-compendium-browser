@@ -28,5 +28,6 @@
     "ForgeCompendiumBrowser.AmbientSound": "Sounds", 
     "ForgeCompendiumBrowser.Tile": "Tiles", 
     "ForgeCompendiumBrowser.Token": "Tokens", 
-    "ForgeCompendiumBrowser.Wall": "Walls"
+    "ForgeCompendiumBrowser.Wall": "Walls",
+    "ForgeCompendiumBrowser.DocumentNotFound": "Document not found"
 }
