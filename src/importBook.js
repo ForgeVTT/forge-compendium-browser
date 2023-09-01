@@ -1,4 +1,4 @@
-import { error } from "./forge-compendium-browser.js";
+import { error, setting } from "./forge-compendium-browser.js";
 
 export class ImportBook {
     static async importBook(book, options = {}) {
@@ -471,6 +471,8 @@ export class ImportBook {
                             }
                         }
                     }
+                } else if (type === "Scene") {
+                    data.navigation = setting("set-navigate");
                 }
 
                 data._id = randomID();

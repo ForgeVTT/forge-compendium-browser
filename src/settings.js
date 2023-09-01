@@ -12,6 +12,15 @@ export const registerSettings = function () {
 		type: Boolean,
 	});
 
+    game.settings.register(modulename, "set-navigate", {
+		name: i18n("ForgeCompendiumBrowser.set-navigate.name"),
+		hint: i18n("ForgeCompendiumBrowser.set-navigate.hint"),
+		scope: "world",
+		config: true,
+		default: true,
+		type: Boolean,
+	});
+
     game.settings.register(modulename, "permissions", {
 		scope: "world",
 		config: false,
