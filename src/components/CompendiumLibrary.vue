@@ -185,6 +185,13 @@ export default {
   top: 2px;
   font-size: 14px;
   color: #fff;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 100%;
+  border: 1px solid #C0C0C0;
+  width: 25px;
+  height: 25px;
+  text-align: center;
+  line-height: 22px;
 }
 
 .forge-compendium-library .forge-compendium-book .forge-compendium-locked i {
