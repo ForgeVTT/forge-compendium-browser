@@ -68,7 +68,7 @@
         <ul class="flexrow forge-compendium-breadcrumbs">
           <li v-for="(item, index) in path" :key="item.id">
             <span v-if="index !== 0">/</span>
-            <div class="breadcrumb-link" v-on="item.id !== document.id ? { click: () => selectEntity(item) } : {}">
+            <div class="breadcrumb-link" v-on="item.type === 'section' ? { click: () => selectEntity(item) } : {}">
               {{ item.name }}
             </div>
           </li>
@@ -266,7 +266,20 @@ export default {
       } else if (entity.type === "folder") {
         const child = entity.children.find((c) => c.name === entity.name && c.type === "document");
         if (child) this.selectEntity(child);
-        else this.folder = entity;
+        else {
+          // traverse up the parents to find the first section type
+          let parent = entity;
+          while (parent && parent.type !== "section") {
+            parent = parent.parent;
+          }
+          this.folder = parent;
+          this.document = null;
+
+          this.$nextTick(() => {
+            const el = document.querySelector(`.forge-compendium-listing [data-id="${entity.id}"]`);
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        }
       } else if (entity.type === "document") {
         if (!entity.document) {
           const collection = game.packs.get(entity.packId);
