@@ -188,7 +188,7 @@
               >
                 <i class="fas fa-lock"></i>
               </button>
-              <b style="flex-grow: 0; margin-left: 8px">{{ this.i18n("ForgeCompendiumBrowser.Ownership") }}:</b>
+              <b style="flex-grow: 0; margin-left: 8px">{{ this.i18n("ForgeCompendiumBrowser.Permissions") }}:</b>
               <div class="permission-text">
                 <span class="user-permission" v-for="(permission, i) in permissionText" :key="i">{{ permission }}</span>
               </div>

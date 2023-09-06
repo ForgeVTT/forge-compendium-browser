@@ -41,7 +41,7 @@ export class CompendiumBrowserApp extends Application {
     _getContextMenuOptions() {
         return [
             {
-                name: "Configure Permissions",
+                name: i18n("ForgeCompendiumBrowser.ConfigurePermissions"),
                 icon: '<i class="fas fa-lock"></i>',
                 condition: () => {
                     return game.user.isGM;
@@ -58,7 +58,7 @@ export class CompendiumBrowserApp extends Application {
                 }
             },
             {
-                name: "Rebuild Book Structure",
+                name: i18n("ForgeCompendiumBrowser.RebuildBookStructure"),
                 icon: '<i class="fas fa-book"></i>',
                 condition: () => {
                     return game.user.isGM;
