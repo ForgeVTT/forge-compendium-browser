@@ -22,6 +22,7 @@ export class ForgeCompendiumBrowser {
     static books = [];
     static debugEnabled = 1;
     static iconMap = null;
+    static indexed = {};
 
     static init() {
         registerSettings();
@@ -281,9 +282,9 @@ export class ForgeCompendiumBrowser {
             }
         };
 
-        if (!book._indexed) {
+        if (!ForgeCompendiumBrowser.indexed[book.id]) {
             indexPacks(book);
-            book._indexed = true;
+            ForgeCompendiumBrowser.indexed[book.id] = true;
         }
     }
 

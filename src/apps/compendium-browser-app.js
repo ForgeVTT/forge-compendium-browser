@@ -73,6 +73,7 @@ export class CompendiumBrowserApp extends Application {
 
                     const hierarchy = new Hierarchy(book);
                     await hierarchy.buildHierarchy();
+                    ForgeCompendiumBrowser.indexed[book.id] = false;
                 }
             }
         ];

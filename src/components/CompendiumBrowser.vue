@@ -45,13 +45,13 @@ export default {
         if (book) {
           if (!this.isAvailable(book)) {
             if (book.error) {
-              ui.notifications.warn("Erorr loading the book hierarchy file, please make sure you are using the latest version.");
+              ui.notifications.warn("Error loading the book hierarchy file, please make sure you are using the latest version.");
             } else {
               ui.notifications.warn("Please wait, book is still building its index, this may take some time");
             }
           } else {
             this.indexing = true;
-            await game.ForgeCompendiumBrowser.indexBook(book, (progress) => { this.progress = progress; });
+            await game.ForgeCompendiumBrowser.indexBook(book);
             this.indexing = false;
             this.progress = 0;
             this.book = Object.freeze(book);

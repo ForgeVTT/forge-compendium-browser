@@ -32,9 +32,9 @@ globalThis.game = {
                 }
             }
     
-            if (!book._indexed) {
+            if (!ForgeCompendiumBrowser.indexed[book.id]) {
                 await indexPacks(book);
-                book._indexed = true;
+                ForgeCompendiumBrowser.indexed[book.id] = true;
             }
         }
     },
