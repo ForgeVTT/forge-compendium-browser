@@ -108,6 +108,7 @@ export class ImportBook {
             for (const dir of ["actors", "cards", "items", "journal", "playlists", "scenes", "tables"]) {
                 ui[dir].render();
             }
+            ui.nav.render();
         } catch (err) {
             error(err);
             progress("finish", { message: "Unknown Error Encountered" });
