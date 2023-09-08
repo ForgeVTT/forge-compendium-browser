@@ -13,6 +13,10 @@ export default {
     subsheet: null,
   }),
   methods: {
+    i18n(key, args) {
+      if (args) return game.i18n.format(key, args);
+      return game.i18n.localize(key);
+    },
     openLink(e) {
       const packId = e.currentTarget.dataset.pack;
       const id = e.currentTarget.dataset.id;
@@ -53,8 +57,9 @@ export default {
         }
 
         templateData.stats = Object.keys(stats).map((key) => {
+          const nameKey = this.i18n(`ForgeCompendiumBrowser.${key}`);
           return {
-            name: `${stats[key]} ${game.i18n.localize(`ForgeCompendiumBrowser.${key}`)}`,
+            name: `${stats[key]} ${nameKey}`,
             icon: statIcon[key],
             value: stats[key],
           };
@@ -67,7 +72,6 @@ export default {
         this.subsheet = { options: { classes: ["scene-entry"] } };
 
         $(".forge-compendium-scene", this.$refs.entry).on("click", () => {
-          console.log("Poppout image", this.entry);
           const ip = new ImagePopout(templateData.img, {
             title: this.entry.name,
             uuid: `Compendium.${this.entry.packId}.Scene.${this.entry.id}`,
@@ -194,9 +198,6 @@ export default {
       const classes = this.subsheet?.options?.classes || [];
       if (game.version.startsWith("10.")) classes.push("v10");
       return classes.join(" ");
-    },
-    i18n(key) {
-      return game.i18n.localize(key);
     },
   },
   watch: {

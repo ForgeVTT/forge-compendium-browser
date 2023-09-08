@@ -11,7 +11,10 @@ export let warn = (...args) => {
     if (ForgeCompendiumBrowser.debugEnabled > 0) console.warn("forge-compendium-browser | ", ...args);
 };
 export let error = (...args) => console.error("forge-compendium-browser | ", ...args);
-export let i18n = (key) => {
+export let i18n = (key, args) => {
+    if (args) {
+        return game.i18n.format(key, args);
+    }
     return game.i18n.localize(key);
 };
 export let setting = (key) => {
@@ -83,13 +86,13 @@ export class ForgeCompendiumBrowser {
         });
 
         Hooks.on("setupTileActions", (app) => {
-            app.registerTileGroup("forge-compendium-browser", "Forge Compendium Library");
-            app.registerTileAction("forge-compendium-browser", "Forge Compendium Library", {
-                name: "Open Book",
+            app.registerTileGroup("forge-compendium-browser", i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary"));
+            app.registerTileAction("forge-compendium-browser", i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary"), {
+                name: i18n("ForgeCompendiumBrowser.OpenBook"),
                 ctrls: [
                     {
                         id: "bookid",
-                        name: "Compendium Book",
+                        name: i18n("ForgeCompendiumBrowser.CompendiumBook"),
                         list: () => {
                             let list = {};
                             for (const book of game.ForgeCompendiumBrowser.books) {
@@ -116,8 +119,8 @@ export class ForgeCompendiumBrowser {
                 },
                 content: async (trigger, action) => {
                     const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === action.data.bookid);
-                    return `<span class="action-style">Open Compendium Book</span> <span class="details-style">"${
-                        book.name || "Unknown"
+                    return `<span class="action-style">${i18n("ForgeCompendiumBrowser.OpenCompendiumBook")}</span> <span class="details-style">"${
+                        book.name || i18n("ForgeCompendiumBrowser.Unknown")
                     }"</span>`;
                 },
             });

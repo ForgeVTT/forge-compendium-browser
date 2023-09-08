@@ -1,4 +1,4 @@
-import { ForgeCompendiumBrowser, warn, log } from "./forge-compendium-browser.js";
+import { ForgeCompendiumBrowser, warn, log, i18n } from "./forge-compendium-browser.js";
 
 export class Hierarchy {
     book;
@@ -65,7 +65,7 @@ export class Hierarchy {
         }
 
         this.book.children = duplicate(this.book.hierarchy.children);
-        ui.notifications.info(`${this.book.name}, hierarchy has finished building.`);
+        ui.notifications.info(i18n("ForgeCompendiumBrowser.HierarchyBuilt"), { name: this.book.name});
 
         return this.book.hierarchy;
     }
@@ -175,7 +175,7 @@ export class Hierarchy {
             }
             section = {
                 id: type,
-                name: CONFIG[type]?.collection.name || "Unknown",
+                name: CONFIG[type]?.collection.name || i18n("ForgeCompendiumBrowser.Unknown"),
                 packtype: type,
                 type: "section",
                 count: 0,

@@ -1,4 +1,4 @@
-import { error, setting } from "./forge-compendium-browser.js";
+import { error, setting, i18n } from "./forge-compendium-browser.js";
 
 export class ImportBook {
     static async importBook(book, options = {}) {
@@ -26,7 +26,7 @@ export class ImportBook {
                     mainfolder = await Folder.create(folderData);
                 }
                 if (progress) {
-                    progress("reset", { type: c.packtype, max: c.count, message: `Processing ${c.packtype}` });
+                    progress("reset", { type: c.packtype, max: c.count, message: i18n("ForgeCompendiumBrowser.ProcessingType", {type: c.packtype}) });
                 }
                 const data = await ImportBook.processChildren(c, c.packtype, mainfolder, progress);
 
@@ -42,7 +42,7 @@ export class ImportBook {
             for (const [type, documents] of Object.entries(documentData)) {
                 if (type === "Scene") continue;
                 if (progress) {
-                    progress("reset", { max: 1, type, message: `Creating ${type}` });
+                    progress("reset", { max: 1, type, message: i18n("ForgeCompendiumBrowser.CreatingType", {type: type}) });
                 }
 
                 const cls = getDocumentClass(type);
@@ -58,7 +58,7 @@ export class ImportBook {
             if (documentData["Scene"]) {
                 const documents = documentData["Scene"];
                 if (progress) {
-                    progress("reset", { max: 1, type: "Scene", message: "Creating Scene" });
+                    progress("reset", { max: 1, type: "Scene", message: i18n("ForgeCompendiumBrowser.CreatingScene") });
                 }
 
                 const docs = await Scene.createDocuments(documents, { render: false, keepId: true });
@@ -78,7 +78,7 @@ export class ImportBook {
                 for (const [type, data] of Object.entries(docUpdates)) {
                     if (data && data.length) {
                         if (type === "JournalEntry" && isV10) {
-                            if (progress) progress("reset", { max: data.length, type, message: `Updating ${type}` });
+                            if (progress) progress("reset", { max: data.length, type, message: i18n("ForgeCompendiumBrowser.UpdatingType", {type: type}) });
 
                             for (const page of data) {
                                 await page.object.update({ "text.content": page.value });
@@ -87,7 +87,7 @@ export class ImportBook {
                             }
                         } else {
                             if (progress) {
-                                progress("reset", { max: 1, type, message: `Updating ${type}` });
+                                progress("reset", { max: 1, type, message: i18n("ForgeCompendiumBrowser.UpdatingType", {type: type}) });
                             }
 
                             const cls = getDocumentClass(type);
@@ -111,7 +111,7 @@ export class ImportBook {
             ui.nav.render();
         } catch (err) {
             error(err);
-            progress("finish", { message: "Unknown Error Encountered" });
+            progress("finish", { message: i18n("ForgeCompendiumBrowser.UnknownErrorEncountered") });
             return false;
         }
         return true;
@@ -163,7 +163,7 @@ export class ImportBook {
                 progress("reset", {
                     max: data.length,
                     type,
-                    message: type === "Scene" ? "Linking tokens in scenes" : `Fixing inline links in ${type}`,
+                    message: type === "Scene" ? i18n("ForgeCompendiumBrowser.LinkingTokensInScenes") : i18n("ForgeCompendiumBrowser.FixingInlineLinksInType", { type: type }),
                 });
             }
 

@@ -16,7 +16,7 @@
       <div class="forge-compendium-progress">
         <div class="forge-compendium-bar" :style="barWidth">
         </div>
-        <div class="forge-compendium-progress-text">Indexing...</div>
+        <div class="forge-compendium-progress-text">{{this.i18n("ForgeCompendiumBrowser.Indexing")}}...</div>
       </div>
     </div>
   </div>
@@ -39,15 +39,19 @@ export default {
     progress: 0,
   }),
   methods: {
+    i18n(key, args) {
+      if (args) return game.i18n.format(key, args);
+      return game.i18n.localize(key);
+    },
     async selectBook(bookId, packId, id) {
       if (bookId) {
         const book = this.library.find((b) => b.id === bookId);
         if (book) {
           if (!this.isAvailable(book)) {
             if (book.error) {
-              ui.notifications.warn("Error loading the book hierarchy file, please make sure you are using the latest version.");
+              ui.notifications.warn(this.i18n("ForgeCompendiumBrowser.HierarchyLoadingError", { name: book.name }));
             } else {
-              ui.notifications.warn("Please wait, book is still building its index, this may take some time");
+              ui.notifications.warn(this.i18n("ForgeCompendiumBrowser.HierarchyLoading", { name: book.name }));
             }
           } else {
             this.indexing = true;
@@ -62,7 +66,7 @@ export default {
             game.user.setFlag("forge-compendium-browser", "last-book", bookId);
           }
         } else if(typeof bookId === "string") {
-          ui.notifications.warn(`You don't have access to this compendium book. (${bookId})`);
+          ui.notifications.warn(this.i18n("ForgeCompendiumBrowser.AccessError", { name: bookId }));
           this.book = null;
         }
       } else {
