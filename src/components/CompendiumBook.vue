@@ -105,11 +105,11 @@
           <!-- Search -->
           <div v-if="searchTerm != null" class="forge-compendium-search-area flexcol">
             <div class="forge-compendium-search-bar flexrow">
-              <input type="text" v-model="searchTerm" style="margin-right: 0px" />
-              <button type="button" @click="clearSearch()" title="Clear search term" style="margin-left: 0px">
+              <input type="text" v-model="searchTerm" />
+              <button type="button" @click="clearSearch()" title="Clear search term">
                 <i class="fas fa-times-circle"></i>
               </button>
-              <span class="search-div">
+              <span class="search-span">
                 <i class="fas fa-search"></i>
               </span>
             </div>
@@ -1140,7 +1140,7 @@ export default {
 }
 .forge-compendium-search-area input[type="text"] {
   flex: 1;
-  margin: 0 3px;
+  margin: 0;
   background: rgba(255, 255, 245, 0.8);
   height: 30px;
   padding: 1px 3px;
@@ -1152,6 +1152,8 @@ export default {
   border: 1px solid var(--color-border-light-tertiary);
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
@@ -1160,6 +1162,7 @@ export default {
 .forge-compendium-search-area button {
   flex: 0 0 30px;
   border-radius: 0px;
+  margin: 0;
   cursor: pointer;
   overflow: hidden;
   height: 30px;
@@ -1243,16 +1246,16 @@ export default {
   *background-color: #151515;
 }
 
-.search-div {
+.search-span {
   flex: 0 0 30px;
   border-top-right-radius: 3px;
   border-bottom-right-radius: 3px;
   height: 30px;
-  background: rgba(255, 255, 240, 0.8);
+  background: rgba(240,240,240,.8);
   border: 1px solid var(--color-border-light-primary);
   font-size: var(--font-size-14);
   line-height: 28px;
   font-family: var(--font-primary);
-  margin: 0 1px;
+  text-align: center;
 }
 </style>
