@@ -65,7 +65,7 @@ export class Hierarchy {
         }
 
         this.book.children = duplicate(this.book.hierarchy.children);
-        ui.notifications.info(i18n("ForgeCompendiumBrowser.HierarchyBuilt"), { name: this.book.name});
+        ui.notifications.info(i18n("ForgeCompendiumBrowser.HierarchyBuilt", { name: this.book.name}));
 
         return this.book.hierarchy;
     }
