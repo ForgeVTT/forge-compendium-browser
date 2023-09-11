@@ -3,8 +3,9 @@
     <div class="forge-compendium-sidebar flexcol">
       <header class="directory-header flexcol">
         <div class="header-action-buttons flexrow">
-          <div class="compendium-library" @click="exit">
-            <i class="fas fa-atlas"></i> {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
+          <div class="compendium-library" @click="exit" :title="this.i18n('ForgeCompendiumBrowser.ReturnToLibrary')">
+            <i class="fas fa-circle-arrow-left"></i>
+            {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
           </div>
         </div>
         <div class="forge-compendium-book-image-container">
@@ -274,6 +275,7 @@ export default {
           }
           this.folder = parent;
           this.document = null;
+          this.addToHistory(parent);
 
           this.$nextTick(() => {
             const el = document.querySelector(`.forge-compendium-listing [data-id="${entity.id}"] .forge-compendium-title`);
@@ -290,6 +292,7 @@ export default {
         this.folder = entity;
       } else if (entity) {
         this.folder = entity;
+        this.addToHistory(entity);
         if (entity.type === "section") this.document = null;
       }
     },
@@ -407,8 +410,8 @@ export default {
       if (entity.type === "search") {
         this.openSearch(entity.query);
       } else {
-        this.document = entity;
         this.folder = entity;
+        this.document = entity.type === "section" ? null : entity;
       }
     },
     canHistory(dir) {
@@ -1222,28 +1225,29 @@ export default {
   text-shadow: 0 0 8px var(--color-shadow-primary);
 }
 .compendium-library {
+  position: relative;
   cursor: pointer;
   padding: 6px;
   color: #ffffff;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
-  background-color: #363636;
-  *background-color: #222222;
-  background-image: -moz-linear-gradient(top, #444444, #222222);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
-  background-image: -webkit-linear-gradient(top, #444444, #222222);
-  background-image: -o-linear-gradient(top, #444444, #222222);
-  background-image: linear-gradient(to bottom, #444444, #222222);
+  background-color: #5bb75b;
+  *background-color: #51a351;
+  background-image: linear-gradient(180deg,#62c462,#51a351);
   background-repeat: repeat-x;
-  border: 1px solid #000000;
-  border-color: #222222 #222222 #000000;
-  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  border: 2px solid #468847;
+  border-color: #51a351 #51a351 #387038;
   border-radius: 4px;
   margin: 4px;
 }
 .compendium-library:hover {
   text-shadow: 0 0 8px var(--color-shadow-primary);
-  background-color: #222222;
-  *background-color: #151515;
+  border-color: #478f47 #478f47 #2f5e2f;
+}
+.compendium-library i {
+  float:left;
+  position: absolute;
+  left: 8px;
+  top: 7px;
 }
 
 .search-span {

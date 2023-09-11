@@ -50,5 +50,6 @@
     "ForgeCompendiumBrowser.UpdatingType": "Updating {type}",
     "ForgeCompendiumBrowser.UnknownErrorEncountered": "Unknown error encountered",
     "ForgeCompendiumBrowser.LinkingTokensInScenes": "Linking tokens in scenes",
-    "ForgeCompendiumBrowser.FixingInlineLinksInType": "Fixing inline links in {type}"
+    "ForgeCompendiumBrowser.FixingInlineLinksInType": "Fixing inline links in {type}",
+    "ForgeCompendiumBrowser.ReturnToLibrary": "Return to the Compendium Library"
 }
