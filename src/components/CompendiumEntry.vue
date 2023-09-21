@@ -13,6 +13,10 @@ export default {
     subsheet: null,
   }),
   methods: {
+    i18n(key, args) {
+      if (args) return game.i18n.format(key, args);
+      return game.i18n.localize(key);
+    },
     openLink(e) {
       const packId = e.currentTarget.dataset.pack;
       const id = e.currentTarget.dataset.id;
@@ -23,7 +27,7 @@ export default {
     },
     async loadDocument() {
       const document = this.entry.document;
-      let cls = document._getSheetClass ? document._getSheetClass() : null;
+      let cls = document?._getSheetClass ? document._getSheetClass() : null;
 
       if (document instanceof Scene) {
         const templateData = {
@@ -53,8 +57,9 @@ export default {
         }
 
         templateData.stats = Object.keys(stats).map((key) => {
+          const nameKey = this.i18n(`ForgeCompendiumBrowser.${key}`);
           return {
-            name: `${stats[key]} ${game.i18n.localize(`ForgeCompendiumBrowser.${key}`)}`,
+            name: `${stats[key]} ${nameKey}`,
             icon: statIcon[key],
             value: stats[key],
           };
@@ -67,7 +72,6 @@ export default {
         this.subsheet = { options: { classes: ["scene-entry"] } };
 
         $(".forge-compendium-scene", this.$refs.entry).on("click", () => {
-          console.log("Poppout image", this.entry);
           const ip = new ImagePopout(templateData.img, {
             title: this.entry.name,
             uuid: `Compendium.${this.entry.packId}.Scene.${this.entry.id}`,
@@ -111,17 +115,23 @@ export default {
         }
 
         for (const page of pages) {
-          this.subsheet = new page.cls(page.document, { editable: false });
-          this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
-          const templateData = await this.subsheet.getData();
+          if (page.cls && page.document){
+            this.subsheet = new page.cls(page.document, { editable: false });
 
-          if (templateData.enrichedText instanceof Promise) templateData.enrichedText = await templateData.enrichedText;
-          if (templateData.data?.img)
-            templateData.data.img = game.ForgeCompendiumBrowser.mapIcon(templateData.data.img);
-          if (templateData.item?.img)
-            templateData.item.img = game.ForgeCompendiumBrowser.mapIcon(templateData.item.img);
-          const template = await renderTemplate(this.subsheet.template, templateData);
-          html += `<article>${template}</article>`;
+            this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
+            const templateData = await this.subsheet.getData();
+
+            if (templateData.enrichedText instanceof Promise) templateData.enrichedText = await templateData.enrichedText;
+            if (templateData.data?.img)
+              templateData.data.img = game.ForgeCompendiumBrowser.mapIcon(templateData.data.img);
+            if (templateData.item?.img)
+              templateData.item.img = game.ForgeCompendiumBrowser.mapIcon(templateData.item.img);
+            const template = await renderTemplate(this.subsheet.template, templateData);
+            html += `<article>${template}</article>`;
+          } else {
+            this.subsheet = new JournalSheet(new JournalEntry({name: game.i18n.localize("ForgeCompendiumBrowser.DocumentNotFound")}), { editable: false });
+            html = `<div class="flexcol" style="text-align: center;justify-content: center;font-size: 18px;color: #808080;">${game.i18n.localize("ForgeCompendiumBrowser.DocumentNotFound")}</div>`;
+          }
         }
 
         this.$refs.entry.innerHTML = html;
@@ -177,7 +187,8 @@ export default {
         $("a.entity-link[data-pack]", this.$refs.entry).on("click", this.openLink.bind(this));
         $("a.content-link[data-pack]", this.$refs.entry).on("click", this.openLink.bind(this));
 
-        document._sheet = null; // eslint-disable-line
+        if (document)
+          document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
       }
     },
@@ -187,9 +198,6 @@ export default {
       const classes = this.subsheet?.options?.classes || [];
       if (game.version.startsWith("10.")) classes.push("v10");
       return classes.join(" ");
-    },
-    i18n(key) {
-      return game.i18n.localize(key);
     },
   },
   watch: {

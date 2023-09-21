@@ -3,8 +3,9 @@
     <div class="forge-compendium-sidebar flexcol">
       <header class="directory-header flexcol">
         <div class="header-action-buttons flexrow">
-          <div class="compendium-library" @click="exit">
-            <i class="fas fa-atlas"></i> {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
+          <div class="compendium-library" @click="exit" :title="this.i18n('ForgeCompendiumBrowser.ReturnToLibrary')">
+            <i class="fas fa-circle-arrow-left"></i>
+            {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
           </div>
         </div>
         <div class="forge-compendium-book-image-container">
@@ -105,13 +106,13 @@
           <!-- Search -->
           <div v-if="searchTerm != null" class="forge-compendium-search-area flexcol">
             <div class="forge-compendium-search-bar flexrow">
-              <input type="text" v-model="searchTerm" style="margin-right: 0px" />
-              <button type="button" @click="searchBook()" title="Search">
-                <i class="fas fa-search"></i>
-              </button>
-              <button type="button" @click="clearSearch()" title="Clear search term" style="margin-left: 0px">
+              <input type="text" v-model="searchTerm" />
+              <button type="button" @click="clearSearch()" title="Clear search term">
                 <i class="fas fa-times-circle"></i>
               </button>
+              <span class="search-span">
+                <i class="fas fa-search"></i>
+              </span>
             </div>
             <!-- Search Results -->
             <div v-if="searchResults.length" class="forge-compendium-search-list">
@@ -188,7 +189,7 @@
               >
                 <i class="fas fa-lock"></i>
               </button>
-              <b style="flex-grow: 0; margin-left: 8px">{{ this.i18n("ForgeCompendiumBrowser.Ownership") }}:</b>
+              <b style="flex-grow: 0; margin-left: 8px">{{ this.i18n("ForgeCompendiumBrowser.Permissions") }}:</b>
               <div class="permission-text">
                 <span class="user-permission" v-for="(permission, i) in permissionText" :key="i">{{ permission }}</span>
               </div>
@@ -204,7 +205,6 @@
 import CompendiumEntry from "./CompendiumEntry.vue";
 import CompendiumDirectory from "./CompendiumDirectory.vue";
 import CompendiumListing from "./CompendiumListing.vue";
-import { ImportBook } from "@/importBook";
 
 export default {
   name: "CompendiumBook",
@@ -234,6 +234,9 @@ export default {
     },
   },
   methods: {
+    isV10() {
+      return isNewerVersion(game.version, "9.999999");
+    },
     reset() {
       this.folder = null;
       this.document = null;
@@ -264,7 +267,21 @@ export default {
       } else if (entity.type === "folder") {
         const child = entity.children.find((c) => c.name === entity.name && c.type === "document");
         if (child) this.selectEntity(child);
-        else this.folder = entity;
+        else {
+          // traverse up the parents to find the first section type
+          let parent = entity;
+          while (parent && parent.type !== "section") {
+            parent = parent.parent;
+          }
+          this.folder = parent;
+          this.document = null;
+          this.addToHistory(parent);
+
+          this.$nextTick(() => {
+            const el = document.querySelector(`.forge-compendium-listing [data-id="${entity.id}"] .forge-compendium-title`);
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }
       } else if (entity.type === "document") {
         if (!entity.document) {
           const collection = game.packs.get(entity.packId);
@@ -275,6 +292,7 @@ export default {
         this.folder = entity;
       } else if (entity) {
         this.folder = entity;
+        this.addToHistory(entity);
         if (entity.type === "section") this.document = null;
       }
     },
@@ -392,8 +410,8 @@ export default {
       if (entity.type === "search") {
         this.openSearch(entity.query);
       } else {
-        this.document = entity;
         this.folder = entity;
+        this.document = entity.type === "section" ? null : entity;
       }
     },
     canHistory(dir) {
@@ -480,7 +498,6 @@ export default {
       this.searchResults = [];
     },
     searchBook() {
-      const isV10 = isNewerVersion(game.version, "9.999999");
       if (this.searchTerm.length < 2) {
         this.searchResults = [];
         return;
@@ -490,14 +507,13 @@ export default {
       let type = null;
       let query = this.searchTerm.toLowerCase();
 
-      // added idx and text here for a future improvement to show highlighted text
-      const resultObject = (entity, idx, text) => {
+      const resultObject = (entity) => {
         const section =
           entity.parent.type === "section"
             ? entity.parent
             : this.book.children.find((s) => s.id === entity.parent.section);
         let img = entity.img;
-        if (isV10 && img && img.indexOf("systems/dnd5e/icons")) {
+        if (this.isV10 && img && img.indexOf("systems/dnd5e/icons")) {
           img = img.replace("systems/dnd5e/icons", "images/icons");
         }
         return {
@@ -577,7 +593,8 @@ export default {
       traverseSearch(this.book, results);
       this.searchResults = Object.values(results);
     },
-    i18n(key) {
+    i18n(key, args) {
+      if (args) return game.i18n.format(key, args);
       return game.i18n.localize(key);
     },
     async importEntry() {
@@ -585,7 +602,7 @@ export default {
       const pack = game.packs.get(this.document.packId);
       if (collection) {
         if (this.document.section === "Scene") {
-          ui.notifications.info(`Beginning the import of scene ${this.document.name}`);
+          ui.notifications.info(this.i18n('Beginning the import of scene {name}', {name: this.document.name}));
           let sceneBook = {
             name: this.document.name,
             hierarchy: {
@@ -654,7 +671,7 @@ export default {
             };
 
             for (const note of notes) {
-              let entryId = isV10 ? note.entryId : note.data.entryId;
+              let entryId = this.isV10 ? note.entryId : note.data.entryId;
 
               if (!journalChild.children.find((je) => je.id === entryId)) {
                 journalChild.children.push({
@@ -669,16 +686,16 @@ export default {
             }
           }
           let result = await game.ForgeCompendiumBrowser.importBook(sceneBook, { actorFolderName: this.document.name });
-          if (result !== false) return ui.notifications.info("Document has been imported");
+          if (result !== false) return ui.notifications.info(this.i18n("ForgeCompendiumBrowser.DocumentHasBeenImported"));
         } else {
           let document = await collection.importFromCompendium(pack, this.document.id, {}, { renderSheet: true });
           if (this.document.section === "Item" && document?.img) {
             await document.update({ img: game.ForgeCompendiumBrowser.mapIcon(document.img) });
           }
-          if (document) return ui.notifications.info("Document has been imported");
+          if (document) return ui.notifications.info(this.i18n("ForgeCompendiumBrowser.DocumentHasBeenImported"));
         }
       }
-      ui.notifications.error("Error importing document");
+      ui.notifications.error(this.i18n("ForgeCompendiumBrowser.ErrorImportingDocument"));
     },
   },
   computed: {
@@ -1126,7 +1143,7 @@ export default {
 }
 .forge-compendium-search-area input[type="text"] {
   flex: 1;
-  margin: 0 3px;
+  margin: 0;
   background: rgba(255, 255, 245, 0.8);
   height: 30px;
   padding: 1px 3px;
@@ -1138,6 +1155,8 @@ export default {
   border: 1px solid var(--color-border-light-tertiary);
   border-top-left-radius: 3px;
   border-bottom-left-radius: 3px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
@@ -1146,13 +1165,10 @@ export default {
 .forge-compendium-search-area button {
   flex: 0 0 30px;
   border-radius: 0px;
+  margin: 0;
   cursor: pointer;
   overflow: hidden;
   height: 30px;
-}
-.forge-compendium-search-area button:last-child {
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
 }
 .forge-compendium-search-area .no-results {
   width: 100%;
@@ -1209,27 +1225,41 @@ export default {
   text-shadow: 0 0 8px var(--color-shadow-primary);
 }
 .compendium-library {
+  position: relative;
   cursor: pointer;
   padding: 6px;
   color: #ffffff;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
-  background-color: #363636;
-  *background-color: #222222;
-  background-image: -moz-linear-gradient(top, #444444, #222222);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#444444), to(#222222));
-  background-image: -webkit-linear-gradient(top, #444444, #222222);
-  background-image: -o-linear-gradient(top, #444444, #222222);
-  background-image: linear-gradient(to bottom, #444444, #222222);
+  background-color: #5bb75b;
+  *background-color: #51a351;
+  background-image: linear-gradient(180deg,#62c462,#51a351);
   background-repeat: repeat-x;
-  border: 1px solid #000000;
-  border-color: #222222 #222222 #000000;
-  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  border: 2px solid #468847;
+  border-color: #51a351 #51a351 #387038;
   border-radius: 4px;
   margin: 4px;
 }
 .compendium-library:hover {
   text-shadow: 0 0 8px var(--color-shadow-primary);
-  background-color: #222222;
-  *background-color: #151515;
+  border-color: #478f47 #478f47 #2f5e2f;
+}
+.compendium-library i {
+  float:left;
+  position: absolute;
+  left: 8px;
+  top: 7px;
+}
+
+.search-span {
+  flex: 0 0 30px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  height: 30px;
+  background: rgba(240,240,240,.8);
+  border: 1px solid var(--color-border-light-primary);
+  font-size: var(--font-size-14);
+  line-height: 28px;
+  font-family: var(--font-primary);
+  text-align: center;
 }
 </style>

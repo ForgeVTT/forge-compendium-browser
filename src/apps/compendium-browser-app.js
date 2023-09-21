@@ -1,4 +1,4 @@
-import { ForgeCompendiumBrowser, i18n } from '../forge-compendium-browser.js';
+import { ForgeCompendiumBrowser, i18n } from "../forge-compendium-browser.js";
 import { Hierarchy } from "../hierarchy.js";
 
 export class CompendiumBrowserApp extends Application {
@@ -11,8 +11,8 @@ export class CompendiumBrowserApp extends Application {
     }
 
     static get defaultOptions() {
-        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
-        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
 
         return mergeObject(super.defaultOptions, {
             id: "forge-compendium-browser",
@@ -24,7 +24,7 @@ export class CompendiumBrowserApp extends Application {
             width: vw - 400,
             height: vh - 200,
             scrollY: ["ol.forge-compendium-directory-list", ".forge-compendium-listing > div"],
-            dragDrop: [{ dragSelector: ".draggable-item" }]
+            dragDrop: [{ dragSelector: ".draggable-item" }],
         });
     }
 
@@ -35,13 +35,18 @@ export class CompendiumBrowserApp extends Application {
 
     activateListeners(html) {
         super.activateListeners(html);
-        this._contextmenu = ContextMenu.create(this, html.parent(), ".forge-compendium-book", this._getContextMenuOptions());
+        this._contextmenu = ContextMenu.create(
+            this,
+            html.parent(),
+            ".forge-compendium-book",
+            this._getContextMenuOptions()
+        );
     }
 
     _getContextMenuOptions() {
         return [
             {
-                name: "Configure Permissions",
+                name: i18n("ForgeCompendiumBrowser.ConfigurePermissions"),
                 icon: '<i class="fas fa-lock"></i>',
                 condition: () => {
                     return game.user.isGM;
@@ -49,16 +54,15 @@ export class CompendiumBrowserApp extends Application {
                 callback: async (bookid) => {
                     const id = $(bookid).data()["id"];
 
-                    const book = game.ForgeCompendiumBrowser.books.find(b => b.id === id);
+                    const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
 
-                    if (!book)
-                        return;
+                    if (!book) return;
 
                     ForgeCompendiumBrowser.showPermissions(book);
-                }
+                },
             },
             {
-                name: "Rebuild Book Structure",
+                name: i18n("ForgeCompendiumBrowser.RebuildBookStructure"),
                 icon: '<i class="fas fa-book"></i>',
                 condition: () => {
                     return game.user.isGM;
@@ -66,15 +70,15 @@ export class CompendiumBrowserApp extends Application {
                 callback: async (bookid) => {
                     const id = $(bookid).data()["id"];
 
-                    const book = game.ForgeCompendiumBrowser.books.find(b => b.id === id);
+                    const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
 
-                    if (!book)
-                        return;
+                    if (!book) return;
 
                     const hierarchy = new Hierarchy(book);
                     await hierarchy.buildHierarchy();
-                }
-            }
+                    ForgeCompendiumBrowser.indexed[book.id] = false;
+                },
+            },
         ];
     }
 }

@@ -11,7 +11,7 @@
     </header>
     <ol
       v-if="showChildren"
-      class="forge-compendium-directory-list subdirectory"
+      class="forge-compendium-directory-list subdir"
     >
       <compendium-directory
         v-for="item in filterList"
@@ -147,12 +147,14 @@ export default {
   border-left-color: #47d18c;
 }
 
-.forge-compendium-directory-list .subdirectory {
-  padding-left: 16px;
-  margin-top: 0px;
+.forge-compendium-directory-list .subdir {
+  padding: 0 0 0 16px;
+  list-style: none;
+  margin: 0;
+  border-left: 3px solid rgba(255, 255, 255, 0.2);
 }
 
-.forge-compendium-directory-list .subdirectory .forge-compendium-directory-item header {
+.forge-compendium-directory-list .subdir .forge-compendium-directory-item header {
   font-size: 14px;
 }
 </style>
