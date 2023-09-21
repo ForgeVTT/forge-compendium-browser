@@ -1,4 +1,4 @@
-## 1.4.1
+## 1.4.0
 
 Fixed issue where v11 was adding a double icon to the module management to indicate that a module was a Forge Compendium Library compatible module.
 
@@ -17,6 +17,24 @@ Fixed issue with v11 not linking Scene tokens immediately.
 Fixed issue with viewing an individual entry causing only that individual entry to be imported when importing the entire book.
 
 Added additional text translations.
+
+Fixed search button so that it no longer functioned as a button, since typing in the search field automatically does the search.
+
+Fixed issue with rebuilding the hierarchy structure temporarily prevents the book data from being loaded.
+
+Added consistency between Ownership and Permissions.
+
+Fixed issue with scenes not appearing in the scene bar when imported.
+
+Updated the click on the sub folder name so it links to the main folder listing and scrolls so the sub folder is in view.
+
+Fixed the back to library button so that it's more visible and makes sense what it does.
+
+Fixed issue with subdirectory padding getting interferance from other modules
+
+Fixed lock icon so it's visible on lighter book images
+
+Added option to import scene as non-navigable
 
 ## 1.3.4
 
