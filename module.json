@@ -22,9 +22,13 @@
       "name": "KaKaRoTo"
     }
   ],
-  "scripts": ["dist/ForgeCompendiumBrowserModule.umd.min.js"],
+  "scripts": [
+    "dist/ForgeCompendiumBrowserModule.umd.min.js"
+  ],
   "packs": [],
-  "styles": ["css/browser.css"],
+  "styles": [
+    "css/browser.css"
+  ],
   "socket": true,
   "languages": [
     {
@@ -46,6 +50,11 @@
       "lang": "pt-BR",
       "name": "Português",
       "path": "lang/pt-BR.json"
+    },
+    {
+      "lang": "pl",
+      "name": "polski",
+      "path": "lang/pl.json"
     }
   ],
   "relationships": {
