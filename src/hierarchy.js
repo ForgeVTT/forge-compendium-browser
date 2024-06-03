@@ -42,7 +42,7 @@ export class Hierarchy {
                 return null;
             }
         } else {
-            this.book.children = duplicate(this.book.hierarchy.children);
+            this.book.children = foundry.utils.duplicate(this.book.hierarchy.children);
             return this.book.hierarchy;
         }
     }
@@ -70,7 +70,7 @@ export class Hierarchy {
             );
         }
 
-        this.book.children = duplicate(this.book.hierarchy.children);
+        this.book.children = foundry.utils.duplicate(this.book.hierarchy.children);
         ui.notifications.info(i18n("ForgeCompendiumBrowser.HierarchyBuilt", { name: this.book.name }));
 
         return this.book.hierarchy;
@@ -223,7 +223,7 @@ export class Hierarchy {
         let folder = this.folderCache[document.folder];
         if (!folder) {
             let path =
-                getProperty(document, "flags.forge-compendium-browser.path") || getProperty(document, "flags.ddb.path");
+			foundry.utils.getProperty(document, "flags.forge-compendium-browser.path") || foundry.utils.getProperty(document, "flags.ddb.path");
             if (path) {
                 const section = this.getSection(type);
                 folder = section;
@@ -256,7 +256,7 @@ export class Hierarchy {
                             const folderData = typeData && typeData[key];
                             // create the folder
                             folder = this.createHierarchyFolder(
-                                { id: part.id || randomID(), name: folderData?.label || name },
+                                { id: part.id || foundry.utils.randomID(), name: folderData?.label || name },
                                 part.sort ?? folderData?.sort
                             );
                             parent.children.push(folder);
@@ -307,13 +307,13 @@ export class Hierarchy {
                 const _folder = this.getEntityFolder(document, type) || folder;
 
                 if (!_folder.children.find((c) => c.id === document._id)) {
-                    const visible = getProperty(document, "flags.forge-compendium-browser.visible") !== false;
+                    const visible = foundry.utils.getProperty(document, "flags.forge-compendium-browser.visible") !== false;
                     _folder.children.push({
                         id: document._id,
                         name: document.name,
                         type: "document",
                         img: img,
-                        sort: isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort,
+                        sort: foundry.utils.isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort,
                         packId: key,
                         visible: visible,
                     });
