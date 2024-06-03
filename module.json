@@ -55,6 +55,11 @@
       "lang": "pl",
       "name": "polski",
       "path": "lang/pl.json"
+    },
+    {
+      "lang": "tr",
+      "name": "Türkçe",
+      "path": "lang/tr.json"
     }
   ],
   "relationships": {
