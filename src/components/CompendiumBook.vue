@@ -498,14 +498,15 @@ export default {
       this.searchResults = [];
     },
     searchBook() {
-      if (this.searchTerm.length < 2) {
+      let searchTerm = this.searchTerm || "";
+      if (searchTerm.length < 2) {
         this.searchResults = [];
         return;
       }
       // adding title and type here for a future improvement to allow for a more specific searching
-      let title = this.searchTerm.toLowerCase();
+      let title = searchTerm.toLowerCase();
       let type = null;
-      let query = this.searchTerm.toLowerCase();
+      let query = searchTerm.toLowerCase();
 
       const resultObject = (entity) => {
         const section =
@@ -1231,7 +1232,6 @@ export default {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
   background-color: #5bb75b;
-  *background-color: #51a351;
   background-image: linear-gradient(180deg,#62c462,#51a351);
   background-repeat: repeat-x;
   border: 2px solid #468847;
