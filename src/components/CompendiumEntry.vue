@@ -47,7 +47,7 @@ export default {
         };
         const stats = {};
         for (const collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls"]) {
-          const collectionData = isNewerVersion(game.version, "9.99999")
+          const collectionData = foundry.utils.isNewerVersion(game.version, "9.99999")
             ? document[collection]
             : document.data[collection];
           if (collectionData.size) {
@@ -83,7 +83,7 @@ export default {
         let html = "";
         const pages = [];
         if (document instanceof JournalEntry) {
-          if (document instanceof JournalEntry && isNewerVersion(game.version, "9.99999")) {
+          if (document instanceof JournalEntry && foundry.utils.isNewerVersion(game.version, "9.99999")) {
             const cfg = CONFIG["JournalEntryPage"];
             for (const page of this.entry.document.pages) {
               const sheets = cfg.sheetClasses[page.type] || {};
@@ -188,7 +188,7 @@ export default {
         $("a.content-link[data-pack]", this.$refs.entry).on("click", this.openLink.bind(this));
 
         if (document)
-          document._sheet = null; // eslint-disable-line
+          document._sheet = null;
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
       }
     },

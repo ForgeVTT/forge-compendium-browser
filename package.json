@@ -27,25 +27,52 @@
   "eslintConfig": {
     "root": true,
     "env": {
-      "node": true
+      "browser": true,
+      "jquery": true
     },
     "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "plugin:vue/recommended"
+    ],
+    "globals": {
+      "CONFIG": "readonly",
+      "CONST": "readonly",
+      "Actor": "readonly",
+      "Application": "readonly",
+      "ContextMenu": "readonly",
+      "Dialog": "readonly",
+      "Dlopen": "readonly",
+      "FilePicker": "readonly",
+      "Folder": "readonly",
+      "ForgeCompendiumBrowser": "readonly",
+      "ForgeCompendiumBrowserVue": "readonly",
+      "ForgeVTT": "readonly",
+      "FormDataExtended": "readonly",
+      "Hooks": "readonly",
+      "ImageHelper": "readonly",
+      "ImagePopout": "readonly",
+      "Item": "readonly",
+      "JournalEntry": "readonly",
+      "JournalSheet": "readonly",
+      "Scene": "readonly",
+      "Tabs": "readonly",
+      "Vue": "readonly",
+      "canvas": "readonly",
+      "dndbeyond_br": "readonly",
+      "foundry": "readonly",
+      "game": "readonly",
+      "getDocumentClass": "readonly",
+      "globalThis": "readonly",
+      "renderTemplate": "readonly",
+      "ui": "readonly"
+    },
+    "ignorePatterns": [
+      "dist/*",
+      "node_modules/*",
+      "babel.config.js"
     ],
     "parserOptions": {
       "parser": "@babel/eslint-parser"
-    },
-    "rules": {
-      "no-undef": 0,
-      "no-unused-vars": 1
-    },
-    "globals": {
-      "game": true,
-      "CONFIG": true,
-      "CONST": true,
-      "ui": true,
-      "canvas": true
     }
   },
   "browserslist": [
