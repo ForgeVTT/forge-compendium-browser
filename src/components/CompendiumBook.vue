@@ -230,7 +230,7 @@ export default {
     },
     searchTerm() {
       this.searchBook();
-      console.log("Search Results", this.searchResults, this.searchTerm);
+      //console.log("Search Results", this.searchResults, this.searchTerm);
     },
   },
   methods: {
