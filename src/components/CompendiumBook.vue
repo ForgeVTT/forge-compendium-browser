@@ -504,9 +504,9 @@ export default {
         return;
       }
       // adding title and type here for a future improvement to allow for a more specific searching
-      let title = searchTerm.toLowerCase();
-      let type = null;
-      let query = searchTerm.toLowerCase();
+      const title = searchTerm.toLowerCase();
+      const type = null;
+      const query = searchTerm.toLowerCase();
 
       const resultObject = (entity) => {
         const section =
