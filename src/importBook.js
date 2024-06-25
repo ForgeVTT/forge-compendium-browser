@@ -5,7 +5,7 @@ export class ImportBook {
         let { progress } = options;
         ImportBook.translate = [];
 
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
 
         try {
             const documentData = {};
@@ -118,7 +118,7 @@ export class ImportBook {
     }
 
     static getDocumentProperty(document) {
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
         const type = document.folder?.type || document.parent?.folder?.type;
         switch (type) {
             case "Item":
@@ -131,13 +131,13 @@ export class ImportBook {
     }
 
     static async updateDocumentKeys(newDocs, progress) {
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
         if (!isV10) {
             // Collect the original ID since v9 didn't create documents with a provided ID
             for (const [type, documents] of Object.entries(newDocs)) {
                 for (const document of documents) {
                     const docType = document.folder?.type || document.parent?.folder?.type || type;
-                    let originalData = getProperty(document, "data.flags.forge-compendium-browser.originalData");
+                    let originalData = foundry.utils.getProperty(document, "data.flags.forge-compendium-browser.originalData");
                     if (originalData) {
                         ImportBook.translate.push({
                             original: originalData.id,
@@ -177,7 +177,7 @@ export class ImportBook {
                 if (type === "JournalEntry") {
                     if (isV10) {
                         for (const page of document.pages) {
-                            let repvalue = getProperty(page, "text.content");
+                            let repvalue = foundry.utils.getProperty(page, "text.content");
                             const original = repvalue;
                             if (repvalue) {
                                 for (const translate of ImportBook.translate) {
@@ -197,12 +197,12 @@ export class ImportBook {
                                 repvalue = ImportBook.cleanText(document._id, document.name, repvalue);
 
                                 if (repvalue !== original) {
-                                    setProperty(page, "text.content", repvalue);
+                                    foundry.utils.setProperty(page, "text.content", repvalue);
                                 }
                             }
                         }
                     } else {
-                        let repvalue = getProperty(document, "data.content");
+                        let repvalue = foundry.utils.getProperty(document, "data.content");
                         const original = repvalue;
                         if (repvalue) {
                             for (const translate of ImportBook.translate) {
@@ -235,8 +235,8 @@ export class ImportBook {
                     const tokens = document.tokens || document.data.tokens || [];
                     for (const token of tokens) {
                         const tokenName =
-                            getProperty(token, "flags.ddbActorFlags.name") ||
-                            getProperty(token.data, "flags.ddbActorFlags.name") ||
+                            foundry.utils.getProperty(token, "flags.ddbActorFlags.name") ||
+                            foundry.utils.getProperty(token.data, "flags.ddbActorFlags.name") ||
                             token.name;
                         if (!tokenName) continue;
                         // Check to see if it's being imported with this adventure.
@@ -338,7 +338,7 @@ export class ImportBook {
                     }
                 } else {
                     const prop = ImportBook.getDocumentProperty(document);
-                    let repvalue = getProperty(document, prop);
+                    let repvalue = foundry.utils.getProperty(document, prop);
                     const original = repvalue;
                     if (repvalue) {
                         for (const translate of ImportBook.translate) {
@@ -346,7 +346,7 @@ export class ImportBook {
                             repvalue = repvalue.replaceAll(`@Compendium[${translate.key}]`, value);
                         }
                         if (repvalue !== original) {
-                            if (isV10) setProperty(document, prop, repvalue);
+                            if (isV10) foundry.utils.setProperty(document, prop, repvalue);
                             else {
                                 const update = { _id: document._id };
                                 update[prop] = repvalue;
@@ -367,7 +367,7 @@ export class ImportBook {
         let documentData = [];
         let folderSort = 100000;
         let maxDepthSort = 1;
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
 
         const monsterPack = game.packs.get("dnd5e.monsters");
 
@@ -390,7 +390,7 @@ export class ImportBook {
 
                     if (parentFolder.depth >= (CONST.FOLDER_MAX_DEPTH || 3)) {
                         folderData.name = `${parentFolder.name}, ${child.name}`;
-                        folderData.sort = getProperty(parentFolder, isV10 ? "sort" : "data.sort") + maxDepthSort;
+                        folderData.sort = foundry.utils.getProperty(parentFolder, isV10 ? "sort" : "data.sort") + maxDepthSort;
                         folderData[isV10 ? "folder" : "parent"] = parentFolder[isV10 ? "folder" : "parentFolder"];
                         maxDepthSort++;
                     }
@@ -410,8 +410,8 @@ export class ImportBook {
                 const key = `${child.packId}.${document.id}`;
                 if (type === "Actor") {
                     const actor = game.actors.find((a) => {
-                        const a_ddbid = getProperty(a, "flags.forge-compendium-browser.ddbid");
-                        const b_ddbid = getProperty(document, "flags.forge-compendium-browser.ddbid");
+                        const a_ddbid = foundry.utils.getProperty(a, "flags.forge-compendium-browser.ddbid");
+                        const b_ddbid = foundry.utils.getProperty(document, "flags.forge-compendium-browser.ddbid");
                         return (
                             a.folder?.id === parentFolder.id &&
                             ((a_ddbid && b_ddbid && a_ddbid === b_ddbid) || a.name === document.name)
@@ -451,8 +451,8 @@ export class ImportBook {
 
                                 if (isV10) {
                                     if (packData.img) {
-                                        setProperty(data, "img", packData.img || data.img);
-                                        setProperty(
+                                        foundry.utils.setProperty(data, "img", packData.img || data.img);
+                                        foundry.utils.setProperty(
                                             data,
                                             "prototypeToken.texture.src",
                                             packData?.prototypeToken?.texture?.src || data.prototypeToken.texture.src
@@ -460,8 +460,8 @@ export class ImportBook {
                                     }
                                 } else {
                                     if (packData.data.img) {
-                                        setProperty(data, "data.img", packData.data.img || data.data.img);
-                                        setProperty(
+                                        foundry.utils.setProperty(data, "data.img", packData.data.img || data.data.img);
+                                        foundry.utils.setProperty(
                                             data,
                                             "data.prototypeToken.texture.src",
                                             packData?.data?.prototypeToken?.texture?.src ||
@@ -476,9 +476,9 @@ export class ImportBook {
                     data.navigation = setting("set-navigate");
                 }
 
-                data._id = randomID();
+                data._id = foundry.utils.randomID();
                 if (!isV10) {
-                    setProperty(data, "flags.forge-compendium-browser.originalData", { id: document.id, key });
+                    foundry.utils.setProperty(data, "flags.forge-compendium-browser.originalData", { id: document.id, key });
                 } else {
                     ImportBook.translate.push({
                         original: document.id,
