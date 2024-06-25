@@ -230,12 +230,12 @@ export default {
     },
     searchTerm() {
       this.searchBook();
-      console.log("Search Results", this.searchResults, this.searchTerm);
+      //console.log("Search Results", this.searchResults, this.searchTerm);
     },
   },
   methods: {
     isV10() {
-      return isNewerVersion(game.version, "9.999999");
+      return foundry.utils.isNewerVersion(game.version, "9.999999");
     },
     reset() {
       this.folder = null;
@@ -498,14 +498,15 @@ export default {
       this.searchResults = [];
     },
     searchBook() {
-      if (this.searchTerm.length < 2) {
+      let searchTerm = this.searchTerm || "";
+      if (searchTerm.length < 2) {
         this.searchResults = [];
         return;
       }
       // adding title and type here for a future improvement to allow for a more specific searching
-      const title = this.searchTerm.toLowerCase();
+      const title = searchTerm.toLowerCase();
       const type = null;
-      const query = this.searchTerm.toLowerCase();
+      const query = searchTerm.toLowerCase();
 
       const resultObject = (entity) => {
         const section =
@@ -540,7 +541,7 @@ export default {
           if (query != null) {
             try {
               if (parent.document instanceof JournalEntry) {
-                if (isNewerVersion(game.version, "9.99999")) {
+                if (foundry.utils.isNewerVersion(game.version, "9.99999")) {
                   for (const page of parent.pages) {
                     const field = page.content;
                     const idx = field.toLowerCase().indexOf(query);
@@ -557,7 +558,7 @@ export default {
                   }
                 }
               } else if (parent.document instanceof Actor) {
-                const field = isNewerVersion(game.version, "9.99999")
+                const field = foundry.utils.isNewerVersion(game.version, "9.99999")
                   ? parent.document.system.details.biography.value
                   : parent.document.data.data.details.biography.value;
                 const idx = field.toLowerCase().indexOf(query);
@@ -565,7 +566,7 @@ export default {
                   searchResult = resultObject(parent, idx, field);
                 }
               } else if (parent.document instanceof Item) {
-                const field = isNewerVersion(game.version, "9.99999")
+                const field = foundry.utils.isNewerVersion(game.version, "9.99999")
                   ? parent.document.system.description.value
                   : parent.document.data.data.description.value;
                 const idx = field.toLowerCase().indexOf(query);
@@ -625,8 +626,8 @@ export default {
             }
             for (const token of tokens) {
               const tokenName =
-                getProperty(token, "flags.ddbActorFlags.name") ||
-                getProperty(token.data, "flags.ddbActorFlags.name") ||
+              foundry.utils.getProperty(token, "flags.ddbActorFlags.name") ||
+              foundry.utils.getProperty(token.data, "flags.ddbActorFlags.name") ||
                 token.name;
               if (!tokenName) continue;
 
@@ -1231,7 +1232,6 @@ export default {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
   background-color: #5bb75b;
-  *background-color: #51a351;
   background-image: linear-gradient(180deg,#62c462,#51a351);
   background-repeat: repeat-x;
   border: 2px solid #468847;
