@@ -223,7 +223,7 @@ export class Hierarchy {
         let folder = this.folderCache[document.folder];
         if (!folder) {
             let path =
-                foundry.utils.getProperty(document, "flags.forge-compendium-browser.path") || foundry.utils.getProperty(document, "flags.ddb.path");
+			foundry.utils.getProperty(document, "flags.forge-compendium-browser.path") || foundry.utils.getProperty(document, "flags.ddb.path");
             if (path) {
                 const section = this.getSection(type);
                 folder = section;

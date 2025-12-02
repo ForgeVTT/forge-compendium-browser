@@ -230,7 +230,7 @@ export default {
     },
     searchTerm() {
       this.searchBook();
-      console.log("Search Results", this.searchResults, this.searchTerm);
+      //console.log("Search Results", this.searchResults, this.searchTerm);
     },
   },
   methods: {
@@ -498,14 +498,15 @@ export default {
       this.searchResults = [];
     },
     searchBook() {
-      if (this.searchTerm.length < 2) {
+      let searchTerm = this.searchTerm || "";
+      if (searchTerm.length < 2) {
         this.searchResults = [];
         return;
       }
       // adding title and type here for a future improvement to allow for a more specific searching
-      const title = this.searchTerm.toLowerCase();
+      const title = searchTerm.toLowerCase();
       const type = null;
-      const query = this.searchTerm.toLowerCase();
+      const query = searchTerm.toLowerCase();
 
       const resultObject = (entity) => {
         const section =
@@ -625,8 +626,8 @@ export default {
             }
             for (const token of tokens) {
               const tokenName =
-                foundry.utils.getProperty(token, "flags.ddbActorFlags.name") ||
-                foundry.utils.getProperty(token.data, "flags.ddbActorFlags.name") ||
+              foundry.utils.getProperty(token, "flags.ddbActorFlags.name") ||
+              foundry.utils.getProperty(token.data, "flags.ddbActorFlags.name") ||
                 token.name;
               if (!tokenName) continue;
 

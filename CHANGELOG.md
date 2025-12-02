@@ -1,3 +1,9 @@
+## 1.5.0
+
+v12 Compatibility
+
+Fixed an issue where searching for an item, then returning to the home page was throwing an error
+
 ## 1.4.0
 
 Fixed issue where v11 was adding a double icon to the module management to indicate that a module was a Forge Compendium Library compatible module.

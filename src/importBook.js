@@ -235,8 +235,8 @@ export class ImportBook {
                     const tokens = document.tokens || document.data.tokens || [];
                     for (const token of tokens) {
                         const tokenName =
-                            foundry.utils.getProperty(token, "flags.ddbActorFlags.name") ||
-                            foundry.utils.getProperty(token.data, "flags.ddbActorFlags.name") ||
+						foundry.utils.getProperty(token, "flags.ddbActorFlags.name") ||
+						foundry.utils.getProperty(token.data, "flags.ddbActorFlags.name") ||
                             token.name;
                         if (!tokenName) continue;
                         // Check to see if it's being imported with this adventure.
