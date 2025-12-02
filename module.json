@@ -5,10 +5,10 @@
   "description": "Browse your compendium books like they were meant to be viewed. The Forge's Compendium Library lets you navigate your D&amp;D Beyond imported books in a beautiful and easy to use interface!",
   "version": "1.5.0",
   "minimumCoreVersion": "9",
-  "compatibleCoreVersion": "12",
+  "compatibleCoreVersion": "13",
   "compatibility": {
     "minimum": "9",
-    "verified": "12"
+    "verified": "13"
   },
   "author": "The Forge",
   "authors": [

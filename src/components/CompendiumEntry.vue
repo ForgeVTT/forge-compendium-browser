@@ -188,7 +188,7 @@ export default {
         $("a.content-link[data-pack]", this.$refs.entry).on("click", this.openLink.bind(this));
 
         if (document)
-          document._sheet = null; // eslint-disable-line
+          document._sheet = null;
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
       }
     },

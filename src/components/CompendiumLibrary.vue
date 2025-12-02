@@ -101,8 +101,7 @@ export default {
   border: 2px solid #468847;
   color: #ffffff;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
-  background-color: #5bb75b;
-  *background-color: #51a351;
+  background-color: #51a351;
   background-image: -moz-linear-gradient(top, #62c462, #51a351);
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
   background-image: -webkit-linear-gradient(top, #62c462, #51a351);
