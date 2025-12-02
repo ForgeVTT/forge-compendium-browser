@@ -47,7 +47,7 @@ export class ForgeCompendiumBrowser {
 
     static setup() {
         //compile the DnDBeyond compendiums
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
         if (isV10) {
             ForgeCompendiumBrowser.getIconMap().then((data) => {
                 ForgeCompendiumBrowser.iconMap = data;
@@ -127,7 +127,7 @@ export class ForgeCompendiumBrowser {
         });
 
         Hooks.on("renderModuleManagement", (app, html) => {
-            const isV10 = isNewerVersion(game.version, "9.999999");
+            const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
             for (const module of game.modules.values()) {
                 const flags = module.flags ?? module.data.flags;
                 let packageElem = isV10
@@ -300,7 +300,7 @@ export class ForgeCompendiumBrowser {
     }
 
     static clearPacks() {
-        const isV11 = isNewerVersion(game.version, "10.999999");
+        const isV11 = foundry.utils.isNewerVersion(game.version, "10.999999");
         if (ui?.compendium?.element) {
             for (const book of ForgeCompendiumBrowser.books) {
                 for (const pack of book.packs) {
@@ -320,7 +320,7 @@ export class ForgeCompendiumBrowser {
     }
 
     static async showPermissions(book) {
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
 
         const permissions = duplicate(game.ForgeCompendiumBrowser.setting("permissions") || {});
         const permission = permissions[book.id] || {};

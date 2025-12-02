@@ -235,7 +235,7 @@ export default {
   },
   methods: {
     isV10() {
-      return isNewerVersion(game.version, "9.999999");
+      return foundry.utils.isNewerVersion(game.version, "9.999999");
     },
     reset() {
       this.folder = null;
@@ -540,7 +540,7 @@ export default {
           if (query != null) {
             try {
               if (parent.document instanceof JournalEntry) {
-                if (isNewerVersion(game.version, "9.99999")) {
+                if (foundry.utils.isNewerVersion(game.version, "9.99999")) {
                   for (const page of parent.pages) {
                     const field = page.content;
                     const idx = field.toLowerCase().indexOf(query);
@@ -557,7 +557,7 @@ export default {
                   }
                 }
               } else if (parent.document instanceof Actor) {
-                const field = isNewerVersion(game.version, "9.99999")
+                const field = foundry.utils.isNewerVersion(game.version, "9.99999")
                   ? parent.document.system.details.biography.value
                   : parent.document.data.data.details.biography.value;
                 const idx = field.toLowerCase().indexOf(query);
@@ -565,7 +565,7 @@ export default {
                   searchResult = resultObject(parent, idx, field);
                 }
               } else if (parent.document instanceof Item) {
-                const field = isNewerVersion(game.version, "9.99999")
+                const field = foundry.utils.isNewerVersion(game.version, "9.99999")
                   ? parent.document.system.description.value
                   : parent.document.data.data.description.value;
                 const idx = field.toLowerCase().indexOf(query);

@@ -313,7 +313,7 @@ export class Hierarchy {
                         name: document.name,
                         type: "document",
                         img: img,
-                        sort: isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort,
+                        sort: foundry.utils.isNewerVersion(game.version, "9.999999") ? document.sort : document.data?.sort,
                         packId: key,
                         visible: visible,
                     });

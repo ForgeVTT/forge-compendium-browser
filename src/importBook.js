@@ -5,7 +5,7 @@ export class ImportBook {
         let { progress } = options;
         ImportBook.translate = [];
 
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
 
         try {
             const documentData = {};
@@ -118,7 +118,7 @@ export class ImportBook {
     }
 
     static getDocumentProperty(document) {
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
         const type = document.folder?.type || document.parent?.folder?.type;
         switch (type) {
             case "Item":
@@ -131,7 +131,7 @@ export class ImportBook {
     }
 
     static async updateDocumentKeys(newDocs, progress) {
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
         if (!isV10) {
             // Collect the original ID since v9 didn't create documents with a provided ID
             for (const [type, documents] of Object.entries(newDocs)) {
@@ -367,7 +367,7 @@ export class ImportBook {
         let documentData = [];
         let folderSort = 100000;
         let maxDepthSort = 1;
-        const isV10 = isNewerVersion(game.version, "9.999999");
+        const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
 
         const monsterPack = game.packs.get("dnd5e.monsters");
 
