@@ -322,7 +322,7 @@ export class ForgeCompendiumBrowser {
     static async showPermissions(book) {
         const isV10 = foundry.utils.isNewerVersion(game.version, "9.999999");
 
-        const permissions = duplicate(game.ForgeCompendiumBrowser.setting("permissions") || {});
+        const permissions = foundry.utils.duplicate(game.ForgeCompendiumBrowser.setting("permissions") || {});
         const permission = permissions[book.id] || {};
 
         const data = {

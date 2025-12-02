@@ -19,7 +19,7 @@ globalThis.game = {
                     };
             }
         },
-        i18n(key) {
+        i18n() {
             return "";
         },
         async indexBook(book) {
@@ -55,7 +55,7 @@ globalThis.game = {
                 "ForgeCompendiumBrowser.OpenCompendiumBrowser": "Open Compendium Browser",
                 "ForgeCompendiumBrowser.ForgeCompendiumLibrary": "Forge Compendium Library",
                 "ForgeCompendiumBrowser.LibraryMessage":
-                    "This is your library of compendium books.  If you have no books listed, please use the {link} from the Bazaar to import your books.",
+                    "This is your library of compendium books. If you have no books listed, please use the {link} from the Bazaar to import your books.",
                 "ForgeCompendiumBrowser.NoBooksLoaded": "No Books Loaded",
                 "ForgeCompendiumBrowser.CompendiumLibrary": "Compendium Library",
                 "ForgeCompendiumBrowser.Prev": "Prev",
@@ -71,11 +71,11 @@ globalThis.game = {
         format: (key, data) => {
             const keys = {
                 "ForgeCompendiumBrowser.LibraryMessage":
-                    "This is your library of compendium books.  If you have no books listed, please use the {link} from the Bazaar to import your books.",
+                    "This is your library of compendium books. If you have no books listed, please use the {link} from the Bazaar to import your books.",
             };
 
             let str = keys[key];
-            const fmt = /\{[^\}]+\}/g; //eslint-disable-line
+            const fmt = /\{[^}]+\}/g;
             str = str.replace(fmt, (k) => {
                 return data[k.slice(1, -1)];
             });

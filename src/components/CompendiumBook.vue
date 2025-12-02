@@ -625,8 +625,8 @@ export default {
             }
             for (const token of tokens) {
               const tokenName =
-                getProperty(token, "flags.ddbActorFlags.name") ||
-                getProperty(token.data, "flags.ddbActorFlags.name") ||
+                foundry.utils.getProperty(token, "flags.ddbActorFlags.name") ||
+                foundry.utils.getProperty(token.data, "flags.ddbActorFlags.name") ||
                 token.name;
               if (!tokenName) continue;
 
@@ -1231,7 +1231,6 @@ export default {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
   background-color: #5bb75b;
-  *background-color: #51a351;
   background-image: linear-gradient(180deg,#62c462,#51a351);
   background-repeat: repeat-x;
   border: 2px solid #468847;

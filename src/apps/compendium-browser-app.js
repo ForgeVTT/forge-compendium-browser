@@ -14,7 +14,7 @@ export class CompendiumBrowserApp extends Application {
         const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
         const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
 
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             id: "forge-compendium-browser",
             template: "./modules/forge-compendium-browser/templates/compendium-browser.html",
             title: i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary"),
