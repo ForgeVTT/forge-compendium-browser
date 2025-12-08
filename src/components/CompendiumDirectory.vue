@@ -1,12 +1,19 @@
 <template>
-  <li class="forge-compendium-directory-item flexcol" :class="entitySelected">
+  <li
+    class="forge-compendium-directory-item flexcol"
+    :class="entitySelected"
+  >
     <header
       class="forge-compendium-folder-header flexrow"
       @click="selectEntity()"
     >
       <h3 class="flexrow">
-        <span>{{ this.entity.name }}</span>
-        <i v-if="showMarker" class="fas" :class="itemClass"></i>
+        <span>{{ entity.name }}</span>
+        <i
+          v-if="showMarker"
+          class="fas"
+          :class="itemClass"
+        />
       </h3>
     </header>
     <ol
@@ -20,7 +27,7 @@
         :selected="selected"
         @select="bubbleEvent('select', arguments[0])"
         @open="bubbleEvent('open', arguments[0])"
-      ></compendium-directory>
+      />
     </ol>
   </li>
 </template>
@@ -29,28 +36,13 @@
 export default {
   name: "CompendiumDirectory",
   props: {
-    entity: Object,
-    selected: Object,
-  },
-  methods: {
-    selectEntity() {
-      if (this.entity.type === "document") {
-        this.$emit("open", this.entity);
-      } else {
-        if (
-          this.entity.children &&
-          this.entity.children.length &&
-          this.entity.children[0].name === this.entity.name &&
-          this.entity.children[0].type === "document"
-        ) {
-          this.$emit("open", this.entity.children[0]);
-        } else {
-          this.$emit("select", this.entity);
-        }
-      }
+    entity: {
+      type: Object,
+      default: () => ({})
     },
-    bubbleEvent(name, entity) {
-      this.$emit(name, entity);
+    selected: {
+      type: Object,
+      default: () => ({})
     },
   },
   computed: {
@@ -98,6 +90,27 @@ export default {
     },
     itemClass() {
       return this.entitySelected ? "fa-chevron-down" : "fa-chevron-right";
+    },
+  },
+  methods: {
+    selectEntity() {
+      if (this.entity.type === "document") {
+        this.$emit("open", this.entity);
+      } else {
+        if (
+          this.entity.children &&
+          this.entity.children.length &&
+          this.entity.children[0].name === this.entity.name &&
+          this.entity.children[0].type === "document"
+        ) {
+          this.$emit("open", this.entity.children[0]);
+        } else {
+          this.$emit("select", this.entity);
+        }
+      }
+    },
+    bubbleEvent(name, entity) {
+      this.$emit(name, entity);
     },
   },
 };

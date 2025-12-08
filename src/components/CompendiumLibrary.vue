@@ -6,15 +6,21 @@
           class="forge-logo"
           src="/modules/forge-compendium-browser/img/the-forge-logo-400x400.png"
           @click="forgeLink"
-        />
+        >
         <div class="flexcol">
           <h2 class="flexcontain">
-            {{ this.i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary") }}
+            {{ i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary") }}
           </h2>
-          <p class="notes flexcontain" v-html="LibraryMessage"></p>
+          <p
+            class="notes flexcontain"
+            v-html="LibraryMessage"
+          />
         </div>
       </div>
-      <div v-if="hasBooks" class="flexrow forge-compendium-library-list">
+      <div
+        v-if="hasBooks"
+        class="flexrow forge-compendium-library-list"
+      >
         <div
           v-for="book in availableBooks"
           :key="book.id"
@@ -24,16 +30,28 @@
           data-type="book"
           @click="selectBook(book.id)"
         >
-          <div v-if="book.img" class="forge-compendium-img" :style="bookImage(book)" />
-          <div v-if="book.permissions.default === false" class="forge-compendium-locked">
-            <i class="fas fa-lock"></i>
+          <div
+            v-if="book.img"
+            class="forge-compendium-img"
+            :style="bookImage(book)"
+          />
+          <div
+            v-if="book.permissions.default === false"
+            class="forge-compendium-locked"
+          >
+            <i class="fas fa-lock" />
           </div>
-          <div class="forge-compendium-title">{{ book.name }}</div>
+          <div class="forge-compendium-title">
+            {{ book.name }}
+          </div>
         </div>
       </div>
-      <div v-else class="compendium-information flexrow">
+      <div
+        v-else
+        class="compendium-information flexrow"
+      >
         <h3 class="compendium-muted">
-          {{ this.i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
+          {{ i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
         </h3>
       </div>
     </div>
@@ -44,7 +62,28 @@
 export default {
   name: "CompendiumLibrary",
   props: {
-    library: Array,
+    library: {
+      type: Array,
+      default: () => []
+    },
+  },
+  computed: {
+    hasBooks() {
+      return this.availableBooks && this.availableBooks.length > 0;
+    },
+    availableBooks() {
+      if (!this.library) return null;
+
+      return this.library.filter((book) => {
+        if (game.user.isGM) return true;
+        return book.permissions[game.user.id] ?? book.permissions["default"] ?? true;
+      });
+    },
+    LibraryMessage() {
+      return this.i18n("ForgeCompendiumBrowser.LibraryMessage", {
+        link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>',
+      });
+    },
   },
   methods: {
     selectBook(id) {
@@ -65,24 +104,6 @@ export default {
     },
     isAvailable(book) {
       return book && book.children && book.children.length && book.error !== true;
-    },
-  },
-  computed: {
-    hasBooks() {
-      return this.availableBooks && this.availableBooks.length > 0;
-    },
-    availableBooks() {
-      if (!this.library) return null;
-
-      return this.library.filter((book) => {
-        if (game.user.isGM) return true;
-        return book.permissions[game.user.id] ?? book.permissions["default"] ?? true;
-      });
-    },
-    LibraryMessage() {
-      return this.i18n("ForgeCompendiumBrowser.LibraryMessage", {
-        link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>',
-      });
     },
   },
 };

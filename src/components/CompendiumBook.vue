@@ -3,29 +3,56 @@
     <div class="forge-compendium-sidebar flexcol">
       <header class="directory-header flexcol">
         <div class="header-action-buttons flexrow">
-          <div class="compendium-library" @click="exit" :title="this.i18n('ForgeCompendiumBrowser.ReturnToLibrary')">
-            <i class="fas fa-circle-arrow-left"></i>
-            {{ this.i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
+          <div
+            class="compendium-library"
+            :title="i18n('ForgeCompendiumBrowser.ReturnToLibrary')"
+            @click="exit"
+          >
+            <i class="fas fa-circle-arrow-left" />
+            {{ i18n("ForgeCompendiumBrowser.CompendiumLibrary") }}
           </div>
         </div>
         <div class="forge-compendium-book-image-container">
-          <div class="forge-compendium-book-image-background" :style="backgroundStyle"></div>
-          <img class="forge-compendium-book-image" :src="book.img" @click="clearPath" />
+          <div
+            class="forge-compendium-book-image-background"
+            :style="backgroundStyle"
+          />
+          <img
+            class="forge-compendium-book-image"
+            :src="book.img"
+            @click="clearPath"
+          >
         </div>
-        <hr />
+        <hr>
         <!-- navigation row -->
         <div class="flexrow navigation-row">
-          <div class="navigation-button first" :class="canPrevChapter" @click="changeChapter(-1)">
-            <i class="fas fa-angle-double-left"></i>
+          <div
+            class="navigation-button first"
+            :class="canPrevChapter"
+            @click="changeChapter(-1)"
+          >
+            <i class="fas fa-angle-double-left" />
           </div>
-          <div class="navigation-button prev" :class="canPrevItem" @click="changeItem(-1)">
-            <i class="fas fa-chevron-left"></i> {{ this.i18n("ForgeCompendiumBrowser.Prev") }}
+          <div
+            class="navigation-button prev"
+            :class="canPrevItem"
+            @click="changeItem(-1)"
+          >
+            <i class="fas fa-chevron-left" /> {{ i18n("ForgeCompendiumBrowser.Prev") }}
           </div>
-          <div class="navigation-button next" :class="canNextItem" @click="changeItem(1)">
-            {{ this.i18n("ForgeCompendiumBrowser.Next") }} <i class="fas fa-chevron-right"></i>
+          <div
+            class="navigation-button next"
+            :class="canNextItem"
+            @click="changeItem(1)"
+          >
+            {{ i18n("ForgeCompendiumBrowser.Next") }} <i class="fas fa-chevron-right" />
           </div>
-          <div class="navigation-button last" :class="canNextChapter" @click="changeChapter(1)">
-            <i class="fas fa-angle-double-right"></i>
+          <div
+            class="navigation-button last"
+            :class="canNextChapter"
+            @click="changeChapter(1)"
+          >
+            <i class="fas fa-angle-double-right" />
           </div>
         </div>
         <!-- section links -->
@@ -38,54 +65,92 @@
             :title="section.name"
             @click="selectEntity(section)"
           >
-            <i class="fas" :class="section.icon"></i>
+            <i
+              class="fas"
+              :class="section.icon"
+            />
             <span>{{ section.name }}</span>
           </div>
-          <div class="navigation-section-link" :class="sectionActive({ id: 'search' })" @click="openSearch()">
-            <i class="fas fa-search"></i>
-            <span>{{ this.i18n("ForgeCompendiumBrowser.Search") }}</span>
+          <div
+            class="navigation-section-link"
+            :class="sectionActive({ id: 'search' })"
+            @click="openSearch()"
+          >
+            <i class="fas fa-search" />
+            <span>{{ i18n("ForgeCompendiumBrowser.Search") }}</span>
           </div>
         </div>
-        <hr />
+        <hr>
       </header>
-      <ol v-if="currentSection" class="forge-compendium-directory-list">
+      <ol
+        v-if="currentSection"
+        class="forge-compendium-directory-list"
+      >
         <compendium-directory
           :entity="currentSection"
           :selected="folder"
           @select="selectEntity"
           @open="selectEntity"
-        ></compendium-directory>
+        />
       </ol>
     </div>
     <div class="forge-compendium-content flexcol">
-      <h2 v-if="document" class="flexrow flexcontain forge-compendium-listing-header">
-        <div class="back-button" :class="canHistory(-1)" @click="viewHistory(-1)">
-          <i class="fas fa-chevron-left"></i>
+      <h2
+        v-if="document"
+        class="flexrow flexcontain forge-compendium-listing-header"
+      >
+        <div
+          class="back-button"
+          :class="canHistory(-1)"
+          @click="viewHistory(-1)"
+        >
+          <i class="fas fa-chevron-left" />
         </div>
-        <div class="forward-button" :class="canHistory(1)" @click="viewHistory(1)">
-          <i class="fas fa-chevron-right"></i>
+        <div
+          class="forward-button"
+          :class="canHistory(1)"
+          @click="viewHistory(1)"
+        >
+          <i class="fas fa-chevron-right" />
         </div>
         <!-- breadcrumbs -->
         <ul class="flexrow forge-compendium-breadcrumbs">
-          <li v-for="(item, index) in path" :key="item.id">
+          <li
+            v-for="(item, index) in path"
+            :key="item.id"
+          >
             <span v-if="index !== 0">/</span>
-            <div class="breadcrumb-link" v-on="item.id !== document.id ? { click: () => selectEntity(item) } : {}">
+            <div
+              class="breadcrumb-link"
+              v-on="item.id !== document.id ? { click: () => selectEntity(item) } : {}"
+            >
               {{ item.name }}
             </div>
           </li>
         </ul>
-        <div class="forge-entry-import" @click="importEntry">
-          <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.Import") }}
+        <div
+          class="forge-entry-import"
+          @click="importEntry"
+        >
+          <i class="fas fa-download" /> {{ i18n("ForgeCompendiumBrowser.Import") }}
         </div>
       </h2>
-      <compendium-entry v-if="document" :entry="document" @link="openLink"></compendium-entry>
+      <compendium-entry
+        v-if="document"
+        :entry="document"
+        @link="openLink"
+      />
       <compendium-listing
         v-else-if="currentSection"
         :listing="currentSection"
         @select="selectEntity"
         @open="selectEntity"
-      ></compendium-listing>
-      <div v-else class="forge-compendium-background flexcol" :style="backgroundStyle">
+      />
+      <div
+        v-else
+        class="forge-compendium-background flexcol"
+        :style="backgroundStyle"
+      >
         <!-- Book Title -->
         <div class="forge-compendium-book-title">
           <svg class="forge-compendium-svg">
@@ -104,18 +169,31 @@
         </div>
         <div class="forge-compendium-info flexcol">
           <!-- Search -->
-          <div v-if="searchTerm != null" class="forge-compendium-search-area flexcol">
+          <div
+            v-if="searchTerm != null"
+            class="forge-compendium-search-area flexcol"
+          >
             <div class="forge-compendium-search-bar flexrow">
-              <input type="text" v-model="searchTerm" />
-              <button type="button" @click="clearSearch()" title="Clear search term">
-                <i class="fas fa-times-circle"></i>
+              <input
+                v-model="searchTerm"
+                type="text"
+              >
+              <button
+                type="button"
+                title="Clear search term"
+                @click="clearSearch()"
+              >
+                <i class="fas fa-times-circle" />
               </button>
               <span class="search-span">
-                <i class="fas fa-search"></i>
+                <i class="fas fa-search" />
               </span>
             </div>
             <!-- Search Results -->
-            <div v-if="searchResults.length" class="forge-compendium-search-list">
+            <div
+              v-if="searchResults.length"
+              class="forge-compendium-search-list"
+            >
               <table class="forge-compendium-search-table">
                 <tr
                   v-for="item in searchResults"
@@ -124,10 +202,17 @@
                   @click="selectFromSearch(item.document)"
                 >
                   <td class="search-image">
-                    <img v-if="item.img" :src="item.img" />
+                    <img
+                      v-if="item.img"
+                      :src="item.img"
+                    >
                   </td>
                   <td class="search-section">
-                    <i class="fas" :class="item.icon" :title="item.section"></i>
+                    <i
+                      class="fas"
+                      :class="item.icon"
+                      :title="item.section"
+                    />
                   </td>
                   <td class="search-name">
                     {{ item.name }}
@@ -138,24 +223,39 @@
                 </tr>
               </table>
             </div>
-            <div v-else class="no-results">
-              <div>{{ this.i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div>
+            <div
+              v-else
+              class="no-results"
+            >
+              <div>{{ i18n("ForgeCompendiumBrowser.NoSearchResults") }}</div>
             </div>
           </div>
-          <div v-else class="flexcol">
+          <div
+            v-else
+            class="flexcol"
+          >
             <div class="flexrow flexcontain">
-              <div class="forge-compendium-description" v-html="book.description"></div>
+              <div
+                class="forge-compendium-description"
+                v-html="book.description"
+              />
               <div class="forge-compendium-contains flexcol">
-                <b style="flex-grow: 0">{{ this.i18n("ForgeCompendiumBrowser.Contains") }}:</b>
+                <b style="flex-grow: 0">{{ i18n("ForgeCompendiumBrowser.Contains") }}:</b>
                 <ul class="forge-compendium-contains-list">
-                  <li v-for="section in sections" :key="section.id">
-                    <i class="fas" :class="section.icon"></i>
+                  <li
+                    v-for="section in sections"
+                    :key="section.id"
+                  >
+                    <i
+                      class="fas"
+                      :class="section.icon"
+                    />
                     {{ section.count }} {{ section.name }}
                   </li>
                 </ul>
                 <div style="text-align: center; flex-grow: 0">
                   <button @click="importModule">
-                    <i class="fas fa-download"></i> {{ this.i18n("ForgeCompendiumBrowser.ImportDocuments") }}
+                    <i class="fas fa-download" /> {{ i18n("ForgeCompendiumBrowser.ImportDocuments") }}
                   </button>
                 </div>
               </div>
@@ -163,35 +263,49 @@
             <!-- Section listing -->
             <div class="forge-compendium-section-listing flexrow">
               <div
-                class="forge-compendium-section flexcol"
                 v-for="item in sections"
                 :key="item.id"
+                class="forge-compendium-section flexcol"
                 :data-id="item.id"
                 @click="selectEntity(item)"
               >
                 <div class="forge-compendium-icon">
-                  <i class="fas" :class="item.icon"></i>
+                  <i
+                    class="fas"
+                    :class="item.icon"
+                  />
                 </div>
-                <div class="forge-compendium-title">{{ item.name }}</div>
+                <div class="forge-compendium-title">
+                  {{ item.name }}
+                </div>
               </div>
-              <div class="forge-compendium-section flexcol" @click="openSearch()">
+              <div
+                class="forge-compendium-section flexcol"
+                @click="openSearch()"
+              >
                 <div class="forge-compendium-icon">
-                  <i class="fas fa-search"></i>
+                  <i class="fas fa-search" />
                 </div>
-                <div class="forge-compendium-title">{{ this.i18n("ForgeCompendiumBrowser.Search") }}</div>
+                <div class="forge-compendium-title">
+                  {{ i18n("ForgeCompendiumBrowser.Search") }}
+                </div>
               </div>
             </div>
             <div class="flexrow forge-compendium-permissions">
               <button
                 class="permission-button"
-                @click="updatePermissions"
                 :title="i18n('ForgeCompendiumBrowser.ConfigurePermissions')"
+                @click="updatePermissions"
               >
-                <i class="fas fa-lock"></i>
+                <i class="fas fa-lock" />
               </button>
-              <b style="flex-grow: 0; margin-left: 8px">{{ this.i18n("ForgeCompendiumBrowser.Permissions") }}:</b>
+              <b style="flex-grow: 0; margin-left: 8px">{{ i18n("ForgeCompendiumBrowser.Permissions") }}:</b>
               <div class="permission-text">
-                <span class="user-permission" v-for="(permission, i) in permissionText" :key="i">{{ permission }}</span>
+                <span
+                  v-for="(permission, i) in permissionText"
+                  :key="i"
+                  class="user-permission"
+                >{{ permission }}</span>
               </div>
             </div>
           </div>
@@ -214,7 +328,10 @@ export default {
     CompendiumEntry,
   },
   props: {
-    book: Object,
+    book: {
+      type: Object,
+      default: () => ({})
+    },
   },
   data: () => ({
     folder: null, // This is used to determine the selected path on the left side
@@ -224,6 +341,99 @@ export default {
     searchTerm: null,
     searchResults: [],
   }),
+  computed: {
+    canPrevChapter() {
+      return !this.findClosestChapter(-1) ? "disabled" : "";
+    },
+    canNextChapter() {
+      return !this.findClosestChapter(1) || !this.currentChapter ? "disabled" : "";
+    },
+    canPrevItem() {
+      return !this.findClosestItem(-1) ? "disabled" : "";
+    },
+    canNextItem() {
+      return !this.findClosestItem(1) ? "disabled" : "";
+    },
+    path() {
+      let items = [];
+      let item = this.document;
+      items.push(item);
+      while (item.parent) {
+        item = item.parent;
+        if (item.type !== "book") {
+          let canAdd = true;
+          if (game.ForgeCompendiumBrowser.setting("same-name") && item.name === items[items.length - 1].name) {
+            //Don't double up on the names if the user doesn't want to see them
+            canAdd = false;
+          }
+          if (canAdd) {
+            items.push(item);
+          }
+        }
+      }
+      items = items.reverse();
+      return items;
+    },
+    sections() {
+      return this.book.children;
+    },
+    directoryList() {
+      if (this.currentSection) {
+        return [this.currentSection];
+      }
+      return [];
+    },
+    currentSection() {
+      if (!this.document && !this.folder) {
+        return null;
+      } else {
+        let section = this.document || this.folder;
+        while (section.type !== "section" && section.parent) {
+          section = section.parent;
+        }
+        return section;
+      }
+    },
+    currentChapter() {
+      if (!this.folder || this.folder.type === "section") {
+        return null;
+      } else {
+        let chapter = this.folder;
+        while (chapter.parent && chapter.parent.type !== "section") {
+          chapter = chapter.parent;
+        }
+        return chapter;
+      }
+    },
+    backgroundStyle() {
+      if (!this.book || !this.book.background) return "";
+
+      return `background-image:url(${this.book.background})`;
+    },
+    bookName() {
+      return this.book.name.toUpperCase();
+    },
+    permissionText() {
+      const permission = this.book.permissions || {};
+
+      const levels = {
+        true: this.i18n("ForgeCompendiumBrowser.Allowed"),
+        false: this.i18n("ForgeCompendiumBrowser.NotAllowed"),
+      };
+
+      const currentDefault = permission["default"] == undefined || permission["default"] ? "true" : "false";
+      const playerPermissions = Object.entries(permission)
+        .map(([k, v]) => {
+          if (k === "default" || v === currentDefault || v == undefined) return null;
+          const user = game.users.get(k);
+          const value = v ? "true" : "false";
+          return `${user.name}: ${levels[value]}`;
+        })
+        .filter((p) => !!p);
+
+      return [`${this.i18n("ForgeCompendiumBrowser.Everyone")}: ${levels[currentDefault]}`, ...playerPermissions];
+    },
+  },
   watch: {
     book() {
       this.reset();
@@ -697,99 +907,6 @@ export default {
         }
       }
       ui.notifications.error(this.i18n("ForgeCompendiumBrowser.ErrorImportingDocument"));
-    },
-  },
-  computed: {
-    canPrevChapter() {
-      return !this.findClosestChapter(-1) ? "disabled" : "";
-    },
-    canNextChapter() {
-      return !this.findClosestChapter(1) || !this.currentChapter ? "disabled" : "";
-    },
-    canPrevItem() {
-      return !this.findClosestItem(-1) ? "disabled" : "";
-    },
-    canNextItem() {
-      return !this.findClosestItem(1) ? "disabled" : "";
-    },
-    path() {
-      let items = [];
-      let item = this.document;
-      items.push(item);
-      while (item.parent) {
-        item = item.parent;
-        if (item.type !== "book") {
-          let canAdd = true;
-          if (game.ForgeCompendiumBrowser.setting("same-name") && item.name === items[items.length - 1].name) {
-            //Don't double up on the names if the user doesn't want to see them
-            canAdd = false;
-          }
-          if (canAdd) {
-            items.push(item);
-          }
-        }
-      }
-      items = items.reverse();
-      return items;
-    },
-    sections() {
-      return this.book.children;
-    },
-    directoryList() {
-      if (this.currentSection) {
-        return [this.currentSection];
-      }
-      return [];
-    },
-    currentSection() {
-      if (!this.document && !this.folder) {
-        return null;
-      } else {
-        let section = this.document || this.folder;
-        while (section.type !== "section" && section.parent) {
-          section = section.parent;
-        }
-        return section;
-      }
-    },
-    currentChapter() {
-      if (!this.folder || this.folder.type === "section") {
-        return null;
-      } else {
-        let chapter = this.folder;
-        while (chapter.parent && chapter.parent.type !== "section") {
-          chapter = chapter.parent;
-        }
-        return chapter;
-      }
-    },
-    backgroundStyle() {
-      if (!this.book || !this.book.background) return "";
-
-      return `background-image:url(${this.book.background})`;
-    },
-    bookName() {
-      return this.book.name.toUpperCase();
-    },
-    permissionText() {
-      const permission = this.book.permissions || {};
-
-      const levels = {
-        true: this.i18n("ForgeCompendiumBrowser.Allowed"),
-        false: this.i18n("ForgeCompendiumBrowser.NotAllowed"),
-      };
-
-      const currentDefault = permission["default"] == undefined || permission["default"] ? "true" : "false";
-      const playerPermissions = Object.entries(permission)
-        .map(([k, v]) => {
-          if (k === "default" || v === currentDefault || v == undefined) return null;
-          const user = game.users.get(k);
-          const value = v ? "true" : "false";
-          return `${user.name}: ${levels[value]}`;
-        })
-        .filter((p) => !!p);
-
-      return [`${this.i18n("ForgeCompendiumBrowser.Everyone")}: ${levels[currentDefault]}`, ...playerPermissions];
     },
   },
 };

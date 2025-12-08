@@ -1,5 +1,8 @@
 <template>
-  <div ref="mainlisting" class="forge-compendium-listing flexcol">
+  <div
+    ref="mainlisting"
+    class="forge-compendium-listing flexcol"
+  >
     <div>
       <compendium-list
         :listing="listing.children"
@@ -7,7 +10,7 @@
         :depth="0"
         @select="selectItem"
         @open="selectItem"
-      ></compendium-list>
+      />
     </div>
   </div>
 </template>
@@ -21,26 +24,15 @@ export default {
     CompendiumList,
   },
   props: {
-    listing: Object,
+    listing: {
+      type: Object,
+      default: () => ({})
+    },
   },
   data() {
     return {
       observer: null,        
     };
-  },
-  methods: {
-    selectItem(item) {
-      this.$emit("select", item);
-    },
-    observeImages() {
-      this.$nextTick(function () {
-        const lazyloadImages = document.querySelectorAll(".lazy");
-        const observer = this.observer;
-        lazyloadImages.forEach(function(image) {
-          observer.observe(image);
-        });
-      });
-    }
   },
   created() {
     this.observer = new IntersectionObserver(function(entries, observer) {
@@ -63,6 +55,20 @@ export default {
   },
   beforeDestroy() {
     this.observer.disconnect();
+  },
+  methods: {
+    selectItem(item) {
+      this.$emit("select", item);
+    },
+    observeImages() {
+      this.$nextTick(function () {
+        const lazyloadImages = document.querySelectorAll(".lazy");
+        const observer = this.observer;
+        lazyloadImages.forEach(function(image) {
+          observer.observe(image);
+        });
+      });
+    }
   },
 };
 </script>

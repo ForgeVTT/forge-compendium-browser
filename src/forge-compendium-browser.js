@@ -160,6 +160,7 @@ export class ForgeCompendiumBrowser {
     }
 
     static async onMessage(data) {
+        console.warn("ForgeCompendiumBrowser.openBrowser", data);
         switch (data.action) {
             case "open": {
                 if (data.userid === game.user.id || data.userid == undefined) {
@@ -296,6 +297,7 @@ export class ForgeCompendiumBrowser {
     }
 
     static openBrowser(book) {
+        console.warn("ForgeCompendiumBrowser.openBrowser", book);
         ForgeCompendiumBrowser.browser = new CompendiumBrowserApp(book).render(true);
     }
 

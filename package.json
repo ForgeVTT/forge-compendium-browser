@@ -38,8 +38,6 @@
       "CONFIG": "readonly",
       "CONST": "readonly",
       "Actor": "readonly",
-      "Application": "readonly",
-      "ContextMenu": "readonly",
       "Dialog": "readonly",
       "Dlopen": "readonly",
       "FilePicker": "readonly",
@@ -72,7 +70,8 @@
       "*.config.js"
     ],
     "parserOptions": {
-      "parser": "@babel/eslint-parser"
+      "parser": "@babel/eslint-parser",
+      "requireConfigFile": false
     }
   },
   "browserslist": [

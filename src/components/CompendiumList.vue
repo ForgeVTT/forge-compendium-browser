@@ -5,13 +5,20 @@
     :depth="depth"
     :style="`margin-left:${Math.max(depth - 1, 0) * 10}px`"
   >
-    <div v-for="item in sortedList" :key="item.id" :data-id="item.id">
-      <div class="flexcol" :class="listClass">
+    <div
+      v-for="item in sortedList"
+      :key="item.id"
+      :data-id="item.id"
+    >
+      <div
+        class="flexcol"
+        :class="listClass"
+      >
         <div
           class="forge-compendium-title draggable-item flexrow"
           :class="hasImage(item)"
-          @click="openItem(item)"
           draggable
+          @click="openItem(item)"
           @dragstart="startDrag($event, item)"
         >
           <img
@@ -20,7 +27,7 @@
             class="lazy forge-compendium-image"
             :class="item.section === 'Scene' ? 'noborder' : ''"
             @error="errorLoadingImage"
-          />
+          >
           <span>{{ item.name }}</span>
         </div>
         <compendium-list
@@ -28,7 +35,7 @@
           :parent="item"
           :depth="depth + 1"
           @open="openItem"
-        ></compendium-list>
+        />
       </div>
     </div>
   </div>
@@ -38,9 +45,29 @@
 export default {
   name: "CompendiumList",
   props: {
-    listing: Array,
-    parent: Object,
-    depth: Number,
+    listing: {
+      type: Array,
+      default: () => []
+    },
+    parent: {
+      type: Object,
+      default: () => ({})
+    },
+    depth: {
+      type: Number,
+      default: 0
+    },
+  },
+  computed: {
+    showListing() {
+      return this.listing && this.listing.length;
+    },
+    listClass() {
+      return this.depth === 0 ? "forge-compendium-item" : "";
+    },
+    sortedList() {
+      return [...this.listing].sort(game.ForgeCompendiumBrowser.compare);
+    },
   },
   methods: {
     openItem(item) {
@@ -79,17 +106,6 @@ export default {
       const defaultImage = "icons/svg/mystery-man.svg";
       const img = ev.target;
       if (img && img.attributes.src.value !== defaultImage) img.src = defaultImage;
-    },
-  },
-  computed: {
-    showListing() {
-      return this.listing && this.listing.length;
-    },
-    listClass() {
-      return this.depth === 0 ? "forge-compendium-item" : "";
-    },
-    sortedList() {
-      return [...this.listing].sort(game.ForgeCompendiumBrowser.compare);
     },
   },
 };

@@ -1,8 +1,10 @@
 ## 1.5.0
 
-v12 Compatibility
+v12/13 Compatibility.
 
-Fixed an issue where searching for an item, then returning to the home page was throwing an error
+Fixed an issue where searching for an item, then returning to the home page was throwing an error.
+
+Fixed linter warnings (vue prop defaults, formatting).
 
 ## 1.4.0
 

@@ -4,19 +4,26 @@
       v-if="!showBook"
       :library="library"
       @select="selectBook"
-    ></compendium-library>
+    />
     <compendium-book
       v-else
       ref="compendiumBook"
       :book="book"
       @exit="selectBook"
       @link="selectBook"
-    ></compendium-book>
-    <div v-if="indexing" class="forge-compendium-indexing">
+    />
+    <div
+      v-if="indexing"
+      class="forge-compendium-indexing"
+    >
       <div class="forge-compendium-progress">
-        <div class="forge-compendium-bar" :style="barWidth">
+        <div
+          class="forge-compendium-bar"
+          :style="barWidth"
+        />
+        <div class="forge-compendium-progress-text">
+          {{ i18n("ForgeCompendiumBrowser.Indexing") }}...
         </div>
-        <div class="forge-compendium-progress-text">{{this.i18n("ForgeCompendiumBrowser.Indexing")}}...</div>
       </div>
     </div>
   </div>
@@ -38,6 +45,24 @@ export default {
     indexing: false,
     progress: 0,
   }),
+  computed: {
+    showBook() {
+      return this.book != null;
+    },
+    bookName() {
+      return this.book ? this.book.name : "";
+    },
+    barWidth() {
+      return `width: ${this.progress * 100 }%`;
+    },
+  },
+  mounted() {
+    this.library = game.ForgeCompendiumBrowser.books;
+    const lastBook = game.user.getFlag("forge-compendium-browser", "last-book");
+    if (lastBook) {
+      this.selectBook(lastBook);
+    }
+  },
   methods: {
     i18n(key, args) {
       if (args) return game.i18n.format(key, args);
@@ -77,24 +102,6 @@ export default {
     isAvailable(book) {
       return book && book.children && book.children.length && book.error !== true;
     },
-  },
-  computed: {
-    showBook() {
-      return this.book != null;
-    },
-    bookName() {
-      return this.book ? this.book.name : "";
-    },
-    barWidth() {
-      return `width: ${this.progress * 100 }%`;
-    },
-  },
-  mounted() {
-    this.library = game.ForgeCompendiumBrowser.books;
-    const lastBook = game.user.getFlag("forge-compendium-browser", "last-book");
-    if (lastBook) {
-      this.selectBook(lastBook);
-    }
   },
 };
 </script>
