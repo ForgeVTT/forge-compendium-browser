@@ -1,7 +1,55 @@
 import { ForgeCompendiumBrowser, i18n } from "../forge-compendium-browser.js";
 import { Hierarchy } from "../hierarchy.js";
 
-export class CompendiumBrowserApp extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
+let CompendiumBrowserAppBase;
+if (foundry?.applications?.api?.ApplicationV2) {
+    // Application V2
+    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
+        async _prepareContext(options) {
+            console.warn("CompendiumBrowserApp._prepareContext", options);
+            const context = await super._prepareContext(options);
+            return context;
+        }
+        _onRender(context, options) {
+            console.warn("CompendiumBrowserApp._onRender", context, options);
+            super._onRender(context, options);
+            this._contextmenu = new foundry.applications.ux.ContextMenu(
+                this.element,
+                ".forge-compendium-book",
+                this._getContextMenuOptions(),
+                { jQuery: true }
+            );
+        }
+    }
+} else {
+    // Application V1
+    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends Application {
+        constructor(options = {}) {
+            super(null, options);
+        }
+
+        static get defaultOptions() {
+            return foundry.utils.mergeObject(super.defaultOptions, this.DEFAULT_OPTIONS);
+        }
+    
+        getData(options) {
+            const data = super.getData(options);
+            return data;
+        }
+
+        activateListeners(html) {
+            super.activateListeners(html);
+            this._contextmenu = ContextMenu.create(
+                this,
+                html.parent(),
+                ".forge-compendium-book",
+                this._getContextMenuOptions()
+            );
+        }
+    }
+}
+
+export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
     constructor(book, options = {}) {
         console.warn("CompendiumBrowserApp.constructor", book, options);
         super(options);
@@ -13,6 +61,8 @@ export class CompendiumBrowserApp extends foundry.applications.api.HandlebarsApp
 
     static DEFAULT_OPTIONS = {
         id: "forge-compendium-browser",
+        template: "./modules/forge-compendium-browser/templates/compendium-browser.html",
+        title: "ForgeCompendiumBrowser.ForgeCompendiumLibrary",
         classes: ["forge-compendium-browser"],
         tag: "div",
         window: {
@@ -33,23 +83,6 @@ export class CompendiumBrowserApp extends foundry.applications.api.HandlebarsApp
         },
     };
 
-    async _prepareContext(options) {
-        console.warn("CompendiumBrowserApp._prepareContext", options);
-        const context = await super._prepareContext(options);
-        return context;
-    }
-
-    _onRender(context, options) {
-        console.warn("CompendiumBrowserApp._onRender", context, options);
-        super._onRender(context, options);
-        this._contextmenu = new foundry.applications.ux.ContextMenu(
-            this.element,
-            ".forge-compendium-book",
-            this._getContextMenuOptions(),
-            { jQuery: false },
-        );
-    }
-
     _getContextMenuOptions() {
         return [
             {
@@ -59,7 +92,7 @@ export class CompendiumBrowserApp extends foundry.applications.api.HandlebarsApp
                     return game.user.isGM;
                 },
                 callback: async (bookid) => {
-                    const id = bookid.dataset.id;
+                    const id = $(bookid).data()["id"];
 
                     const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
 
@@ -75,7 +108,7 @@ export class CompendiumBrowserApp extends foundry.applications.api.HandlebarsApp
                     return game.user.isGM;
                 },
                 callback: async (bookid) => {
-                    const id = bookid.dataset.id;
+                    const id = $(bookid).data()["id"];
 
                     const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
 

@@ -38,6 +38,8 @@
       "CONFIG": "readonly",
       "CONST": "readonly",
       "Actor": "readonly",
+      "Application": "readonly",
+      "ContextMenu": "readonly",
       "Dialog": "readonly",
       "Dlopen": "readonly",
       "FilePicker": "readonly",
