@@ -1,8 +1,5 @@
 <template>
-  <div
-    id="app"
-    class="window-content"
-  >
+  <div id="app" class="window-content">
     <CompendiumBrowser msg="Forge Compendium Library" />
   </div>
 </template>

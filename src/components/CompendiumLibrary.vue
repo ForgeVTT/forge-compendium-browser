@@ -6,21 +6,15 @@
           class="forge-logo"
           src="/modules/forge-compendium-browser/img/the-forge-logo-400x400.png"
           @click="forgeLink"
-        >
+        />
         <div class="flexcol">
           <h2 class="flexcontain">
-            {{ i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary") }}
+            {{ this.i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary") }}
           </h2>
-          <p
-            class="notes flexcontain"
-            v-html="LibraryMessage"
-          />
+          <p class="notes flexcontain" v-html="LibraryMessage"></p>
         </div>
       </div>
-      <div
-        v-if="hasBooks"
-        class="flexrow forge-compendium-library-list"
-      >
+      <div v-if="hasBooks" class="flexrow forge-compendium-library-list">
         <div
           v-for="book in availableBooks"
           :key="book.id"
@@ -30,28 +24,16 @@
           data-type="book"
           @click="selectBook(book.id)"
         >
-          <div
-            v-if="book.img"
-            class="forge-compendium-img"
-            :style="bookImage(book)"
-          />
-          <div
-            v-if="book.permissions.default === false"
-            class="forge-compendium-locked"
-          >
-            <i class="fas fa-lock" />
+          <div v-if="book.img" class="forge-compendium-img" :style="bookImage(book)" />
+          <div v-if="book.permissions.default === false" class="forge-compendium-locked">
+            <i class="fas fa-lock"></i>
           </div>
-          <div class="forge-compendium-title">
-            {{ book.name }}
-          </div>
+          <div class="forge-compendium-title">{{ book.name }}</div>
         </div>
       </div>
-      <div
-        v-else
-        class="compendium-information flexrow"
-      >
+      <div v-else class="compendium-information flexrow">
         <h3 class="compendium-muted">
-          {{ i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
+          {{ this.i18n("ForgeCompendiumBrowser.NoBooksLoaded") }}
         </h3>
       </div>
     </div>
@@ -62,28 +44,7 @@
 export default {
   name: "CompendiumLibrary",
   props: {
-    library: {
-      type: Array,
-      default: () => []
-    },
-  },
-  computed: {
-    hasBooks() {
-      return this.availableBooks && this.availableBooks.length > 0;
-    },
-    availableBooks() {
-      if (!this.library) return null;
-
-      return this.library.filter((book) => {
-        if (game.user.isGM) return true;
-        return book.permissions[game.user.id] ?? book.permissions["default"] ?? true;
-      });
-    },
-    LibraryMessage() {
-      return this.i18n("ForgeCompendiumBrowser.LibraryMessage", {
-        link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>',
-      });
-    },
+    library: Array,
   },
   methods: {
     selectBook(id) {
@@ -106,6 +67,24 @@ export default {
       return book && book.children && book.children.length && book.error !== true;
     },
   },
+  computed: {
+    hasBooks() {
+      return this.availableBooks && this.availableBooks.length > 0;
+    },
+    availableBooks() {
+      if (!this.library) return null;
+
+      return this.library.filter((book) => {
+        if (game.user.isGM) return true;
+        return book.permissions[game.user.id] ?? book.permissions["default"] ?? true;
+      });
+    },
+    LibraryMessage() {
+      return this.i18n("ForgeCompendiumBrowser.LibraryMessage", {
+        link: '<a href="https://forge-vtt.com/bazaar#filter=all&type=dndbeyond" target="_blank">D&amp;D Beyond converter</a>',
+      });
+    },
+  },
 };
 </script>
 
@@ -122,7 +101,8 @@ export default {
   border: 2px solid #468847;
   color: #ffffff;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
-  background-color: #51a351;
+  background-color: #5bb75b;
+  *background-color: #51a351;
   background-image: -moz-linear-gradient(top, #62c462, #51a351);
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
   background-image: -webkit-linear-gradient(top, #62c462, #51a351);

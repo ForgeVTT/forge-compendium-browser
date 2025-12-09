@@ -1,40 +1,17 @@
 <template>
-  <div
-    ref="entry"
-    class="forge-compendium-entry"
-    :class="documentClasses"
-    v-html="html"
-  />
+  <div ref="entry" class="forge-compendium-entry" :class="documentClasses" v-html="html"></div>
 </template>
 
 <script>
 export default {
   name: "CompendiumEntry",
   props: {
-    entry: {
-      type: Object,
-      default: () => ({})
-    },
+    entry: Object,
   },
   data: () => ({
     html: "",
     subsheet: null,
   }),
-  computed: {
-    documentClasses() {
-      const classes = this.subsheet?.options?.classes || [];
-      if (game.version.startsWith("10.")) classes.push("v10");
-      return classes.join(" ");
-    },
-  },
-  watch: {
-    entry: function () {
-      this.loadDocument();
-    },
-  },
-  async mounted() {
-    this.loadDocument();
-  },
   methods: {
     i18n(key, args) {
       if (args) return game.i18n.format(key, args);
@@ -211,10 +188,25 @@ export default {
         $("a.content-link[data-pack]", this.$refs.entry).on("click", this.openLink.bind(this));
 
         if (document)
-          document._sheet = null;
+          document._sheet = null; // eslint-disable-line
         this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERED;
       }
     },
+  },
+  computed: {
+    documentClasses() {
+      const classes = this.subsheet?.options?.classes || [];
+      if (game.version.startsWith("10.")) classes.push("v10");
+      return classes.join(" ");
+    },
+  },
+  watch: {
+    entry: function () {
+      this.loadDocument();
+    },
+  },
+  async mounted() {
+    this.loadDocument();
   },
 };
 </script>
