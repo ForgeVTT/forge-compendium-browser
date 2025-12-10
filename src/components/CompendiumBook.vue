@@ -967,20 +967,21 @@ export default {
 
 .forge-compendium-content {
   height: 100%;
+  overflow: auto;
 }
 
 .forge-compendium-content .forge-compendium-description {
   margin: 10px;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--background, var(--background, rgba(255, 255, 255, 0.95)));
 }
 
 .forge-compendium-content .forge-compendium-contains {
   margin: 10px;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--background, var(--background, rgba(255, 255, 255, 0.95)));
   flex: 0 0 300px;
 }
 
@@ -989,7 +990,7 @@ export default {
   margin: 10px;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--background, var(--background, rgba(255, 255, 255, 0.95)));
   line-height: 32px;
 }
 
@@ -1033,7 +1034,7 @@ export default {
   margin: 8px;
   border-radius: 8px;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: var(--background, rgba(255, 255, 255, 0.95));
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-icon {
@@ -1042,6 +1043,7 @@ export default {
   text-align: center;
   font-size: 80px;
   line-height: 1px;
+  flex: 1;
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-title {
@@ -1075,7 +1077,7 @@ export default {
 .forge-compendium-content .forge-compendium-info {
   margin: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--color-header-background, rgba(255, 255, 255, 0.4));
   overflow-y: auto;
 }
 
@@ -1086,7 +1088,7 @@ export default {
 
 .forge-compendium-browser .forge-compendium-listing-header {
   padding: 8px;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--color-header-background, rgba(0, 0, 0, 0.7));
   color: #fff;
   margin-bottom: 0px;
 }
@@ -1178,7 +1180,7 @@ export default {
 }
 .forge-compendium-search-area .no-results > div {
   padding: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--background, rgba(255, 255, 255, 0.9));
   border-radius: 10px;
   border: 2px solid #eee;
   width: 300px;

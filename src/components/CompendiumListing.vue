@@ -69,8 +69,8 @@ export default {
 
 <style scoped>
 .forge-compendium-listing {
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  padding: 1em;
 }
 
 .forge-compendium-listing > div {

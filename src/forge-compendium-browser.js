@@ -375,6 +375,13 @@ export class ForgeCompendiumBrowser {
         let result = (a.sort ?? 0) - (b.sort ?? 0);
         return result == 0 ? (a.name || "").localeCompare(b.name || "") : result;
     }
+
+    static renderTemplate(...args) {
+        if (foundry?.applications?.handlebars?.renderTemplate) {
+            return foundry.applications.handlebars.renderTemplate(...args);
+        }
+        return renderTemplate(...args);
+    }
 }
 
 Hooks.on("init", ForgeCompendiumBrowser.init);

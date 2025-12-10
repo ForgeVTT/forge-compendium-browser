@@ -119,7 +119,11 @@ export default {
             this.subsheet = new page.cls(page.document, { editable: false });
 
             this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
-            const templateData = await this.subsheet.getData();
+            const templateData = await (
+              typeof this.subsheet._prepareContext === "function"
+                ? this.subsheet._prepareContext()
+                : this.subsheet.getData()
+            );
 
             if (templateData.enrichedText instanceof Promise) templateData.enrichedText = await templateData.enrichedText;
             if (templateData.data?.img)
