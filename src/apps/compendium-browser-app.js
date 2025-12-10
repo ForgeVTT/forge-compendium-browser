@@ -4,12 +4,17 @@ import { Hierarchy } from "../hierarchy.js";
 let CompendiumBrowserAppBase;
 if (foundry?.applications?.api?.ApplicationV2) {
     // Application V2
-    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
+    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends (
+        foundry.applications.api.HandlebarsApplicationMixin(
+            foundry.applications.api.ApplicationV2
+        )
+    ) {
         async _prepareContext(options) {
             console.warn("CompendiumBrowserApp._prepareContext", options);
             const context = await super._prepareContext(options);
             return context;
         }
+
         _onRender(context, options) {
             console.warn("CompendiumBrowserApp._onRender", context, options);
             super._onRender(context, options);
@@ -20,18 +25,33 @@ if (foundry?.applications?.api?.ApplicationV2) {
                 { jQuery: true }
             );
         }
-    }
+    };
 } else {
     // Application V1
-    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends Application {
+    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends (
+        Application
+    ) {
         constructor(options = {}) {
             super(null, options);
         }
 
         static get defaultOptions() {
-            return foundry.utils.mergeObject(super.defaultOptions, this.DEFAULT_OPTIONS);
+            return foundry.utils.mergeObject(super.defaultOptions, {
+                ...this.DEFAULT_OPTIONS,
+                template:
+                    "./modules/forge-compendium-browser/templates/compendium-browser.html",
+                title: i18n(this.DEFAULT_OPTIONS.window.title),
+                popOut: true,
+                resizable: true,
+                width: this.DEFAULT_OPTIONS.position.width,
+                height: this.DEFAULT_OPTIONS.position.height,
+                scrollY: [
+                    "ol.forge-compendium-directory-list",
+                    ".forge-compendium-listing > div",
+                ],
+            });
         }
-    
+
         getData(options) {
             const data = super.getData(options);
             return data;
@@ -46,7 +66,7 @@ if (foundry?.applications?.api?.ApplicationV2) {
                 this._getContextMenuOptions()
             );
         }
-    }
+    };
 }
 
 export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
@@ -61,8 +81,6 @@ export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
 
     static DEFAULT_OPTIONS = {
         id: "forge-compendium-browser",
-        template: "./modules/forge-compendium-browser/templates/compendium-browser.html",
-        title: "ForgeCompendiumBrowser.ForgeCompendiumLibrary",
         classes: ["forge-compendium-browser"],
         tag: "div",
         window: {
@@ -70,8 +88,16 @@ export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
             resizable: true,
         },
         position: {
-            width: Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0) - 400,
-            height: Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0) - 200,
+            width:
+                Math.max(
+                    document.documentElement.clientWidth || 0,
+                    window.innerWidth || 0
+                ) - 400,
+            height:
+                Math.max(
+                    document.documentElement.clientHeight || 0,
+                    window.innerHeight || 0
+                ) - 200,
         },
         actions: {},
         dragDrop: [{ dragSelector: ".draggable-item" }],
@@ -79,7 +105,8 @@ export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
 
     static PARTS = {
         browser: {
-            template: "modules/forge-compendium-browser/templates/compendium-browser.html",
+            template:
+                "modules/forge-compendium-browser/templates/compendium-browser.html",
         },
     };
 
@@ -94,7 +121,9 @@ export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
                 callback: async (bookid) => {
                     const id = $(bookid).data()["id"];
 
-                    const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
+                    const book = game.ForgeCompendiumBrowser.books.find(
+                        (b) => b.id === id
+                    );
 
                     if (!book) return;
 
@@ -110,7 +139,9 @@ export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
                 callback: async (bookid) => {
                     const id = $(bookid).data()["id"];
 
-                    const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
+                    const book = game.ForgeCompendiumBrowser.books.find(
+                        (b) => b.id === id
+                    );
 
                     if (!book) return;
 
