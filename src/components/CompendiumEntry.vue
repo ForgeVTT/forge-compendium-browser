@@ -222,10 +222,15 @@ export default {
   flex-wrap: nowrap;
   justify-content: flex-start;
   padding: 8px;
-  color: var(--color-text-dark-primary);
+  color: var(--color-text-light-primary);
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+.theme-light .forge-compendium-entry {
+  color: var(--color-text-dark-primary);
+}
+
 .forge-compendium-entry.scene-entry {
   overflow-y: hidden;
 }

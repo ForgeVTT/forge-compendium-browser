@@ -796,6 +796,17 @@ export default {
 </script>
 
 <style scoped>
+
+body.theme-light .forge-compendium-sidebar {
+  --color-text-primary: rgb(239, 230, 216);
+  color: var(--color-text-primary);
+}
+
+body.theme-light .forge-compendium-content {
+  --color-header-background: rgba(255, 255, 255, 0.4);
+  --background: rgba(255, 255, 255, 0.95);
+}
+
 .forge-compendium-book-container {
   height: 100%;
 }
@@ -1088,7 +1099,7 @@ export default {
 
 .forge-compendium-browser .forge-compendium-listing-header {
   padding: 8px;
-  background: var(--color-header-background, rgba(0, 0, 0, 0.7));
+  background: rgba(0, 0, 0, 0.7);
   color: #fff;
   margin-bottom: 0px;
 }
