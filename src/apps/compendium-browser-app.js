@@ -1,72 +1,27 @@
 import { ForgeCompendiumBrowser, i18n } from "../forge-compendium-browser.js";
 import { Hierarchy } from "../hierarchy.js";
 
-let CompendiumBrowserAppBase;
-if (foundry?.applications?.api?.ApplicationV2) {
-    // Application V2
-    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends (
-        foundry.applications.api.HandlebarsApplicationMixin(
-            foundry.applications.api.ApplicationV2
-        )
-    ) {
-        async _prepareContext(options) {
-            console.warn("CompendiumBrowserApp._prepareContext", options);
-            const context = await super._prepareContext(options);
-            return context;
-        }
+class CompendiumBrowserAppBase extends (
+    foundry.applications.api.HandlebarsApplicationMixin(
+        foundry.applications.api.ApplicationV2
+    )
+) {
+    async _prepareContext(options) {
+        console.warn("CompendiumBrowserApp._prepareContext", options);
+        const context = await super._prepareContext(options);
+        return context;
+    }
 
-        _onRender(context, options) {
-            console.warn("CompendiumBrowserApp._onRender", context, options);
-            super._onRender(context, options);
-            this._contextmenu = new foundry.applications.ux.ContextMenu(
-                this.element,
-                ".forge-compendium-book",
-                this._getContextMenuOptions(),
-                { jQuery: true }
-            );
-        }
-    };
-} else {
-    // Application V1
-    CompendiumBrowserAppBase = class CompendiumBrowserAppBase extends (
-        Application
-    ) {
-        constructor(options = {}) {
-            super(null, options);
-        }
-
-        static get defaultOptions() {
-            return foundry.utils.mergeObject(super.defaultOptions, {
-                ...this.DEFAULT_OPTIONS,
-                template:
-                    "./modules/forge-compendium-browser/templates/compendium-browser.html",
-                title: i18n(this.DEFAULT_OPTIONS.window.title),
-                popOut: true,
-                resizable: true,
-                width: this.DEFAULT_OPTIONS.position.width,
-                height: this.DEFAULT_OPTIONS.position.height,
-                scrollY: [
-                    "ol.forge-compendium-directory-list",
-                    ".forge-compendium-listing > div",
-                ],
-            });
-        }
-
-        getData(options) {
-            const data = super.getData(options);
-            return data;
-        }
-
-        activateListeners(html) {
-            super.activateListeners(html);
-            this._contextmenu = ContextMenu.create(
-                this,
-                html.parent(),
-                ".forge-compendium-book",
-                this._getContextMenuOptions()
-            );
-        }
-    };
+    _onRender(context, options) {
+        console.warn("CompendiumBrowserApp._onRender", context, options);
+        super._onRender(context, options);
+        this._contextmenu = new foundry.applications.ux.ContextMenu(
+            this.element,
+            ".forge-compendium-book",
+            this._getContextMenuOptions(),
+            { jQuery: true }
+        );
+    }
 }
 
 export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
