@@ -1,5 +1,5 @@
 <template>
-  <div ref="entry" class="forge-compendium-entry" :class="documentClasses" v-html="html"></div>
+  <div ref="entry" class="forge-compendium-entry" v-html="html"></div>
 </template>
 
 <script>
