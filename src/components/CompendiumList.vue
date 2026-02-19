@@ -115,6 +115,10 @@ export default {
   padding: 8px 14px;
 }
 
+.theme-dark .forge-compendium-list .forge-compendium-item {
+  background-color: hsl(0deg 0% 11.65% / 90%);
+}
+
 .forge-compendium-list .forge-compendium-item .forge-compendium-title {
   font-size: 20px;
   line-height: 32px;
