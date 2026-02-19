@@ -310,6 +310,7 @@ export default {
   color: var(--color-text-light-primary);
   overflow-y: auto;
   overflow-x: hidden;
+  flex-grow: 1;
 }
 
 .theme-light .forge-compendium-entry {
@@ -324,15 +325,15 @@ export default {
   display: none;
 }
 
-.forge-compendium-entry.journal-sheet form .editor {
+.forge-compendium-entry .journal-sheet form .editor {
   height: 100%;
 }
 
-.forge-compendium-entry.journal-sheet.v10 > header {
+.forge-compendium-entry  .journal-sheet.v10 > header {
   display: none;
 }
 
-.forge-compendium-entry.journal-sheet .journal-page-content img {
+.forge-compendium-entry .journal-sheet .journal-page-content img {
   border: 0px;
 }
 
@@ -346,4 +347,41 @@ export default {
 .forge-compendium-entry a.content-link i {
   color: var(--color-text-hyperlink);
 }
+
+.forge-compendium-entry .Basic-Text-Frame {
+  color: #000;
+}
+
+.forge-compendium-entry .Basic-Text-Frame a.content-link,
+.forge-compendium-entry .Basic-Text-Frame a.content-link i {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.forge-compendium-entry .Basic-Text-Frame .Stat-Block-Styles_Stat-Block-Title a.content-link,
+.forge-compendium-entry .Basic-Text-Frame .Stat-Block-Styles_Stat-Block-Title a.content-link i {
+  color: var(--heading-color);
+  text-decoration: none;
+}
+
+
+.forge-compendium-entry .application {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.forge-compendium-entry .application.actor {
+  overflow-y: visible;
+  overflow-x: visible;
+  position: relative;
+	width: calc(100% - 44px);
+	height: stretch;
+}
+
+.forge-compendium-entry .application.item {
+  position: relative;
+  height: stretch;
+}
+
 </style>
