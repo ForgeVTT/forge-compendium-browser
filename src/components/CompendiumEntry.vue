@@ -45,7 +45,7 @@ export default {
         img: document.background?.src ?? document.data.img,
         stats: [],
       };
-
+      
       // Collect the stats on the scene
       const statIcon = {
         Drawing: "fa-solid fa-pencil-alt",
@@ -384,6 +384,11 @@ export default {
 .forge-compendium-entry .application.item {
   position: relative;
   height: stretch;
+}
+
+.forge-compendium-entry .dnd5e2.sheet.item:not(.minimized)::before,
+.forge-compendium-entry .dnd5e2.sheet.actor.npc:not(.minimized)::before {
+  z-index: -1;
 }
 
 </style>
