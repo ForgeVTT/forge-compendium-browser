@@ -1116,6 +1116,7 @@ body.theme-light .forge-compendium-content {
   list-style: none;
   margin: 0;
   padding: 0;
+  font-size: 1.5rem;
 }
 .forge-compendium-breadcrumbs li {
   flex-grow: 0;
@@ -1143,6 +1144,7 @@ body.theme-light .forge-compendium-content {
   text-align: center;
   margin-right: 10px;
   cursor: pointer;
+  font-size: 1.5rem;
 }
 
 .back-button:not(.disabled):hover,
@@ -1242,6 +1244,7 @@ body.theme-light .forge-compendium-content {
   cursor: pointer;
   margin-right: 8px;
   white-space: nowrap;
+  font-size: 1.5rem;
 }
 .forge-entry-import:hover {
   text-shadow: 0 0 8px var(--color-shadow-primary);
