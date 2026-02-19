@@ -7,13 +7,13 @@ class CompendiumBrowserAppBase extends (
     )
 ) {
     async _prepareContext(options) {
-        console.warn("CompendiumBrowserApp._prepareContext", options);
+        console.debug("CompendiumBrowserApp._prepareContext", options);
         const context = await super._prepareContext(options);
         return context;
     }
 
     _onRender(context, options) {
-        console.warn("CompendiumBrowserApp._onRender", context, options);
+        console.debug("CompendiumBrowserApp._onRender", context, options);
         super._onRender(context, options);
         this._contextmenu = new foundry.applications.ux.ContextMenu(
             this.element,
@@ -26,7 +26,7 @@ class CompendiumBrowserAppBase extends (
 
 export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
     constructor(book, options = {}) {
-        console.warn("CompendiumBrowserApp.constructor", book, options);
+        console.debug("CompendiumBrowserApp.constructor", book, options);
         super(options);
 
         if (book) {
