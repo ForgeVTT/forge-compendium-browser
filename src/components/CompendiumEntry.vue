@@ -45,7 +45,7 @@ export default {
         img: document.background?.src ?? document.data.img,
         stats: [],
       };
-      
+
       // Collect the stats on the scene
       const statIcon = {
         Drawing: "fa-solid fa-pencil-alt",
@@ -381,14 +381,29 @@ export default {
 	height: stretch;
 }
 
+.forge-compendium-entry .application.journal-sheet {
+  border-radius: 0px;
+  box-shadow: none;
+  padding-inline: 16px;
+}
+
 .forge-compendium-entry .application.item {
   position: relative;
   height: stretch;
+  box-shadow: none;
 }
 
 .forge-compendium-entry .dnd5e2.sheet.item:not(.minimized)::before,
 .forge-compendium-entry .dnd5e2.sheet.actor.npc:not(.minimized)::before {
   z-index: -1;
+}
+
+.forge-compendium-entry .dnd5e2.vertical-tabs::after {
+  content: none;
+}
+
+.forge-compendium-entry:has(.journal-sheet) {
+  padding: 0px;
 }
 
 </style>
