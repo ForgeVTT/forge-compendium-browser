@@ -116,6 +116,10 @@ export default {
   flex: 1;
 }
 
+.forge-compendium-browser .flexcol > * {
+  flex: 1;
+}
+
 .forge-compendium-browser .flexcontain {
   flex-grow: 0;
 }

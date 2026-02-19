@@ -143,7 +143,8 @@
             </div>
           </div>
           <div v-else class="flexcol">
-            <div class="flexrow flexcontain">
+            <!-- Section Info -->
+            <div class="forge-compendium-section-info flexrow flexcontain">
               <div class="forge-compendium-description" v-html="book.description"></div>
               <div class="forge-compendium-contains flexcol">
                 <b style="flex-grow: 0">{{ this.i18n("ForgeCompendiumBrowser.Contains") }}:</b>
@@ -1090,11 +1091,18 @@ body.theme-light .forge-compendium-content {
   border-radius: 10px;
   background: var(--color-header-background, rgba(255, 255, 255, 0.4));
   overflow-y: auto;
+  flex-grow: 1;
+}
+
+.forge-compendium-content .forge-compendium-info .forge-compendium-section-info {
+  align-items: stretch;
 }
 
 .forge-compendium-content .forge-compendium-info .forge-compendium-section-listing {
   justify-content: center;
+  align-items: start;
   margin-top: 20px;
+  flex: 1;
 }
 
 .forge-compendium-browser .forge-compendium-listing-header {
