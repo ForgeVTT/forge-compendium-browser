@@ -600,7 +600,7 @@ export default {
       return game.i18n.localize(key);
     },
     async importEntry() {
-      const collection = this.document.document.collection;
+      const collection = game.collections.get(this.document.document.collection.metadata.type);
       const pack = game.packs.get(this.document.packId);
       if (collection) {
         if (this.document.section === "Scene") {
