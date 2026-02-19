@@ -56,7 +56,9 @@ export default {
         Token: "fas fa-user-alt",
         Wall: "fa-solid fa-university",
       };
+
       const stats = {};
+
       for (const collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls"]) {
         const collectionData = foundry.utils.isNewerVersion(game.version, "9.99999")
           ? document[collection]
@@ -82,7 +84,7 @@ export default {
 
       this.subsheet = { options: { classes: ["scene-entry"] } };
 
-      $(".forge-compendium-scene", this.$refs.entry).on("click", () => {
+      this.$refs.entry.querySelecto(".forge-compendium-scene")?.addEventListener("click", () => {
         const ip = new ImagePopout(templateData.img, {
           title: this.entry.name,
           uuid: `Compendium.${this.entry.packId}.Scene.${this.entry.id}`,
