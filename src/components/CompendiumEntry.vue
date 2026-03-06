@@ -59,9 +59,7 @@ export default {
       const stats = {};
 
       for (const collection of ["drawings", "lights", "notes", "sounds", "tiles", "tokens", "walls"]) {
-        const collectionData = foundry.utils.isNewerVersion(game.version, "9.99999")
-          ? document[collection]
-          : document.data[collection];
+        const collectionData = document[collection]
         if (collectionData.size) {
           const name = collectionData.documentClass.documentName;
           stats[name] = collectionData.size;
