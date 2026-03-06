@@ -427,11 +427,8 @@ export class ImportBook {
                         });
                         continue;
                     }
-                } /*else if (type === "Scene") {
-                    for (const note of (document.notes || document.data.notes || [])) {
-                        // TODO import the note properly
-                    }
-                }*/
+                } 
+                
                 const data = document.toObject();
                 data.folder = parentFolder;
 

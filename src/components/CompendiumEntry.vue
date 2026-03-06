@@ -15,7 +15,6 @@ export default {
   computed: {
     documentClasses() {
       const classes = this.subsheet?.options?.classes || [];
-      // if (game.version.startsWith("10.")) classes.push("v10");
       return classes.join(" ");
     },
   },
@@ -129,20 +128,6 @@ export default {
         if (page.cls && page.document) {
           const rendered = await this.renderPage(page);
           container.appendChild(rendered);
-          // this.subsheet._state = this.subsheet.constructor.RENDER_STATES.RENDERING;
-          // const templateData = await (
-          //   typeof this.subsheet._prepareContext === "function"
-          //     ? this.subsheet._prepareContext()
-          //     : this.subsheet.getData()
-          // );
-
-          // if (templateData.enrichedText instanceof Promise) templateData.enrichedText = await templateData.enrichedText;
-          // if (templateData.data?.img)
-          //   templateData.data.img = game.ForgeCompendiumBrowser.mapIcon(templateData.data.img);
-          // if (templateData.item?.img)
-          //   templateData.item.img = game.ForgeCompendiumBrowser.mapIcon(templateData.item.img);
-          // const template = await renderTemplate(this.subsheet.template, templateData);
-          // html += `<article>${template}</article>`;
         } else {
           container.appendChild(await this.renderPageNotFound(page));
         }
@@ -226,7 +211,6 @@ export default {
       });
 
       entryWrapper.querySelectorAll("a[href^='ddb://']").forEach((link) => {
-        // const linkHtml = $(link).html() || "";
         let href = link.getAttribute("href") || "";
 
         if (href.startsWith("ddb://compendium")) {
@@ -270,9 +254,6 @@ export default {
 
       const entryWrapper = this.$refs.entry;
 
-      // this.subsheet.form = entryWrapper.querySelector("form:first-of-type") || null;
-      // this.subsheet._element = entryWrapper;
-
       if (this.subsheet.options.tabs) {
         this.subsheet._tabs = this.subsheet.options.tabs.map((tab) => {
           tab.callback = this.subsheet._onChangeTab.bind(this.subsheet);
@@ -289,8 +270,6 @@ export default {
       }
 
       this.cleanUpHtml(entryWrapper);
-
-      // this.subsheet._disableFields(entryWrapper[0]);
 
       if (document) {
         document._sheet = null; // eslint-disable-line
