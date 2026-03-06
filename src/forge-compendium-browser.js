@@ -160,7 +160,7 @@ export class ForgeCompendiumBrowser {
     }
 
     static async onMessage(data) {
-        console.debug("ForgeCompendiumBrowser.openBrowser", data);
+        console.debug("ForgeCompendiumBrowser.onMessage", data);
         switch (data.action) {
             case "open": {
                 if (data.userid === game.user.id || data.userid == undefined) {
