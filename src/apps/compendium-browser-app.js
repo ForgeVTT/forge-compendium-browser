@@ -1,30 +1,11 @@
 import { ForgeCompendiumBrowser, i18n } from "../forge-compendium-browser.js";
 import { Hierarchy } from "../hierarchy.js";
 
-class CompendiumBrowserAppBase extends (
+export class CompendiumBrowserApp extends (
     foundry.applications.api.HandlebarsApplicationMixin(
         foundry.applications.api.ApplicationV2
     )
 ) {
-    async _prepareContext(options) {
-        console.debug("CompendiumBrowserApp._prepareContext", options);
-        const context = await super._prepareContext(options);
-        return context;
-    }
-
-    _onRender(context, options) {
-        console.debug("CompendiumBrowserApp._onRender", context, options);
-        super._onRender(context, options);
-        this._contextmenu = new foundry.applications.ux.ContextMenu(
-            this.element,
-            ".forge-compendium-book",
-            this._getContextMenuOptions(),
-            { jQuery: true }
-        );
-    }
-}
-
-export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
     constructor(book, options = {}) {
         console.debug("CompendiumBrowserApp.constructor", book, options);
         super(options);
@@ -64,6 +45,23 @@ export class CompendiumBrowserApp extends CompendiumBrowserAppBase {
                 "modules/forge-compendium-browser/templates/compendium-browser.html",
         },
     };
+
+    async _prepareContext(options) {
+        console.debug("CompendiumBrowserApp._prepareContext", options);
+        const context = await super._prepareContext(options);
+        return context;
+    }
+
+    _onRender(context, options) {
+        console.debug("CompendiumBrowserApp._onRender", context, options);
+        super._onRender(context, options);
+        this._contextmenu = new foundry.applications.ux.ContextMenu(
+            this.element,
+            ".forge-compendium-book",
+            this._getContextMenuOptions(),
+            { jQuery: true }
+        );
+    }
 
     _getContextMenuOptions() {
         return [
