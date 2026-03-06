@@ -171,6 +171,14 @@ export default {
         _renderModeToggle() {
           return null;
         }
+
+        /**
+         * The sheets in the compendium library app are always read-only.
+         * This will prevent rendering errors.
+         */
+        get isEditable() {
+          return false;
+        }
       };
     },
     async renderPage(page) {
