@@ -160,6 +160,7 @@ export class ForgeCompendiumBrowser {
     }
 
     static async onMessage(data) {
+        console.debug("ForgeCompendiumBrowser.onMessage", data);
         switch (data.action) {
             case "open": {
                 if (data.userid === game.user.id || data.userid == undefined) {
@@ -296,24 +297,26 @@ export class ForgeCompendiumBrowser {
     }
 
     static openBrowser(book) {
+        console.debug("ForgeCompendiumBrowser.openBrowser", book);
         ForgeCompendiumBrowser.browser = new CompendiumBrowserApp(book).render(true);
     }
 
+    /**
+     * Marks compendium packs that are consumed by the compendium browser with a special class
+     * so that they can be hidden from the normal Foundry compendium UI.
+     */
     static clearPacks() {
-        const isV11 = foundry.utils.isNewerVersion(game.version, "10.999999");
-        if (ui?.compendium?.element) {
-            for (const book of ForgeCompendiumBrowser.books) {
-                for (const pack of book.packs) {
-                    if (isV11) {
-                        $(
-                            `.directory-item.compendium[data-entry-id="${book.id}.${pack.name}"]`,
-                            ui.compendium.element
-                        ).addClass("forge-compendium-pack");
-                    } else {
-                        $(`.compendium-pack[data-pack="${book.id}.${pack.name}"]`, ui.compendium.element).addClass(
-                            "forge-compendium-pack"
-                        );
-                    }
+        if (!ui?.compendium?.element) {
+            warn("Compendium sidebar element not found.");
+            return;
+        }
+
+        for (const book of ForgeCompendiumBrowser.books) {
+            for (const pack of book.packs) {
+                const listItem = ui.compendium.element.querySelector(`.directory-item.compendium[data-pack="${book.id}.${pack.name}"]`);
+
+                if (listItem) {
+                    listItem.classList.add("forge-compendium-pack");
                 }
             }
         }
@@ -372,6 +375,13 @@ export class ForgeCompendiumBrowser {
     static compare(a, b) {
         let result = (a.sort ?? 0) - (b.sort ?? 0);
         return result == 0 ? (a.name || "").localeCompare(b.name || "") : result;
+    }
+
+    static renderTemplate(...args) {
+        if (foundry?.applications?.handlebars?.renderTemplate) {
+            return foundry.applications.handlebars.renderTemplate(...args);
+        }
+        return renderTemplate(...args);
     }
 }
 

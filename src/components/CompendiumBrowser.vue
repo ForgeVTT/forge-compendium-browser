@@ -103,7 +103,23 @@ export default {
 .forge-compendium-browser {
   max-height: 100%;
   overflow: hidden;
+  --color-scrollbar: var(--dnd5e-color-scrollbar);
+  border: none;
+  background: var(--dnd5e-background-texture-denim);
 }
+
+.theme-light .forge-compendium-browser {
+  background: var(--dnd5e-background-texture-paper-red);
+}
+
+.forge-compendium-browser .window-content > * {
+  flex: 1;
+}
+
+.forge-compendium-browser .flexcol > * {
+  flex: 1;
+}
+
 .forge-compendium-browser .flexcontain {
   flex-grow: 0;
 }

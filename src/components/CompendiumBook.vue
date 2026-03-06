@@ -143,7 +143,8 @@
             </div>
           </div>
           <div v-else class="flexcol">
-            <div class="flexrow flexcontain">
+            <!-- Section Info -->
+            <div class="forge-compendium-section-info flexrow flexcontain">
               <div class="forge-compendium-description" v-html="book.description"></div>
               <div class="forge-compendium-contains flexcol">
                 <b style="flex-grow: 0">{{ this.i18n("ForgeCompendiumBrowser.Contains") }}:</b>
@@ -599,7 +600,7 @@ export default {
       return game.i18n.localize(key);
     },
     async importEntry() {
-      const collection = this.document.document.collection;
+      const collection = game.collections.get(this.document.document.collection.metadata.type);
       const pack = game.packs.get(this.document.packId);
       if (collection) {
         if (this.document.section === "Scene") {
@@ -796,6 +797,17 @@ export default {
 </script>
 
 <style scoped>
+
+body.theme-light .forge-compendium-sidebar {
+  --color-text-primary: rgb(239, 230, 216);
+  color: var(--color-text-primary);
+}
+
+body.theme-light .forge-compendium-content {
+  --color-header-background: rgba(255, 255, 255, 0.4);
+  --background: rgba(255, 255, 255, 0.95);
+}
+
 .forge-compendium-book-container {
   height: 100%;
 }
@@ -967,20 +979,21 @@ export default {
 
 .forge-compendium-content {
   height: 100%;
+  overflow: auto;
 }
 
 .forge-compendium-content .forge-compendium-description {
   margin: 10px;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--background, var(--background, rgba(255, 255, 255, 0.95)));
 }
 
 .forge-compendium-content .forge-compendium-contains {
   margin: 10px;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--background, var(--background, rgba(255, 255, 255, 0.95)));
   flex: 0 0 300px;
 }
 
@@ -989,7 +1002,7 @@ export default {
   margin: 10px;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--background, var(--background, rgba(255, 255, 255, 0.95)));
   line-height: 32px;
 }
 
@@ -1033,7 +1046,7 @@ export default {
   margin: 8px;
   border-radius: 8px;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: var(--background, rgba(255, 255, 255, 0.95));
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-icon {
@@ -1042,6 +1055,7 @@ export default {
   text-align: center;
   font-size: 80px;
   line-height: 1px;
+  flex: 1;
 }
 
 .forge-compendium-content .forge-compendium-section .forge-compendium-title {
@@ -1075,13 +1089,20 @@ export default {
 .forge-compendium-content .forge-compendium-info {
   margin: 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.4);
+  background: var(--color-header-background, rgba(255, 255, 255, 0.4));
   overflow-y: auto;
+  flex-grow: 1;
+}
+
+.forge-compendium-content .forge-compendium-info .forge-compendium-section-info {
+  align-items: stretch;
 }
 
 .forge-compendium-content .forge-compendium-info .forge-compendium-section-listing {
   justify-content: center;
+  align-items: start;
   margin-top: 20px;
+  flex: 1;
 }
 
 .forge-compendium-browser .forge-compendium-listing-header {
@@ -1095,6 +1116,7 @@ export default {
   list-style: none;
   margin: 0;
   padding: 0;
+  font-size: 1.5rem;
 }
 .forge-compendium-breadcrumbs li {
   flex-grow: 0;
@@ -1122,6 +1144,7 @@ export default {
   text-align: center;
   margin-right: 10px;
   cursor: pointer;
+  font-size: 1.5rem;
 }
 
 .back-button:not(.disabled):hover,
@@ -1178,7 +1201,7 @@ export default {
 }
 .forge-compendium-search-area .no-results > div {
   padding: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--background, rgba(255, 255, 255, 0.9));
   border-radius: 10px;
   border: 2px solid #eee;
   width: 300px;
@@ -1221,6 +1244,7 @@ export default {
   cursor: pointer;
   margin-right: 8px;
   white-space: nowrap;
+  font-size: 1.5rem;
 }
 .forge-entry-import:hover {
   text-shadow: 0 0 8px var(--color-shadow-primary);

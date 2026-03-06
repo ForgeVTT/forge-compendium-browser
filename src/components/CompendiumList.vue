@@ -111,8 +111,12 @@ export default {
 .forge-compendium-list .forge-compendium-item {
   border-radius: 8px;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--background, rgba(255, 255, 255, 0.8));
   padding: 8px 14px;
+}
+
+.theme-dark .forge-compendium-list .forge-compendium-item {
+  background-color: hsl(0deg 0% 11.65% / 90%);
 }
 
 .forge-compendium-list .forge-compendium-item .forge-compendium-title {

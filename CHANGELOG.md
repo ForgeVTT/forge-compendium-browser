@@ -1,3 +1,7 @@
+## 1.6.0
+
+v13 Compatibility.
+
 ## 1.5.0
 
 v12 Compatibility

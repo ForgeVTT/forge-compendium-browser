@@ -1,45 +1,65 @@
 import { ForgeCompendiumBrowser, i18n } from "../forge-compendium-browser.js";
 import { Hierarchy } from "../hierarchy.js";
 
-export class CompendiumBrowserApp extends Application {
+export class CompendiumBrowserApp extends (
+    foundry.applications.api.HandlebarsApplicationMixin(
+        foundry.applications.api.ApplicationV2
+    )
+) {
     constructor(book, options = {}) {
-        super(null, options);
+        console.debug("CompendiumBrowserApp.constructor", book, options);
+        super(options);
 
         if (book) {
             game.user.setFlag("forge-compendium-browser", "last-book", book);
         }
     }
 
-    static get defaultOptions() {
-        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            id: "forge-compendium-browser",
-            template: "./modules/forge-compendium-browser/templates/compendium-browser.html",
-            title: i18n("ForgeCompendiumBrowser.ForgeCompendiumLibrary"),
-            classes: ["forge-compendium-browser"],
-            popOut: true,
+    static DEFAULT_OPTIONS = {
+        id: "forge-compendium-browser",
+        classes: ["forge-compendium-browser"],
+        tag: "div",
+        window: {
+            title: "ForgeCompendiumBrowser.ForgeCompendiumLibrary",
             resizable: true,
-            width: vw - 400,
-            height: vh - 200,
-            scrollY: ["ol.forge-compendium-directory-list", ".forge-compendium-listing > div"],
-            dragDrop: [{ dragSelector: ".draggable-item" }],
-        });
+        },
+        position: {
+            width:
+                Math.max(
+                    document.documentElement.clientWidth || 0,
+                    window.innerWidth || 0
+                ) - 400,
+            height:
+                Math.max(
+                    document.documentElement.clientHeight || 0,
+                    window.innerHeight || 0
+                ) - 200,
+        },
+        actions: {},
+        dragDrop: [{ dragSelector: ".draggable-item" }],
+    };
+
+    static PARTS = {
+        browser: {
+            template:
+                "modules/forge-compendium-browser/templates/compendium-browser.html",
+        },
+    };
+
+    async _prepareContext(options) {
+        console.debug("CompendiumBrowserApp._prepareContext", options);
+        const context = await super._prepareContext(options);
+        return context;
     }
 
-    getData(options) {
-        const data = super.getData(options);
-        return data;
-    }
-
-    activateListeners(html) {
-        super.activateListeners(html);
-        this._contextmenu = ContextMenu.create(
-            this,
-            html.parent(),
+    _onRender(context, options) {
+        console.debug("CompendiumBrowserApp._onRender", context, options);
+        super._onRender(context, options);
+        this._contextmenu = new foundry.applications.ux.ContextMenu(
+            this.element,
             ".forge-compendium-book",
-            this._getContextMenuOptions()
+            this._getContextMenuOptions(),
+            { jQuery: true }
         );
     }
 
@@ -54,7 +74,9 @@ export class CompendiumBrowserApp extends Application {
                 callback: async (bookid) => {
                     const id = $(bookid).data()["id"];
 
-                    const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
+                    const book = game.ForgeCompendiumBrowser.books.find(
+                        (b) => b.id === id
+                    );
 
                     if (!book) return;
 
@@ -70,7 +92,9 @@ export class CompendiumBrowserApp extends Application {
                 callback: async (bookid) => {
                     const id = $(bookid).data()["id"];
 
-                    const book = game.ForgeCompendiumBrowser.books.find((b) => b.id === id);
+                    const book = game.ForgeCompendiumBrowser.books.find(
+                        (b) => b.id === id
+                    );
 
                     if (!book) return;
 
