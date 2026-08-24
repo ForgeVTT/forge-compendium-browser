@@ -7,6 +7,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "umd": "vue-cli-service build --target lib --name ForgeCompendiumBrowserVue src/components/CompendiumBrowser.vue && vue-cli-service build --no-clean --target lib --name ForgeCompendiumBrowserModule src/forge-compendium-browser.js",
+    "watch": "npx concurrently --kill-others-on-fail \"npm:watch-vue\" \"npm:watch-js\"",
     "watch-vue": "vue-cli-service build --no-clean --watch --target lib --name ForgeCompendiumBrowserVue src/components/CompendiumBrowser.vue",
     "watch-js": "vue-cli-service build --no-clean --watch --target lib --name ForgeCompendiumBrowserModule src/forge-compendium-browser.js"
   },

@@ -363,6 +363,24 @@ export class ImportBook {
         return docUpdates;
     }
 
+    /**
+     * Retrieve a document from a compendium pack.
+     *
+     * @param {string} packId The compendium pack ID.
+     * @param {string} id The document ID.
+     * @returns {Promise<Document|null|undefined>} The requested document, if found.
+     */
+    static async getDocument(packId, id) {
+        const collection = game.packs.get(packId);
+        if (collection.metadata.type === "Scene") {
+            return collection.getDocument(id);
+        }
+        if (collection.contents.length !== collection.index.size) {
+            await collection.getDocuments();
+        }
+        return collection.get(id);
+    }
+
     static async processChildren(parent, type, parentFolder, progress) {
         let documentData = [];
         let folderSort = 100000;
@@ -400,11 +418,7 @@ export class ImportBook {
                 }
                 documentData = documentData.concat(await ImportBook.processChildren(child, type, folder, progress));
             } else if (child.type === "document") {
-                const collection = game.packs.get(child.packId);
-                if (collection.contents.length !== collection.index.size) {
-                    await collection.getDocuments();
-                }
-                const document = collection.get(child.id);
+                const document = await ImportBook.getDocument(child.packId, child.id);
                 if (!document) continue;
 
                 const key = `${child.packId}.${document.id}`;

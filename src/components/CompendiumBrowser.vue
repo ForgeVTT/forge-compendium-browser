@@ -105,11 +105,11 @@ export default {
   overflow: hidden;
   --color-scrollbar: var(--dnd5e-color-scrollbar);
   border: none;
-  background: var(--dnd5e-background-texture-denim);
+  background: var(--dnd5e-color-dark-gray) url("../img/denim075.png");
 }
 
 .theme-light .forge-compendium-browser {
-  background: var(--dnd5e-background-texture-paper-red);
+  background: url("../img/parchment.jpg") repeat;
 }
 
 .forge-compendium-browser .window-content > * {
